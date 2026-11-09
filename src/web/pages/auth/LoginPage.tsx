@@ -24,7 +24,7 @@ export default function LoginPage() {
   }
 
   return (
-    <FitStage designWidth={1440} designHeight={900} className="bg-white">
+    <FitStage designWidth={1440} designHeight={900} maxScale={0.85} className="bg-white">
     <main className="flex h-full items-center justify-center bg-white px-4 py-16 font-pretendard">
       <div className="flex w-[258px] flex-col items-center">
         <h1 className="text-center text-2xl font-medium tracking-[-0.144px] whitespace-nowrap text-black">A11y Translator 시작하기</h1>

@@ -25,7 +25,7 @@ export function Header({
 }: HeaderProps) {
   const navigate = useNavigate()
   return (
-    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-web-header-line bg-white px-8 font-pretendard">
+    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-web-header-line bg-white page-x font-pretendard">
       <button type="button" onClick={() => navigate(-1)} aria-label="뒤로 가기" className="flex size-6 items-center justify-center rounded">
         <img src={iconBack} alt="" width={24} height={24} />
       </button>

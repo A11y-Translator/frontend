@@ -32,12 +32,12 @@ export function TodoSummaryCard() {
   const mentionAuthor = memberById(mention?.authorId)
 
   return (
-    <div className="flex min-h-[475px] w-full flex-col rounded-[32px] border border-web-line bg-white px-7 pt-6 pb-5 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.05)]">
+    <div className="flex min-h-[392px] w-full flex-col rounded-2xl border border-web-line bg-white px-6 pt-5 pb-5 font-noto">
       <p className="flex flex-col gap-1 leading-[1.4]">
         <span className="text-sm font-medium text-muted-2">내 할 일</span>
         <span className="flex items-baseline gap-1.5">
-          <span className="text-[44px] font-bold text-ink">{remaining.length}</span>
-          <span className="text-lg font-medium text-muted-3">개 남았어요</span>
+          <span className="text-[32px] font-bold text-ink">{remaining.length}</span>
+          <span className="text-[15px] font-medium text-muted-3">개 남았어요</span>
         </span>
       </p>
 
@@ -59,7 +59,7 @@ export function TodoSummaryCard() {
           const due = dueOf(issue)
           return (
             <li key={issue.id} className="border-t border-web-line-2">
-              <Link to={`/issues/${issue.id}`} className="flex items-center gap-3.5 rounded-lg py-[13px] hover:bg-web-chip">
+              <Link to={`/issues/${issue.id}`} className="flex items-center gap-3 rounded-lg py-3 hover:bg-web-chip">
                 <StatusTag kind={issue.priority === 'high' ? 'important' : 'normal'} />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5 leading-[1.4]">
                   <span className="truncate text-[15px] font-medium text-ink">{issue.title}</span>
@@ -83,7 +83,7 @@ export function TodoSummaryCard() {
         <div className="mt-auto pt-4">
           <Link
             to={`/issues/${mention.issueId}`}
-            className="flex items-center gap-2.5 rounded-2xl bg-web-chip px-4 py-3 hover:bg-web-line-2"
+            className="flex items-center gap-2.5 rounded-xl bg-web-chip px-4 py-2.5 hover:bg-web-line-2"
           >
             <span aria-hidden className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-web-header-line text-[11px] leading-[1.4] font-bold text-ink">
               {mentionAuthor.initial}

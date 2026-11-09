@@ -46,7 +46,7 @@ export default function InspectionResultPage() {
   return (
     <>
       <Header version={`버전 ${currentVersion}`} project={PROJECT_NAME} right={<OpenInChromeLink />} />
-      <div className="flex flex-1 flex-col gap-8 bg-white px-8 pt-8 pb-12">
+      <div className="flex flex-1 flex-col gap-8 bg-white page-x pt-8 pb-12">
         {/* Title row */}
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1 leading-[1.45]">

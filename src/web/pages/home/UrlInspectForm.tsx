@@ -1,4 +1,5 @@
 // 프로젝트 홈 / 빈 홈 공통: URL 입력 pill + 검사하기 버튼 (Figma 533:7100, 533:7211)
+// 디자인(높이 80px, 글자 24px)이 실제 화면에서 너무 커 보여서 높이 56px · 글자 16px 로 줄였습니다.
 import { useId, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -35,7 +36,7 @@ export function UrlInspectForm({ describedBy, className = '' }: UrlInspectFormPr
   return (
     <form onSubmit={onSubmit} noValidate aria-label="페이지 검사" className={className}>
       {/* 입력칸 자체 테두리 대신 pill 전체에 포커스 링을 그립니다 */}
-      <div className="flex items-center gap-4 rounded-[40px] bg-white px-6 py-3 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-accent">
+      <div className="flex items-center gap-3 rounded-full border border-web-line bg-white py-1.5 pr-1.5 pl-6 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-accent">
         <label htmlFor={inputId} className="sr-only">
           검사할 페이지 주소
         </label>
@@ -54,11 +55,11 @@ export function UrlInspectForm({ describedBy, className = '' }: UrlInspectFormPr
           }}
           aria-invalid={error || undefined}
           aria-describedby={describedByIds}
-          className="min-w-0 flex-1 bg-transparent font-noto text-2xl leading-[1.45] text-ink outline-none placeholder:text-placeholder"
+          className="min-w-0 flex-1 bg-transparent font-noto text-base leading-[1.45] text-ink outline-none placeholder:text-placeholder"
         />
         <button
           type="submit"
-          className="h-14 w-[167px] shrink-0 rounded-[28px] bg-black font-noto text-lg leading-[1.45] text-white hover:bg-ink-3"
+          className="h-11 shrink-0 rounded-full bg-black px-7 font-noto text-[15px] leading-[1.45] font-medium text-white hover:bg-ink-3"
         >
           검사하기
         </button>

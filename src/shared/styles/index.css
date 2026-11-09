@@ -56,6 +56,12 @@
   --radius-pill: 999px;
 }
 
+:root {
+  /* 웹 레이아웃 크기 (Navbar 폭과 맞춰야 함) */
+  --sidebar-w: 232px;
+  --page-max: 1100px;
+}
+
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -78,6 +84,16 @@
   [tabindex="-1"]:focus {
     outline: none;
   }
+}
+
+/*
+ * 일반 웹처럼: 배경은 화면 끝까지, 내용은 최대 1100px.
+ * 공간이 넉넉하면 사이드바 폭의 절반만큼 왼쪽으로 당겨서 "화면 전체" 기준 가운데에 오도록 합니다.
+ * 좁은 화면에서는 양쪽 2rem 여백으로 돌아갑니다.
+ */
+@utility page-x {
+  padding-left: max(2rem, calc((100% - var(--page-max)) / 2 - var(--sidebar-w) / 2));
+  padding-right: max(2rem, calc((100% - var(--page-max)) / 2 + var(--sidebar-w) / 2));
 }
 
 @utility sr-only-focusable {

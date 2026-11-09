@@ -4,7 +4,7 @@ import { UrlInspectForm } from './UrlInspectForm'
 
 export default function ProjectEmptyPage() {
   return (
-    <div className="mx-auto flex w-full max-w-[1160px] flex-col items-center px-5 pt-[162px] pb-12 font-pretendard">
+    <div className="flex w-full flex-col items-center page-x pt-[162px] pb-12 font-pretendard">
       {/* 디자인에는 제목이 없어서 화면낭독기용 제목만 둡니다 */}
       <h1 className="sr-only">첫 검사 시작하기</h1>
 

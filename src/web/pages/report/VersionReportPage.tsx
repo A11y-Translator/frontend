@@ -34,7 +34,7 @@ export default function VersionReportPage() {
   return (
     <>
       <Header version={`버전 ${currentVersion}`} project={PROJECT_NAME} />
-      <div className="flex flex-1 flex-col gap-6 bg-white px-5 pt-12 pb-10">
+      <div className="flex flex-1 flex-col gap-6 bg-white page-x pt-12 pb-10">
         <div className="flex flex-col gap-[3px]">
           <h1 className="text-[32px] leading-[1.6] font-bold text-black">버전 {currentVersion}</h1>
           <p className="text-xl leading-[1.45] text-muted">현재 작업 중인 버전</p>

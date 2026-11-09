@@ -35,7 +35,9 @@ export default function DemoSite({ issues, overlay, emphasizedId, ctaColor, onHo
   const noop = (e: FormEvent) => e.preventDefault()
 
   return (
-    <div className="min-w-[760px] bg-white font-noto text-black">
+    // 임시 예시 사이트: 실제로는 사용자가 열어 둔 아무 웹사이트 위에서 확장이 동작합니다.
+    // 보통 웹사이트 크기감에 맞게 85% 로 보여주고, 내용은 최대 1280px 가운데 정렬.
+    <div className="mx-auto max-w-[1280px] min-w-[760px] bg-white font-noto text-black" style={{ zoom: 0.85 }}>
       {/* 사이트 내비 */}
       <header className="flex h-16 items-center justify-between border-b border-ext-line px-10">
         <span aria-hidden className="h-6 w-24 rounded bg-[#333]" />

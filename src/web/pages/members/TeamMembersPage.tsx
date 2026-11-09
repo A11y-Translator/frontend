@@ -55,7 +55,7 @@ export default function TeamMembersPage() {
   return (
     <div className="flex flex-1 flex-col bg-white">
       <Header version={`버전 ${currentVersion}`} />
-      <div className="flex flex-col gap-8 px-8 pt-10 pb-8 font-noto">
+      <div className="flex flex-col gap-8 page-x pt-10 pb-8 font-noto">
         {/* 제목 줄 */}
         <div className="flex items-end gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1 leading-[1.45]">

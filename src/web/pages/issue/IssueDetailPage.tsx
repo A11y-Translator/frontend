@@ -123,8 +123,8 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
   }
 
   return (
-    <div className="flex flex-1">
-      <div className="flex min-w-0 flex-1 flex-col gap-3.5 p-5">
+    <div className="flex flex-1 page-x">
+      <div className="flex min-w-0 flex-1 flex-col gap-3.5 py-5 pr-5">
         <h1 className="sr-only">이슈 상세: {issue.title}</h1>
 
         {/* URL bar */}

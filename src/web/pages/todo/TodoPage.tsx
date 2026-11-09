@@ -47,7 +47,7 @@ export default function TodoPage() {
   return (
     <>
       <Header version={`버전 ${currentVersion}`} />
-      <div className="flex flex-col gap-5 px-8 pt-10 pb-8 font-noto">
+      <div className="flex flex-col gap-5 page-x pt-10 pb-8 font-noto">
         <div className="flex flex-col gap-1.5 leading-[1.45]">
           <h1 className="text-[30px] font-bold text-ink-2">할 일</h1>
           <p className="text-[15px] text-[#626873]">{DESCRIPTION[tab]}</p>

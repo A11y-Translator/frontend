@@ -9,6 +9,8 @@ import { useEffect, useState, type ReactNode } from 'react'
 interface FitStageProps {
   designWidth: number
   designHeight: number
+  /** 최대 배율. 1 보다 작으면 큰 화면에서도 전체를 그만큼 줄여 보여줌 (일반 웹 크기감) */
+  maxScale?: number
   children: ReactNode
   className?: string
 }
@@ -23,9 +25,9 @@ function useViewport() {
   return size
 }
 
-export function FitStage({ designWidth, designHeight, children, className = '' }: FitStageProps) {
+export function FitStage({ designWidth, designHeight, maxScale = 1, children, className = '' }: FitStageProps) {
   const { w, h } = useViewport()
-  const scale = Math.min(1, w / designWidth, h / designHeight)
+  const scale = Math.min(maxScale, w / designWidth, h / designHeight)
   return (
     <div className="h-screen w-screen overflow-hidden">
       <div

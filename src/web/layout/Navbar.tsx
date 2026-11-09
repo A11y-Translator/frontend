@@ -1,6 +1,6 @@
 // Figma: 컴포넌트 / Navbar (554:9041) + card/team (팀 스페이스 전환, 554:10338)
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById, teams } from '@/shared/mocks'
 import { useAppState } from '@/shared/store'
 import iconFolder from '@/web/assets/icon-folder.svg'
@@ -29,12 +29,12 @@ export function Navbar() {
   const myOpen = issues.filter((i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved').length
 
   return (
-    <nav aria-label="주 메뉴" className="flex h-full w-[280px] shrink-0 flex-col gap-[15px] bg-web-nav px-3 py-4 font-pretendard">
+    <nav aria-label="주 메뉴" className="flex h-full w-(--sidebar-w) shrink-0 flex-col gap-3 bg-web-nav px-2.5 py-4 font-pretendard">
       {/* 워크스페이스 */}
       <div className="flex items-center justify-between rounded-[10px] py-1 pr-1 pl-2">
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-lg text-base font-medium text-black">
-            <img src={workspaceAvatar} alt="" width={28} height={28} />
+          <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-lg text-[15px] font-medium text-black">
+            <img src={workspaceAvatar} alt="" width={24} height={24} />
             A11y Team
             <img src={iconDropdown} alt="" width={19} height={19} />
             <span className="sr-only">팀 스페이스 바꾸기</span>
@@ -69,35 +69,35 @@ export function Navbar() {
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
-        <button type="button" aria-label="알림" className="flex size-10 items-center justify-center rounded-lg">
-          <img src={iconNotice} alt="" width={24} height={24} />
+        <button type="button" aria-label="알림" className="flex size-9 items-center justify-center rounded-lg">
+          <img src={iconNotice} alt="" width={22} height={22} />
         </button>
       </div>
 
       {/* 검색 */}
-      <label className="flex items-center gap-2 rounded-xl bg-web-search p-2.5">
-        <img src={iconSearch} alt="" width={24} height={24} />
+      <label className="flex items-center gap-2 rounded-xl bg-web-search px-2.5 py-2">
+        <img src={iconSearch} alt="" width={20} height={20} />
         <span className="sr-only">검색</span>
         <input
           type="search"
           placeholder="Search"
-          className="w-full bg-transparent text-base font-medium tracking-[-0.4px] text-black outline-none placeholder:text-placeholder"
+          className="w-full bg-transparent text-sm font-medium tracking-[-0.4px] text-black outline-none placeholder:text-placeholder"
         />
       </label>
 
       {/* 메뉴 */}
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-1">
         {MENU.map((m) => (
           <li key={m.to}>
             <NavLink
               to={m.to}
               end={m.end}
               className={({ isActive }) =>
-                `flex items-center gap-2 rounded-xl px-1 py-0.5 text-base font-medium tracking-[-0.4px] text-black ${isActive ? 'bg-white' : 'hover:bg-white/60'}`
+                `flex items-center gap-2 rounded-xl px-1 py-0.5 text-[15px] font-medium tracking-[-0.3px] text-black ${isActive ? 'bg-white' : 'hover:bg-white/60'}`
               }
             >
-              <span className="flex size-10 items-center justify-center">
-                <img src={m.icon} alt="" width={24} height={24} />
+              <span className="flex size-9 items-center justify-center">
+                <img src={m.icon} alt="" width={22} height={22} />
               </span>
               {m.label}
               {'badge' in m && m.badge && myOpen > 0 && (
@@ -112,6 +112,15 @@ export function Navbar() {
       </ul>
 
       <div className="flex-1" />
+
+      {/* 디자인에 없는 진입점: 크롬 확장 프로그램 데모 (확장 화면은 웹과 다른 곳이라 URL 로만 이동) */}
+      <Link
+        to="/extension"
+        className="flex items-center gap-2.5 rounded-xl border border-web-line bg-white px-3 py-2.5 text-sm font-medium text-black hover:bg-web-chip"
+      >
+        <span aria-hidden className="flex size-6 items-center justify-center rounded-md bg-black text-xs font-bold text-white">A</span>
+        크롬 확장 프로그램 열기
+      </Link>
 
       {/* 사용자 */}
       <div className="flex items-center gap-2.5 p-2">
