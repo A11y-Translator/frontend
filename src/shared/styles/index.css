@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+ * 디자인 토큰 — Figma "Page 4" 기준
+ * 웹: Pretendard / 확장: Noto Sans KR
+ * 새 색이 필요하면 여기에 먼저 추가하고 클래스(bg-*, text-*, border-*)로 사용하세요.
+ */
+@theme {
+  --font-sans: "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  --font-pretendard: "Pretendard", system-ui, sans-serif;
+  --font-noto: "Noto Sans KR", system-ui, sans-serif;
+
+  /* 공통 */
+  --color-ink: #111111;
+  --color-ink-2: #191b20;
+  --color-ink-3: #3a3f47;
+  --color-muted: #6f6f6f;
+  --color-muted-2: #6f737a;
+  --color-muted-3: #55595f;
+  --color-subtle: #8a8f98;
+  --color-faint: #b5b9c0;
+  --color-placeholder: #b5b5b5;
+  --color-accent: #3086ff;
+  --color-success: #19734b;
+  --color-success-bg: #edf8f1;
+  --color-danger: #b42318;
+
+  /* 웹 */
+  --color-web-bg: #f0f0f0;
+  --color-web-nav: #fafafa;
+  --color-web-search: #ededed;
+  --color-web-line: #e2e4e8;
+  --color-web-line-2: #eeeff1;
+  --color-web-header-line: #e3e6eb;
+  --color-web-chip: #f6f7f9;
+  --color-avatar: #e7e7e7;
+
+  /* 웹 상태 태그 (Component 1) */
+  --color-tag-danger-bg: rgb(255 69 65 / 0.3);
+  --color-tag-danger-line: #f45b57;
+  --color-tag-danger-text: #b71c1c;
+  --color-tag-info-bg: rgb(65 173 255 / 0.3);
+  --color-tag-info-line: #3086ff;
+  --color-tag-info-text: #0c5192;
+
+  /* 확장 */
+  --color-ext-bg: #f7f7f7;
+  --color-ext-line: #e0e0e0;
+  --color-ext-frame: #d5d9e0;
+  --color-ext-soft: #f0f0f0;
+  --color-sev-critical: #121212;
+  --color-sev-serious: #545454;
+  --color-sev-moderate: #dbdbdb;
+  --color-sev-minor: #f2f2f2;
+
+  --radius-pill: 999px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+    background: var(--color-web-bg);
+  }
+  /* 키보드 사용자를 위한 포커스 표시 — 접근성 서비스이므로 모든 곳에 기본 적용 */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+@utility sr-only-focusable {
+  position: absolute;
+  left: -9999px;
+  &:focus {
+    left: 8px;
+    top: 8px;
+    z-index: 100;
+  }
+}

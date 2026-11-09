@@ -1,0 +1,21 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="270" height="200" viewBox="0 0 270 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Front pocket" clip-path="url(#clip0_0_133)">
+<foreignObject x="-12" y="-12" width="294" height="224"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(6px);clip-path:url(#bgblur_1_0_133_clip_path);height:100%;width:100%"></div></foreignObject><g id="Vector" data-figma-bg-blur-radius="12">
+<path d="M0 26C0 11.64 11.64 0 26 0H136C143 0 149.5 3.4 153.5 9.1L162.5 22C166.5 27.7 173 31 180 31H244C258.36 31 270 42.64 270 57V200H0V26Z" fill="url(#paint0_linear_0_133)"/>
+<mask id="stroke0_0_133" fill="white">
+<path d="M0 26C0 11.64 11.64 0 26 0H136C143 0 149.5 3.4 153.5 9.1L162.5 22C166.5 27.7 173 31 180 31H244C258.36 31 270 42.64 270 57V200H0V26Z"/>
+</mask>
+<path d="M0 26C0 11.64 11.64 0 26 0H136C143 0 149.5 3.4 153.5 9.1L162.5 22C166.5 27.7 173 31 180 31H244C258.36 31 270 42.64 270 57V200H0V26Z" stroke-width="2" stroke="white" stroke-opacity="0.9" mask="url(#stroke0_0_133)"/>
+</g>
+</g>
+<defs>
+<clipPath id="bgblur_1_0_133_clip_path" transform="translate(12 12)"><path d="M0 26C0 11.64 11.64 0 26 0H136C143 0 149.5 3.4 153.5 9.1L162.5 22C166.5 27.7 173 31 180 31H244C258.36 31 270 42.64 270 57V200H0V26Z"/>
+</clipPath><linearGradient id="paint0_linear_0_133" x1="135" y1="0" x2="135" y2="200" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FAFAFB" stop-opacity="0.94"/>
+<stop offset="1" stop-color="#F1F2F4"/>
+</linearGradient>
+<clipPath id="clip0_0_133">
+<rect width="270" height="200" fill="white"/>
+</clipPath>
+</defs>
+</svg>
