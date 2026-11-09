@@ -13,21 +13,27 @@ export default function ProjectHomePage() {
   const recent = projects.slice(0, RECENT_LIMIT)
 
   return (
-    <div className="mx-auto flex w-full max-w-[1160px] flex-col px-5 pt-[57px] pb-12 font-pretendard">
+    <div className="mx-auto flex w-full max-w-[1160px] flex-col px-5 pt-8 pb-6 font-pretendard">
       {/* 컴포넌트 title (554:9315) */}
       <div className="flex flex-col gap-[3px]">
         <h1 className="text-[32px] leading-[1.6] font-bold text-black">모두가 쓰기 편한 화면, 오늘도 같이 만들어 봐요</h1>
         <p className="text-xl leading-[1.45] text-muted">색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인해요</p>
       </div>
 
-      <UrlInspectForm className="mx-1 mt-8" />
+      <UrlInspectForm className="mx-1 mt-6" />
 
-      <div className="mt-[21px] grid grid-cols-[minmax(0,568fr)_minmax(0,501fr)] items-start gap-8 px-2">
-        <section aria-labelledby="home-recent" className="flex flex-col gap-[26px]">
-          <h2 id="home-recent" className="text-base leading-[1.45] font-semibold text-black">
-            최근 프로젝트
-          </h2>
-          <ul className="grid grid-cols-2 gap-x-[26px] gap-y-4">
+      <div className="mt-4 grid grid-cols-[minmax(0,568fr)_minmax(0,501fr)] items-start gap-8 px-2">
+        <section aria-labelledby="home-recent" className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 id="home-recent" className="text-base leading-[1.45] font-semibold text-black">
+              최근 프로젝트
+            </h2>
+            {/* 디자인에 없는 진입점: 첫 검사(빈 프로젝트) 화면으로 */}
+            <Link to="/projects/new" className="rounded text-sm leading-[1.4] font-medium text-muted-2 hover:text-black">
+              + 새 프로젝트
+            </Link>
+          </div>
+          <ul className="grid grid-cols-2 gap-x-[26px] gap-y-3">
             {recent.map((p) => {
               const active = p.status === 'active'
               return (

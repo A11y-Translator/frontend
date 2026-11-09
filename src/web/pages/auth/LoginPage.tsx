@@ -1,6 +1,7 @@
 // Figma: A11Y_LOG_001 (533:7372) — 로그인. WebLayout 없이 단독으로 렌더됩니다.
 // 컴포넌트 btn: login-unavailable(회색) / login-available(검정) — 이메일·비밀번호를 모두 채워야 활성화.
 import { useState, type FormEvent } from 'react'
+import { FitStage } from '@/shared/ui/FitStage'
 import { useNavigate } from 'react-router-dom'
 import brandGoogle from '@/web/assets/brand-google.svg'
 
@@ -23,7 +24,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-4 py-16 font-pretendard">
+    <FitStage designWidth={1440} designHeight={900} className="bg-white">
+    <main className="flex h-full items-center justify-center bg-white px-4 py-16 font-pretendard">
       <div className="flex w-[258px] flex-col items-center">
         <h1 className="text-center text-2xl font-medium tracking-[-0.144px] whitespace-nowrap text-black">A11y Translator 시작하기</h1>
 
@@ -99,5 +101,6 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
+    </FitStage>
   )
 }

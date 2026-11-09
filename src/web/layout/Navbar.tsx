@@ -2,8 +2,10 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { NavLink } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById, teams } from '@/shared/mocks'
+import { useAppState } from '@/shared/store'
 import iconFolder from '@/web/assets/icon-folder.svg'
 import iconReport from '@/web/assets/icon-report.svg'
+import iconTodo from '@/web/assets/icon-todo.svg'
 import iconGroup from '@/web/assets/icon-group.svg'
 import iconSetting from '@/web/assets/icon-setting.svg'
 import iconNotice from '@/web/assets/icon-notice.svg'
@@ -14,6 +16,8 @@ import workspaceAvatar from '@/web/assets/workspace-avatar.svg'
 
 const MENU = [
   { to: '/', label: '프로젝트', icon: iconFolder, end: true },
+  // 디자인 Navbar 에는 없지만 구조도의 '할 일' 메뉴를 위해 추가 (내 할 일 개수 배지)
+  { to: '/todo', label: '할 일', icon: iconTodo, badge: true },
   { to: '/report', label: '리포트', icon: iconReport },
   { to: '/members', label: '팀원', icon: iconGroup },
   { to: '/settings', label: '설정', icon: iconSetting },
@@ -21,6 +25,8 @@ const MENU = [
 
 export function Navbar() {
   const me = memberById(CURRENT_USER_ID)!
+  const { issues } = useAppState()
+  const myOpen = issues.filter((i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved').length
 
   return (
     <nav aria-label="주 메뉴" className="flex h-full w-[280px] shrink-0 flex-col gap-[15px] bg-web-nav px-3 py-4 font-pretendard">
@@ -94,6 +100,12 @@ export function Navbar() {
                 <img src={m.icon} alt="" width={24} height={24} />
               </span>
               {m.label}
+              {'badge' in m && m.badge && myOpen > 0 && (
+                <span className="ml-auto mr-2 rounded-full bg-black px-2 py-0.5 text-xs font-semibold text-white">
+                  {myOpen}
+                  <span className="sr-only">개 남음</span>
+                </span>
+              )}
             </NavLink>
           </li>
         ))}

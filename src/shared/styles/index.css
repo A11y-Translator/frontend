@@ -74,6 +74,10 @@
   button {
     cursor: pointer;
   }
+  /* 화면 전환 시 스크립트로 포커스를 옮긴 제목(tabindex=-1)에는 테두리를 그리지 않음 */
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
 }
 
 @utility sr-only-focusable {

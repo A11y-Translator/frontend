@@ -49,8 +49,15 @@ export default function ExtensionDemoPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-white">
       <h1 className="sr-only">A11y Translator 확장 프로그램 데모</h1>
+      {/* 데모용: 협업 웹사이트로 돌아가는 링크 (확장 → 웹은 URL 로만 이동) */}
+      <a
+        href="/"
+        className="absolute bottom-4 left-4 z-50 rounded-full bg-black px-4 py-2 font-pretendard text-sm font-semibold text-white shadow-lg hover:bg-[#333]"
+      >
+        ← 협업 웹으로
+      </a>
       <BrowserChrome
         url={SITE_URL}
         tabTitle="Web A 메인"
@@ -77,7 +84,8 @@ export default function ExtensionDemoPage() {
             }}
           />
         </main>
-        {panelOpen && (
+        {/* 실제 크롬 확장처럼: 로그인 전에는 아이콘 아래 작은 팝업(폭 360px, 높이는 내용만큼), 검사를 시작하면 오른쪽 사이드 패널(폭 360px, 브라우저 높이)로 열림 */}
+        {panelOpen && screen.name !== 'login' && (
           <aside aria-label="A11y Translator 사이드 패널" className="h-full w-[360px] shrink-0 border-l border-[#ccc]">
             <PanelApp
               screen={screen}
@@ -87,6 +95,21 @@ export default function ExtensionDemoPage() {
               onOverlayChange={setOverlay}
             />
           </aside>
+        )}
+        {panelOpen && screen.name === 'login' && (
+          <div
+            role="dialog"
+            aria-label="A11y Translator 확장 프로그램"
+            className="absolute top-[76px] right-3 z-40 max-h-[calc(100%-88px)] w-[360px] overflow-hidden rounded-xl border border-[#ccc] bg-white shadow-[0_8px_28px_rgba(0,0,0,0.18)]"
+          >
+            <PanelApp
+              screen={screen}
+              onScreenChange={setScreen}
+              onHighlight={setHovered}
+              overlay={overlay}
+              onOverlayChange={setOverlay}
+            />
+          </div>
         )}
       </div>
     </div>

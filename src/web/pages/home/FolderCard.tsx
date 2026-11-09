@@ -1,5 +1,5 @@
 // Figma: 컴포넌트 / Folder Card (555:1576) — State=Default(회색) / Active(파랑, 종이 미리보기 표시)
-// Figma 는 270×275 고정 크기지만, 그리드 폭에 맞게 가로로 늘어나도록 좌우 inset 으로 바꿨습니다.
+// Figma 는 270×275 고정 크기지만, 홈이 한 화면(820px)에 들어오도록 높이를 255로 줄이고, 그리드 폭에 맞게 가로로 늘어나도록 좌우 inset 으로 바꿨습니다.
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import pocket from '@/web/assets/folder-pocket.svg'
@@ -21,7 +21,7 @@ interface FolderCardProps {
 }
 
 export function FolderCard({ title, status, meta, active = false, preview, to, className = '' }: FolderCardProps) {
-  const frame = `relative block h-[275px] overflow-hidden rounded-[32px] border bg-linear-to-b shadow-[0_6px_18px_rgba(0,0,0,0.06)] ${
+  const frame = `relative block h-[255px] overflow-hidden rounded-[32px] border bg-linear-to-b shadow-[0_6px_18px_rgba(0,0,0,0.06)] ${
     active ? 'border-[#8eb1f5] from-[#5f8fee] to-[#7ba4f2]' : 'border-web-line from-[#f1f2f4] to-[#e8eaed]'
   }`
 
@@ -39,17 +39,17 @@ export function FolderCard({ title, status, meta, active = false, preview, to, c
         )}
       </span>
       {/* 앞주머니 */}
-      <img src={active ? pocketActive : pocket} alt="" className="absolute top-[73px] right-0 left-[-2px] h-[200px] w-[calc(100%+2px)]" />
+      <img src={active ? pocketActive : pocket} alt="" className="absolute top-[55px] right-0 left-[-2px] h-[200px] w-[calc(100%+2px)]" />
 
       <span
-        className={`absolute top-[164px] right-4 left-[26px] truncate text-2xl font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`}
+        className={`absolute top-[146px] right-4 left-[26px] truncate text-2xl font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`}
       >
         {title}
       </span>
-      <span className={`absolute top-[202px] right-4 left-[26px] truncate text-[17px] font-medium ${active ? 'text-white/90' : 'text-muted-3'}`}>
+      <span className={`absolute top-[184px] right-4 left-[26px] truncate text-[17px] font-medium ${active ? 'text-white/90' : 'text-muted-3'}`}>
         {status}
       </span>
-      <span className={`absolute top-[240px] right-4 left-[26px] truncate text-sm ${active ? 'text-white/75' : 'text-muted-2'}`}>
+      <span className={`absolute top-[221px] right-4 left-[26px] truncate text-sm ${active ? 'text-white/75' : 'text-muted-2'}`}>
         {meta}
       </span>
     </>

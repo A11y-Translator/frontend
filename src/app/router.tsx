@@ -33,7 +33,17 @@ export const router = createBrowserRouter([
   // ① 크롬 확장: 가짜 브라우저 + 사이트 + 사이드 패널 데모
   { path: '/extension', element: <ExtensionDemoPage /> },
   // 실제 사이드 패널이 보여줄 화면만 단독으로 (나중에 확장 sidepanel.html 이 이걸 렌더)
-  { path: '/extension/panel', element: <div className="h-screen w-[360px]"><PanelApp /></div> },
+  {
+    path: '/extension/panel',
+    // 실제 크롬 사이드 패널 크기(폭 360px, 창 높이)로 가운데에 표시
+    element: (
+      <div className="flex h-screen justify-center bg-[#dfe1e5]">
+        <div className="h-full w-[360px] border-x border-[#ccc] bg-white">
+          <PanelApp />
+        </div>
+      </div>
+    ),
+  },
   // 화면 목록 (개발·시연용)
   { path: '/demo', element: <DemoIndex /> },
 ])
