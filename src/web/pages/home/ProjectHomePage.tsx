@@ -10,12 +10,15 @@ import { ProjectCardMenu } from './ProjectCardMenu'
 import { useAnnouncer } from '@/web/common/useAnnouncer'
 import { LiveToast } from '@/web/common/LiveToast'
 import { UrlInspectForm } from './UrlInspectForm'
+import { useCreateAndInspect } from './useCreateAndInspect'
 
 const RECENT_LIMIT = 4
 
 export default function ProjectHomePage() {
   const { projects, inspectionHistory } = useAppState()
   const [message, announce] = useAnnouncer()
+  // 홈에서 URL 을 넣어도 새 프로젝트를 만들고 실제로 검사합니다 (이름 = 도메인)
+  const createAndInspect = useCreateAndInspect()
   const recent = projects.slice(0, RECENT_LIMIT)
 
   return (
@@ -26,7 +29,7 @@ export default function ProjectHomePage() {
         <p className="text-[15px] text-muted-2">색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인해요</p>
       </div>
 
-      <UrlInspectForm className="mt-6" />
+      <UrlInspectForm className="mt-6" onInspect={(url) => createAndInspect(url)} />
 
       <div className="mt-8 grid grid-cols-2 items-start gap-6">
         <section aria-labelledby="home-recent" className="flex flex-col gap-3">

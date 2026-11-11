@@ -122,7 +122,7 @@ export function toInspection(projectId: string, requestedUrl: string, version: n
 
   // 화면이 거의 비어 있으면(로그인 필요·스크립트 오류 등) "이슈 0개"를 믿으면 안 돼요
   const warning =
-    scan.textLength < 40 || scan.elementCount < 25
+    scan.textLength < 40
       ? `페이지 내용이 거의 보이지 않아요(글자 ${scan.textLength}자 · 요소 ${scan.elementCount}개). 로그인이 필요하거나 페이지가 제대로 열리지 않았을 수 있어서 결과가 정확하지 않을 수 있어요.`
       : undefined
 
