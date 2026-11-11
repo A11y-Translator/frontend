@@ -78,14 +78,5 @@ export function SelectMenu<T extends string>({
 }
 
 /** 작업 결과 알림: 화면낭독기(role=status)와 화면 아래 토스트를 한 곳에서 */
-export function LiveToast({ message }: { message: string }) {
-  return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-8 left-[calc(50%+140px)] z-[60] -translate-x-1/2 font-noto">
-      {message && (
-        <span className="block rounded-pill bg-ink-2 px-4 py-2.5 text-[13px] font-medium whitespace-nowrap text-white shadow-[0_8px_24px_rgba(0,0,0,0.18)]">
-          {message}
-        </span>
-      )}
-    </div>
-  )
-}
+// 여러 페이지가 같이 써서 web/common 으로 옮겼어요
+export { LiveToast } from '@/web/common/LiveToast'

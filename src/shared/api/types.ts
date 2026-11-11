@@ -61,6 +61,8 @@ export interface Issue {
   savedFix?: string
   /** 재검사로 자동 해결됐는지 */
   autoResolved?: boolean
+  /** "해결됨으로 표시" 전 상태 — 되돌리기 하면 이 상태로 돌아감 */
+  reopenStatus?: IssueStatus
 }
 
 export interface Comment {
@@ -101,4 +103,53 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
   serious: '심각',
   moderate: '보통',
   minor: '경미',
+}
+
+/* ── 프로젝트 생성 · 검사 (새 프로젝트 화면) ─────────────────────────── */
+
+/** 캡처(734×557 기준 px) 위 문제 위치 박스 */
+export interface IssueOverlay {
+  /** 화면에 보이는 배지 숫자 (페이지 안 순서) */
+  label: number
+  issueId: string
+  selector: string
+  page: string
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+/** POST /projects 요청 */
+export interface CreateProjectInput {
+  name: string
+  /** normalizeUrl() 을 거친 주소 (https://…) */
+  url: string
+}
+
+/** 한 번의 검사 결과 (POST /projects/:id/inspections 응답) */
+export interface Inspection {
+  id: string
+  projectId: string
+  url: string
+  version: number
+  /** ISO 8601 */
+  scannedAt: string
+  standard: string
+  /** 검사한 페이지 경로 (예: ['/main', '/contact']) */
+  pages: string[]
+  /** 기준 통과율 0~100 */
+  passRate: number
+  issues: Issue[]
+  overlays: IssueOverlay[]
+  /** 어떻게 검사했는지: live = 실제 페이지(axe-core), mock = 임시 규칙, server = 백엔드 */
+  source?: 'live' | 'mock' | 'server'
+  /** live 검사: 실제로 연 주소(리다이렉트 반영), 페이지 제목, 검사 화면 캡처(1440×1093) 주소 */
+  capture?: { url: string; title?: string; screenshotUrl?: string }
+  /** live 검사: 통과한 검사 규칙 수 (이슈 0개일 때 "정말 검사했는지" 보여주는 근거) */
+  passedRules?: number
+  /** live 검사: 사람이 직접 확인해야 하는 항목 수 (axe incomplete) */
+  needsReview?: number
+  /** 결과를 믿기 어려울 때 안내 (예: 페이지 내용이 거의 안 그려짐) */
+  warning?: string
 }

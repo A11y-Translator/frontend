@@ -3,14 +3,19 @@
 // 상단 "Browser chrome" 과 왼쪽 Navbar 는 WebLayout 이 담당하므로 여기서는 본문만 그립니다.
 // 글자·카드 크기는 할 일 등 다른 웹 화면과 맞췄습니다 (제목 30px, 설명 15px, 카드 모서리 12~16px).
 import { Link } from 'react-router-dom'
-import { projects } from '@/shared/mocks'
+import { useAppState } from '@/shared/store'
 import { FolderCard } from './FolderCard'
 import { TodoSummaryCard } from './TodoSummaryCard'
+import { ProjectCardMenu } from './ProjectCardMenu'
+import { useAnnouncer } from '@/web/common/useAnnouncer'
+import { LiveToast } from '@/web/common/LiveToast'
 import { UrlInspectForm } from './UrlInspectForm'
 
 const RECENT_LIMIT = 4
 
 export default function ProjectHomePage() {
+  const { projects, inspectionHistory } = useAppState()
+  const [message, announce] = useAnnouncer()
   const recent = projects.slice(0, RECENT_LIMIT)
 
   return (
@@ -34,17 +39,25 @@ export default function ProjectHomePage() {
               + 새 프로젝트
             </Link>
           </div>
+          {recent.length === 0 && (
+            <p className="rounded-xl border border-dashed border-web-line px-4 py-8 text-center text-sm text-muted-2">
+              프로젝트가 없어요.{' '}
+              <Link to="/projects/new" className="font-bold text-ink-2 underline">
+                새 프로젝트 만들기
+              </Link>
+            </p>
+          )}
           <ul className="grid grid-cols-2 gap-4">
             {recent.map((p) => {
               const active = p.status === 'active'
               return (
-                <li key={p.id}>
+                <li key={p.id} className="relative">
                   <FolderCard
                     to={`/projects/${p.id}/inspection`}
                     active={active}
                     title={p.name}
                     status={active ? '진행중' : '완료됨'}
-                    preview={`${p.url}\n버전 ${p.currentVersion} 검사 중`}
+                    preview={`${p.url.replace(/^https?:\/\//, '')}\n버전 ${p.currentVersion} 검사 중`}
                     meta={
                       <>
                         최근 수정일<span aria-hidden> | </span>
@@ -53,6 +66,10 @@ export default function ProjectHomePage() {
                       </>
                     }
                   />
+                  {/* 링크(카드) 밖에 겹쳐 둔 ⋮ 메뉴 */}
+                  <div className="absolute top-[98px] right-2.5">
+                    <ProjectCardMenu project={p} versions={inspectionHistory[p.id]?.length ?? 0} onDark={active} announce={announce} />
+                  </div>
                 </li>
               )
             })}
@@ -71,6 +88,7 @@ export default function ProjectHomePage() {
           <TodoSummaryCard />
         </section>
       </div>
+      <LiveToast message={message} />
     </div>
   )
 }

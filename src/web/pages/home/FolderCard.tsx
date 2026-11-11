@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import pocket from '@/web/assets/folder-pocket.svg'
 import pocketActive from '@/web/assets/folder-pocket-active.svg'
+import { EditableTitle } from './EditableTitle'
 
 interface FolderCardProps {
   title: string
@@ -17,10 +18,12 @@ interface FolderCardProps {
   preview?: string
   /** 있으면 링크, 없으면 장식용 카드(빈 홈) */
   to?: string
+  /** 있으면 제목을 눌러 이름을 바꿀 수 있음 (새 프로젝트 화면) */
+  onTitleChange?: (title: string) => void
   className?: string
 }
 
-export function FolderCard({ title, status, meta, active = false, preview, to, className = '' }: FolderCardProps) {
+export function FolderCard({ title, status, meta, active = false, preview, to, onTitleChange, className = '' }: FolderCardProps) {
   const frame = `relative block h-[188px] overflow-hidden rounded-[20px] border bg-linear-to-b shadow-[0_6px_18px_rgba(0,0,0,0.06)] ${
     active ? 'border-[#8eb1f5] from-[#5f8fee] to-[#7ba4f2]' : 'border-web-line from-[#f1f2f4] to-[#e8eaed]'
   }`
@@ -41,11 +44,22 @@ export function FolderCard({ title, status, meta, active = false, preview, to, c
       {/* 앞주머니 */}
       <img src={active ? pocketActive : pocket} alt="" className="absolute top-[40px] right-0 left-[-2px] h-[148px] w-[calc(100%+2px)]" />
 
-      <span
-        className={`absolute top-[98px] right-4 left-5 truncate text-lg font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`}
-      >
-        {title}
-      </span>
+      {onTitleChange ? (
+        <span className="absolute top-[96px] right-4 left-5 flex">
+          <EditableTitle
+            value={title}
+            onChange={onTitleChange}
+            label="프로젝트 이름"
+            className={`max-w-full min-w-0 truncate text-lg font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`}
+          />
+        </span>
+      ) : (
+        <span
+          className={`absolute top-[98px] right-12 left-5 truncate text-lg font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`}
+        >
+          {title}
+        </span>
+      )}
       <span className={`absolute top-[126px] right-4 left-5 truncate text-sm font-medium ${active ? 'text-white/90' : 'text-muted-3'}`}>
         {status}
       </span>
@@ -66,7 +80,8 @@ export function FolderCard({ title, status, meta, active = false, preview, to, c
     )
   }
   return (
-    <div aria-hidden className={`${frame} ${className}`}>
+    // 이름 편집이 없으면 순수 장식이라 화면낭독기에서 숨깁니다
+    <div aria-hidden={onTitleChange ? undefined : true} className={`${frame} ${className}`}>
       {body}
     </div>
   )

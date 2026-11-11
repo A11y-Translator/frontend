@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as Tabs from '@radix-ui/react-tabs'
 import type { Issue } from '@/shared/api/types'
-import { MORE_PAGES, PAGES } from '@/shared/mocks/scan'
+import { MORE_PAGES, PAGES, type OverlayBox } from '@/shared/mocks/scan'
 import { contrastSummary, tagKindOf } from '@/web/common/issueHelpers'
 import { SiteCapture } from '@/web/common/SiteCapture'
 import { StatusTag } from '@/web/common/StatusTag'
@@ -13,13 +13,18 @@ interface Props {
   issue: Issue
   page: string
   onPageChange: (page: string) => void
+  /** 새 프로젝트: 검사한 페이지 목록 (있으면 +3 접기 없이 이것만 탭으로) */
+  pages?: string[]
+  overlays?: OverlayBox[]
+  /** 실제 페이지 검사의 화면 캡처 (미리보기에 실제 화면) */
+  screenshotUrl?: string
 }
 
-export function InspectionPreview({ issue, page, onPageChange }: Props) {
+export function InspectionPreview({ issue, page, onPageChange, pages, overlays, screenshotUrl }: Props) {
   const [overlay, setOverlay] = useState(true)
   // "+3" 을 누르면 나머지 페이지 탭을 펼칩니다
   const [showMore, setShowMore] = useState<boolean>((MORE_PAGES as readonly string[]).includes(page))
-  const tabs: string[] = showMore ? [...PAGES, ...MORE_PAGES] : [...PAGES]
+  const tabs: string[] = pages ?? (showMore ? [...PAGES, ...MORE_PAGES] : [...PAGES])
   const onIssuePage = issue.page === page
 
   return (
@@ -51,6 +56,7 @@ export function InspectionPreview({ issue, page, onPageChange }: Props) {
               </Tabs.Trigger>
             ))}
           </Tabs.List>
+          {!pages && (
           <button
             type="button"
             aria-expanded={showMore}
@@ -64,6 +70,7 @@ export function InspectionPreview({ issue, page, onPageChange }: Props) {
             {showMore ? '접기' : `+${MORE_PAGES.length}`}
             <span className="sr-only">{showMore ? ' 나머지 페이지 숨기기' : ' 페이지 더 보기'}</span>
           </button>
+          )}
         </div>
         {tabs.map((p) => (
           <Tabs.Content key={p} value={p} className="overflow-hidden rounded-lg border border-[#ececec] bg-[#f3f4f6]">
@@ -74,6 +81,8 @@ export function InspectionPreview({ issue, page, onPageChange }: Props) {
                 label={`${p} 페이지 검사 화면${overlay ? ', 문제 위치 오버레이 표시' : ''}`}
                 showOverlay={overlay}
                 activeIssueId={issue.id}
+                overlays={overlays}
+                screenshotUrl={screenshotUrl}
               />
             </div>
           </Tabs.Content>

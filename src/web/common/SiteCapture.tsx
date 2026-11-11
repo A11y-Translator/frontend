@@ -4,7 +4,7 @@
 // 핀·코멘트 같은 조작 요소는 children 으로 받아 확대/축소되지 않는 위 레이어에 % 좌표로 올립니다.
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import iconImage from '@/web/assets/icon-image.svg'
-import { CAPTURE_H, CAPTURE_W, OVERLAYS } from '@/shared/mocks/scan'
+import { CAPTURE_H, CAPTURE_W, OVERLAYS, type OverlayBox } from '@/shared/mocks/scan'
 
 interface SiteCaptureProps {
   page: string
@@ -17,9 +17,13 @@ interface SiteCaptureProps {
   flashSelector?: string
   className?: string
   children?: ReactNode
+  /** 문제 위치 박스 (기본: 데모 프로젝트B). 새 프로젝트는 검사 결과의 overlays */
+  overlays?: OverlayBox[]
+  /** 실제 페이지 검사(live)의 화면 캡처 주소 → 가짜 사이트 대신 실제 화면을 보여줍니다 */
+  screenshotUrl?: string
 }
 
-export function SiteCapture({ page, label, showOverlay = true, activeIssueId, flashSelector, className = '', children }: SiteCaptureProps) {
+export function SiteCapture({ page, label, showOverlay = true, activeIssueId, flashSelector, className = '', children, overlays = OVERLAYS, screenshotUrl }: SiteCaptureProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(CAPTURE_W)
 
@@ -35,7 +39,7 @@ export function SiteCapture({ page, label, showOverlay = true, activeIssueId, fl
   }, [])
 
   const scale = width / CAPTURE_W
-  const boxes = OVERLAYS.filter((o) => o.page === page)
+  const boxes = overlays.filter((o) => o.page === page)
 
   return (
     <div ref={ref} className={`relative w-full overflow-hidden bg-white ${className}`} style={{ height: CAPTURE_H * scale }}>
@@ -45,14 +49,19 @@ export function SiteCapture({ page, label, showOverlay = true, activeIssueId, fl
         className="absolute top-0 left-0 origin-top-left font-noto"
         style={{ width: CAPTURE_W, height: CAPTURE_H, transform: `scale(${scale})` }}
       >
-        <FakeSite page={page} />
+        {screenshotUrl ? (
+          // 검사 화면 캡처(1440×1093)를 기준 크기(734×557)에 맞춰 그립니다. 설명은 바깥 role="img" 의 label 이 함
+          <img src={screenshotUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+        ) : (
+          <FakeSite page={page} />
+        )}
         {showOverlay &&
           boxes.map((o) => {
             const active = o.issueId === activeIssueId
             const flash = flashSelector === o.selector && active
             return (
               <div
-                key={`${o.page}-${o.selector}`}
+                key={`${o.issueId}-${o.label}-${o.selector}`}
                 className={`absolute rounded-[3px] border-[#3086ff] ${active ? 'border-2 bg-[rgb(48_134_255/0.12)] shadow-[0_0_0_3px_rgb(48_134_255/0.35)]' : 'border bg-[rgb(48_134_255/0.08)]'} ${flash ? 'animate-pulse outline-4 outline-offset-2 outline-[#3086ff]' : ''}`}
                 style={{ left: o.x, top: o.y, width: o.w, height: o.h }}
               >

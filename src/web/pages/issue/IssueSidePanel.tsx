@@ -9,7 +9,7 @@ import type { Issue } from '@/shared/api/types'
 import { TEAM_LABEL } from '@/shared/api/types'
 import iconChevronLeft from '@/web/assets/icon-chevron-left.svg'
 import tagSuccess from '@/web/assets/tag-success.svg'
-import { DEFAULT_PROJECT_ID, OVERLAYS } from '@/shared/mocks/scan'
+import { DEFAULT_PROJECT_ID, OVERLAYS, type OverlayBox } from '@/shared/mocks/scan'
 import { CopyButton } from './CopyButton'
 import { SeverityChip } from '@/shared/ui/SeverityChip'
 
@@ -19,13 +19,19 @@ interface Props {
   order: Issue[]
   resolved: boolean
   onResolve: () => void
+  /** "해결됨" 되돌리기 */
+  onReopen: () => void
   /** "위치 보기": 캡처에서 해당 요소를 강조 */
   onLocate: (selector: string) => void
+  /** 새 프로젝트 이슈면 그 검사 결과의 박스 */
+  overlays?: OverlayBox[]
+  /** "목록으로" 링크가 갈 프로젝트 */
+  projectId?: string
 }
 
 const card = 'flex w-full flex-col rounded-xl border border-ext-line bg-white p-4'
 
-export function IssueSidePanel({ issue, order, resolved, onResolve, onLocate }: Props) {
+export function IssueSidePanel({ issue, order, resolved, onResolve, onReopen, onLocate, overlays = OVERLAYS, projectId = DEFAULT_PROJECT_ID }: Props) {
   const navigate = useNavigate()
   const idx = order.findIndex((i) => i.id === issue.id)
   const prev = order[idx - 1]
@@ -49,7 +55,7 @@ export function IssueSidePanel({ issue, order, resolved, onResolve, onLocate }: 
     <aside aria-label="이슈 정보" className="flex w-[386px] shrink-0 flex-col gap-3 self-stretch bg-[#f5f5f5] p-6 font-noto">
       {/* 목록으로 · 이전/다음 */}
       <div className="flex items-center gap-1.5 text-[13px] leading-[1.5] font-medium">
-        <Link to={`/projects/${DEFAULT_PROJECT_ID}/inspection`} className="flex flex-1 items-center gap-1.5 rounded text-black hover:underline">
+        <Link to={`/projects/${projectId}/inspection`} className="flex flex-1 items-center gap-1.5 rounded text-black hover:underline">
           <img src={iconChevronLeft} alt="" width={18} height={18} />
           목록으로
         </Link>
@@ -141,7 +147,7 @@ export function IssueSidePanel({ issue, order, resolved, onResolve, onLocate }: 
         </h3>
         <ul className="flex flex-col">
           {issue.selectors.map((sel) => {
-            const inCapture = OVERLAYS.some((o) => o.selector === sel && o.issueId === issue.id)
+            const inCapture = overlays.some((o) => o.selector === sel && o.issueId === issue.id)
             const open = openHtml === sel
             return (
               <li key={sel} className="flex flex-col py-[3px] text-xs">
@@ -231,14 +237,29 @@ export function IssueSidePanel({ issue, order, resolved, onResolve, onLocate }: 
             </Popover.Content>
           </Popover.Portal>
         </Popover.Root>
-        <button
-          type="button"
-          onClick={onResolve}
-          disabled={resolved}
-          className="rounded-full bg-black px-4 py-2.5 text-sm leading-[1.4] font-bold text-white hover:bg-ink-3 disabled:cursor-default disabled:bg-success"
-        >
-          {resolved ? '해결됨' : '해결됨으로 표시'}
-        </button>
+        {resolved ? (
+          <>
+            <span className="flex items-center gap-1.5 rounded-full bg-success-bg px-3.5 py-2.5 text-sm leading-[1.4] font-bold text-success">
+              <img src={tagSuccess} alt="" width={14} height={14} />
+              해결됨
+            </span>
+            <button
+              type="button"
+              onClick={onReopen}
+              className="rounded-full border border-ext-line bg-white px-4 py-2.5 text-sm leading-[1.4] font-bold text-black hover:bg-web-chip"
+            >
+              되돌리기<span className="sr-only"> — 해결되지 않은 상태로</span>
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={onResolve}
+            className="rounded-full bg-black px-4 py-2.5 text-sm leading-[1.4] font-bold text-white hover:bg-ink-3"
+          >
+            해결됨으로 표시
+          </button>
+        )}
       </div>
     </aside>
   )

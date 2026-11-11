@@ -62,3 +62,10 @@ export function contrastSummary(i: Issue) {
   return i.category === '색 대비' ? '2.7 : 1 → 기준 4.5 : 1' : i.wcag
 }
 
+
+/** ISO 시간 → '2026.11.10 14:05' (새 프로젝트 검사 시각 표시) */
+export function formatScannedAt(iso: string) {
+  const d = new Date(iso)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}

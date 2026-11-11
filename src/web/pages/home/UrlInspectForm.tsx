@@ -2,33 +2,53 @@
 // 디자인(높이 80px, 글자 24px)이 실제 화면에서 너무 커 보여서 높이 56px · 글자 16px 로 줄였습니다.
 import { useId, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { normalizeUrl } from '@/shared/api/url'
 
-/** 프로토타입: 어떤 URL 이든 진행 중인 프로젝트B 의 검사 화면으로 이동 */
+/** onInspect 가 없을 때(홈): 어떤 URL 이든 진행 중인 프로젝트B 의 검사 화면으로 이동 */
 const INSPECTION_PATH = '/projects/b/inspection'
 
 interface UrlInspectFormProps {
   /** 입력칸을 설명하는 다른 요소의 id (예: 빈 홈 안내 문구) */
   describedBy?: string
   className?: string
+  /**
+   * 있으면 정리된 주소(https://…)로 이 함수를 부르고, 끝날 때까지 "검사 중" 상태를 보여줍니다.
+   * 예외를 던지면 그 메시지를 오류로 표시합니다. (새 프로젝트 화면: 프로젝트 생성 + 검사)
+   */
+  onInspect?: (url: string) => Promise<void>
 }
 
-export function UrlInspectForm({ describedBy, className = '' }: UrlInspectFormProps) {
+export function UrlInspectForm({ describedBy, className = '', onInspect }: UrlInspectFormProps) {
   const navigate = useNavigate()
   const [url, setUrl] = useState('')
-  const [error, setError] = useState(false)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputId = useId()
   const errorId = useId()
 
-  const onSubmit = (e: FormEvent) => {
+  const fail = (message: string) => {
+    setError(message)
+    inputRef.current?.focus()
+  }
+
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const value = url.trim()
-    if (!value) {
-      setError(true)
-      inputRef.current?.focus()
+    if (busy) return
+    const checked = normalizeUrl(url)
+    if (!checked.ok) return fail(checked.message)
+    if (!onInspect) {
+      navigate(INSPECTION_PATH, { state: { url: checked.url } })
       return
     }
-    navigate(INSPECTION_PATH, { state: { url: value } })
+    setBusy(true)
+    try {
+      await onInspect(checked.url)
+    } catch (err) {
+      fail(err instanceof Error && err.message ? err.message : '검사하지 못했어요. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const describedByIds = [error ? errorId : null, describedBy].filter(Boolean).join(' ') || undefined
@@ -51,24 +71,29 @@ export function UrlInspectForm({ describedBy, className = '' }: UrlInspectFormPr
           value={url}
           onChange={(e) => {
             setUrl(e.target.value)
-            if (error) setError(false)
+            if (error) setError('')
           }}
-          aria-invalid={error || undefined}
+          aria-invalid={!!error || undefined}
+          readOnly={busy}
           aria-describedby={describedByIds}
           className="min-w-0 flex-1 bg-transparent font-noto text-base leading-[1.45] text-ink outline-none placeholder:text-placeholder"
         />
         <button
           type="submit"
-          className="h-11 shrink-0 rounded-full bg-black px-7 font-noto text-[15px] leading-[1.45] font-medium text-white hover:bg-ink-3"
+          aria-disabled={busy || undefined}
+          className="h-11 shrink-0 rounded-full bg-black px-7 font-noto text-[15px] leading-[1.45] font-medium text-white hover:bg-ink-3 aria-disabled:cursor-wait aria-disabled:bg-muted-2"
         >
-          검사하기
+          {busy ? '검사 중…' : '검사하기'}
         </button>
       </div>
       {error && (
         <p id={errorId} role="alert" className="mt-2 px-6 text-sm font-medium text-danger">
-          검사할 페이지 주소를 입력해 주세요.
+          {error}
         </p>
       )}
+      <p role="status" className="sr-only">
+        {busy ? '페이지를 검사하고 있어요. 잠시만 기다려 주세요.' : ''}
+      </p>
     </form>
   )
 }

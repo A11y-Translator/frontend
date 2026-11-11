@@ -5,7 +5,7 @@
 
 - 디자인: Figma `회의` 파일 › Page 4 (구현 · Workflow · 할 일 탭 · sidebar/checklist)
 - 스택: React 19 · TypeScript · Vite · Tailwind CSS v4 · React Router 7 · Radix UI
-- 데이터: **전부 임시 데이터**(`src/shared/mocks`). 화면에 나오는 이슈·숫자·팀원은 예시 사이트를 검사했다고 가정한 값이에요.
+- 데이터: 새 프로젝트 검사는 **실제 페이지를 axe-core 로 검사**(개발 서버). 그 외 화면은 **임시 데이터**(`src/shared/mocks`). 화면에 나오는 이슈·숫자·팀원은 예시 사이트를 검사했다고 가정한 값이에요.
 - 서버 연결 없음. 웹 ↔ 확장 데모 흐름은 브라우저 `localStorage` 로만 공유합니다.
 
 ## 실행
@@ -110,7 +110,37 @@ src/
 화면은 `useAppState()` / `actions` 로만 데이터를 읽고 바꿉니다.
 백엔드가 준비되면 `shared/store.ts` 의 초기값과 `actions` 안을 API 호출로 바꾸고,
 `shared/api/types.ts` 를 응답 형태에 맞추면 화면 코드는 그대로 둘 수 있습니다.
-(다음 작업: `shared/api/` 에 mock / http 구현을 나눠 스위치 하나로 바꾸도록 정리)
+### 새 프로젝트 만들기 · 검사
+
+`/projects/new` 에서 폴더 카드 제목을 눌러 이름을 바꾸고, URL 을 넣고 **검사하기** →
+프로젝트 생성 + **실제 페이지 검사** → `/projects/:id/inspection` 으로 이동합니다. (이름을 안 바꾸면 도메인이 이름이 됨)
+
+검사 방식은 `.env.local` 의 `VITE_API_MODE` 하나로 바꿉니다.
+
+| 모드 | 언제 | 하는 일 |
+|---|---|---|
+| `live` (개발 서버 기본) | `npm run dev` | 개발 서버가 **이 컴퓨터의 크롬을 화면 없이 띄워** 페이지를 열고(`dev/inspectProxy.ts`) **axe-core 로 WCAG 2.2 AA 검사** + 화면 캡처 |
+| `http` | 백엔드 연결 후 | `VITE_API_BASE_URL` 서버에 생성·검사 요청 (`shared/api/http.ts`) |
+| `mock` | 오프라인 시연 | URL 로 만든 임시 규칙 결과 (`shared/mocks/inspect.ts`) |
+
+| 파일 | 역할 |
+|---|---|
+| `shared/api/client.ts` | 화면이 쓰는 입구 `api` + 모드 스위치 |
+| `shared/api/url.ts` | 주소 규칙 (https 자동 보정 · http/https 만 · 도메인 확인) — 모든 모드 공통 |
+| `shared/api/live.ts` | axe 결과 → `Issue` 변환 (한국어 문구, 카테고리, WCAG 번호, 캡처 위 박스, 통과율) |
+| `shared/api/liveProxy.ts` | 개발 서버에 검사 요청 (`/__inspect/scan`) |
+| `dev/inspectProxy.ts` | [개발 서버 전용] Playwright(크롬) + axe-core 검사, 캡처는 `node_modules/.a11y-shots/` |
+| `shared/store.ts` | `createProjectAndInspect` · `reinspect` · `setResolved`, 버전 기록 `inspectionHistory` |
+
+live 모드 참고
+- **Google Chrome 이 설치돼 있어야 해요.** (`playwright-core` 는 브라우저를 내려받지 않고 설치된 크롬을 씀)
+- 진짜 브라우저로 열어서 React/Vite 같은 SPA 도 다 그려진 뒤 검사해요. 검사 화면(1440px)을 찍어 미리보기·이슈 상세에 보여줘요.
+- 로그인해야 보이는 페이지는 검사할 수 없어요. 내용이 거의 없으면 "결과를 확인해 주세요" 안내가 떠요.
+- 지금은 입력한 **한 페이지**만 검사해요. 자동 검사가 확인 못 한 항목은 "직접 확인 필요 N개"로 표시돼요.
+- 빌드된 앱(`npm run build`)에는 검사 서버가 없어서 live 모드가 동작하지 않아요 → 백엔드가 같은 방식(Playwright + axe-core)으로 검사하면 돼요. `dev/inspectProxy.ts` 를 그대로 참고하세요.
+
+가정한 백엔드 API: `POST /projects {name,url} → Project`, `POST /projects/:id/inspections {url} → Inspection`
+(타입은 `shared/api/types.ts`). 실패 시 `{ message }` 를 그대로 화면에 보여줍니다.
 
 ## 미정 · 확인 필요
 

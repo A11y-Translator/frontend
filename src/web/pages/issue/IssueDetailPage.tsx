@@ -4,10 +4,12 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Header } from '@/web/layout/Header'
-import { actions, useAppState } from '@/shared/store'
+import { actions, findIssueContext, useAppState } from '@/shared/store'
 import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
-import type { Comment, Issue } from '@/shared/api/types'
+import type { Comment, Inspection, Issue, Project } from '@/shared/api/types'
 import { DEFAULT_PROJECT_ID, PROJECT_NAME, SCAN, SITE_URL } from '@/shared/mocks/scan'
+import { formatScannedAt } from '@/web/common/issueHelpers'
+import { useVersionMenu } from '@/web/common/useVersionMenu'
 import { SiteCapture } from '@/web/common/SiteCapture'
 import { OpenInChromeLink } from '@/web/common/OpenInChromeLink'
 import { CommentThread } from './CommentThread'
@@ -17,15 +19,32 @@ type Pin = { x: number; y: number }
 
 export default function IssueDetailPage() {
   const { issueId } = useParams()
-  const { issues, comments, currentVersion } = useAppState()
-  const issue = issues.find((i) => i.id === issueId)
+  const state = useAppState()
+  const { comments, currentVersion } = state
+  // 새로 만든 프로젝트의 이슈면 그 검사 결과에서, 아니면 데모 데이터에서 찾습니다
+  const { issue, issues, project, inspection } = findIssueContext(state, issueId)
+  const versionMenu = useVersionMenu(inspection?.projectId ?? DEFAULT_PROJECT_ID)
 
   return (
     <>
-      <Header version={`버전 ${currentVersion}`} project={PROJECT_NAME} right={<OpenInChromeLink />} />
+      <Header
+        version={`버전 ${inspection?.version ?? currentVersion}`}
+        project={project?.name ?? PROJECT_NAME}
+        status={inspection ? `마지막 검사 ${formatScannedAt(inspection.scannedAt).slice(-5)} · 이슈 ${inspection.issues.length}개` : undefined}
+        right={<OpenInChromeLink />}
+        versionMenu={versionMenu}
+        viewingVersion={inspection?.version ?? currentVersion}
+      />
       {issue ? (
         // 이슈가 바뀌면 핀·입력 상태를 새로 시작하도록 key 사용
-        <IssueDetail key={issue.id} issue={issue} issues={issues} comments={comments.filter((c) => c.issueId === issue.id)} />
+        <IssueDetail
+          key={issue.id}
+          issue={issue}
+          issues={issues}
+          comments={comments.filter((c) => c.issueId === issue.id)}
+          project={project}
+          inspection={inspection}
+        />
       ) : (
         <div className="flex flex-1 flex-col items-start gap-3 p-8">
           <h1 className="text-2xl font-bold">이슈를 찾을 수 없어요</h1>
@@ -40,12 +59,25 @@ export default function IssueDetailPage() {
 
 const clamp = (n: number) => Math.min(97, Math.max(3, n))
 
-function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[]; comments: Comment[] }) {
+interface IssueDetailProps {
+  issue: Issue
+  issues: Issue[]
+  comments: Comment[]
+  /** 새로 만든 프로젝트의 이슈일 때만 있음 */
+  project?: Project
+  inspection?: Inspection
+}
+
+function IssueDetail({ issue, issues, comments, project, inspection }: IssueDetailProps) {
   const [overlay, setOverlay] = useState(true)
   const [pendingPin, setPendingPin] = useState<Pin | null>(null)
   const [activePinId, setActivePinId] = useState<string | null>(null)
+  // 코멘트 창 열림 — 바깥 클릭 · Esc · ✕ 로 닫고, 핀을 누르거나 새 핀을 꽂으면 열림
+  const [threadOpen, setThreadOpen] = useState(true)
+  const threadRef = useRef<HTMLElement>(null)
+  /** 창을 닫은 바로 그 클릭이 캡처에 새 핀까지 꽂지 않도록 */
+  const closedByOutsideClick = useRef(false)
   const [flash, setFlash] = useState<string | undefined>()
-  const [resolvedLocal, setResolvedLocal] = useState(false)
   const [notice, setNotice] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const pendingRef = useRef<HTMLButtonElement>(null)
@@ -56,13 +88,56 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
 
   const order = [...issues].sort((a, b) => a.no - b.no)
   const pinned = comments.filter((c): c is Comment & { pin: Pin } => !!c.pin)
-  // 프로토타입에는 이슈 상태를 바꾸는 store 액션이 없어 "해결됨으로 표시"는 화면 안에서만 유지됩니다
-  const resolved = issue.status === 'resolved' || resolvedLocal
+  const resolved = issue.status === 'resolved'
 
   // 스레드는 지금 보고 있는 핀 옆에 붙습니다 (새 핀 > 고른 핀 > 마지막 핀 > 기본 위치)
   const anchor: Pin = pendingPin ?? pinned.find((c) => c.id === activePinId)?.pin ?? pinned[pinned.length - 1]?.pin ?? { x: 37, y: 37 }
 
+  const closeThread = (returnFocus = false) => {
+    setThreadOpen(false)
+    // 입력 없이 꽂아 둔 새 핀은 같이 취소
+    setPendingPin(null)
+    if (returnFocus) requestAnimationFrame(() => captureRef.current?.querySelector<HTMLButtonElement>('button')?.focus())
+  }
+
+  // 코멘트 창 바깥을 누르면 닫기 (핀 버튼은 창을 여는 쪽이라 제외)
+  useEffect(() => {
+    if (!threadOpen) return
+    const onPointerDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement
+      if (threadRef.current?.contains(t) || t.closest('[data-comment-pin]')) return
+      closedByOutsideClick.current = true
+      closeThread()
+      // 다른 곳 클릭이라 캡처 click 이 안 오면 다음 클릭에 영향 없게 초기화
+      window.setTimeout(() => (closedByOutsideClick.current = false), 400)
+    }
+    // Esc: 포커스가 코멘트 창 안(또는 아무 데도 없을 때)이면 닫기. 멘션 목록·새 핀이 먼저 처리한 Esc 는 무시
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing) return
+      const active = document.activeElement
+      if (active && active !== document.body && !threadRef.current?.contains(active)) return
+      e.preventDefault()
+      closeThread(true)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [threadOpen])
+
+  const openPin = (id: string) => {
+    setActivePinId(id)
+    setThreadOpen(true)
+  }
+
   const addPin = (e: MouseEvent<HTMLButtonElement>) => {
+    if (closedByOutsideClick.current) {
+      closedByOutsideClick.current = false
+      return
+    }
+    setThreadOpen(true)
     let pin: Pin = { x: 50, y: 50 }
     // 키보드(Enter/Space)로 누르면 detail 이 0 → 가운데에 꽂고 방향키로 옮기게 합니다
     if (e.detail > 0) {
@@ -112,7 +187,13 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
     setNotice(`캡처에서 ${selector} 위치를 표시했어요.`)
   }
 
-  const recheck = () => {
+  const recheck = async () => {
+    if (inspection) {
+      setNotice('재검사 중이에요…')
+      await actions.reinspect(inspection.projectId)
+      setNotice('재검사를 마쳤어요.')
+      return
+    }
     actions.recheck()
     setNotice('재검사를 마쳤어요. 수정안을 적용한 이슈는 자동으로 해결돼요.')
   }
@@ -131,7 +212,7 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
         <div className="flex h-14 items-center gap-3 rounded-[40px] bg-white py-2 pr-2 pl-6 font-noto">
           <p className="min-w-0 flex-1 truncate text-base leading-[1.5] font-medium text-black">
             <span className="sr-only">검사한 주소: </span>
-            {SITE_URL}
+            {project?.url ?? SITE_URL}
             {issue.page === '/main' ? '' : issue.page}
           </p>
           <button
@@ -160,6 +241,8 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
               showOverlay={overlay}
               activeIssueId={issue.id}
               flashSelector={flash}
+              overlays={inspection?.overlays}
+              screenshotUrl={inspection?.capture?.screenshotUrl}
             >
               <button
                 type="button"
@@ -173,7 +256,8 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setActivePinId(c.id)}
+                    data-comment-pin
+                    onClick={() => openPin(c.id)}
                     aria-label={`코멘트 핀 ${n + 1}: ${author?.name ?? ''} — ${c.body}`}
                     aria-pressed={anchor === c.pin}
                     className="absolute flex size-7 -translate-x-full items-center justify-center rounded-full rounded-tr-none border-2 border-white bg-black font-noto text-xs leading-[1.5] font-bold text-white shadow"
@@ -186,6 +270,7 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
               {pendingPin && (
                 <button
                   ref={pendingRef}
+                  data-comment-pin
                   type="button"
                   onKeyDown={movePin}
                   onClick={() => inputRef.current?.focus()}
@@ -198,11 +283,22 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
               )}
             </SiteCapture>
           </div>
-          <CommentThread issue={issue} comments={comments} pendingPin={!!pendingPin} inputRef={inputRef} onSubmit={submit} style={threadStyle} />
+          {threadOpen && (
+            <CommentThread
+              ref={threadRef}
+              issue={issue}
+              comments={comments}
+              pendingPin={!!pendingPin}
+              inputRef={inputRef}
+              onSubmit={submit}
+              onClose={() => closeThread(true)}
+              style={threadStyle}
+            />
+          )}
         </div>
 
         <div className="flex flex-col font-noto text-xs leading-[1.5] text-muted">
-          <p>검사 시점 캡처 · {SCAN.scannedAt} · 데스크톱 1440px</p>
+          <p>검사 시점 캡처 · {inspection ? formatScannedAt(inspection.scannedAt) : SCAN.scannedAt} · 데스크톱 1440px</p>
           <p>캡처 위 아무 곳이나 클릭하면 코멘트 핀을 꽂을 수 있어요 (키보드: 캡처를 선택해 Enter → 방향키로 이동)</p>
         </div>
         <p role="status" className="sr-only">
@@ -210,10 +306,22 @@ function IssueDetail({ issue, issues, comments }: { issue: Issue; issues: Issue[
         </p>
       </div>
 
-      <IssueSidePanel issue={issue} order={order} resolved={resolved} onResolve={() => {
-          setResolvedLocal(true)
-          setNotice('해결됨으로 표시했어요.')
-        }} onLocate={locate} />
+      <IssueSidePanel
+        issue={issue}
+        order={order}
+        resolved={resolved}
+        onResolve={() => {
+          actions.setResolved(issue.id, true)
+          setNotice('해결됨으로 표시했어요. 잘못 눌렀다면 되돌리기를 누르세요.')
+        }}
+        onReopen={() => {
+          actions.setResolved(issue.id, false)
+          setNotice('해결 표시를 되돌렸어요. 다시 할 일로 돌아갔어요.')
+        }}
+        onLocate={locate}
+        overlays={inspection?.overlays}
+        projectId={inspection?.projectId}
+      />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 // [임시 데이터] 검사 요약 숫자와 캡처 위 오버레이 좌표.
 // 백엔드가 붙으면 검사 결과 API 응답으로 바뀝니다. (mocks/index.ts 의 issues 는 그중 대표 이슈 목록)
 import { versions } from './index'
+import type { IssueOverlay } from '@/shared/api/types'
 
 /** 프로토타입에서 기본으로 여는 프로젝트 (프로젝트B = Web A 메인) */
 export const DEFAULT_PROJECT_ID = 'b'
@@ -39,16 +40,8 @@ export const MORE_PAGES = ['/about', '/faq', '/signup'] as const
 export const CAPTURE_W = 734
 export const CAPTURE_H = 557
 
-export interface OverlayBox {
-  label: number
-  issueId: string
-  selector: string
-  page: string
-  x: number
-  y: number
-  w: number
-  h: number
-}
+/** 타입은 shared/api/types 의 IssueOverlay 와 같습니다 */
+export type OverlayBox = IssueOverlay
 
 export const OVERLAYS: OverlayBox[] = [
   // /main
