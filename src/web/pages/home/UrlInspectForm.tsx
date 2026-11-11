@@ -4,7 +4,7 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { normalizeUrl } from '@/shared/api/url'
 
-/** onInspect 가 없을 때(홈): 어떤 URL 이든 진행 중인 프로젝트B 의 검사 화면으로 이동 */
+/** onInspect 를 안 넘겼을 때만: 데모용으로 프로젝트B 검사 화면으로 이동 (홈·새 프로젝트 화면은 onInspect 로 실제 검사) */
 const INSPECTION_PATH = '/projects/b/inspection'
 
 interface UrlInspectFormProps {
