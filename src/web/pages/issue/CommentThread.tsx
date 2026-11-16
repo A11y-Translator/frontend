@@ -119,7 +119,7 @@ export function CommentThread({ issue, comments, pendingPin, inputRef, onSubmit,
       ref={ref}
       aria-labelledby={titleId}
       style={style}
-      className="absolute z-10 flex w-[280px] flex-col gap-2.5 rounded-xl border border-ext-line bg-white px-3.5 py-3 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.12)]"
+      className="absolute z-10 flex w-[280px] max-w-[calc(100%-16px)] flex-col gap-2.5 rounded-xl border border-ext-line bg-white px-3.5 py-3 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.12)]"
     >
       <div className="flex items-center text-xs leading-[1.5]">
         <h2 id={titleId} className="flex-1 font-bold text-black">

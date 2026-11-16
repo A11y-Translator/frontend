@@ -52,7 +52,7 @@ export function IssueSidePanel({ issue, order, resolved, onResolve, onReopen, on
   }
 
   return (
-    <aside aria-label="이슈 정보" className="flex w-[386px] shrink-0 flex-col gap-3 self-stretch bg-[#f5f5f5] p-6 font-noto">
+    <aside aria-label="이슈 정보" className="flex w-full shrink-0 flex-col gap-3 self-stretch bg-[#f5f5f5] p-6 font-noto @4xl:w-[340px] @6xl:w-[386px]">
       {/* 목록으로 · 이전/다음 */}
       <div className="flex items-center gap-1.5 text-[13px] leading-[1.5] font-medium">
         <Link to={`/projects/${projectId}/inspection`} className="flex flex-1 items-center gap-1.5 rounded text-black hover:underline">

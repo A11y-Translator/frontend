@@ -23,7 +23,7 @@ export default function ProjectEmptyPage() {
   }
 
   return (
-    <div className="flex w-full flex-col items-center page-x pt-[162px] pb-12 font-pretendard">
+    <div className="flex w-full flex-col items-center page-x pt-[clamp(48px,14vh,162px)] pb-12 font-pretendard">
       {/* 디자인에는 제목이 없어서 화면낭독기용 제목만 둡니다 */}
       <h1 className="sr-only">새 프로젝트 만들기</h1>
 
@@ -37,7 +37,7 @@ export default function ProjectEmptyPage() {
         meta="최근 수정일 | -"
       />
 
-      <p id="empty-home-hint" className="mt-6 text-center text-2xl leading-[1.6] font-medium text-muted">
+      <p id="empty-home-hint" className="mt-6 text-center text-lg leading-[1.6] font-medium text-muted">
         아직 검사한 페이지가 없어요. 위에 URL을 넣고 첫 검사를 시작해 보세요.
       </p>
     </div>

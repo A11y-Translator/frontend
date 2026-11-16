@@ -28,7 +28,7 @@ export function InspectionPreview({ issue, page, onPageChange, pages, overlays, 
   const onIssuePage = issue.page === page
 
   return (
-    <section aria-labelledby="preview-title" className="flex w-[372px] shrink-0 flex-col gap-3 rounded-[10px] border border-[#d9d9d9] bg-white p-[18px]">
+    <section aria-labelledby="preview-title" className="flex w-full shrink-0 flex-col gap-3 @4xl:w-[340px] @6xl:w-[372px] rounded-[10px] border border-[#d9d9d9] bg-white p-[18px]">
       <div className="flex items-center leading-[1.45]">
         <h2 id="preview-title" className="flex-1 text-sm font-bold text-ink-2">
           검사 화면 · 문제 위치

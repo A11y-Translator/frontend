@@ -59,7 +59,7 @@ export default function TeamMembersPage() {
         {/* 제목 줄 */}
         <div className="flex items-end gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1 leading-[1.45]">
-            <h1 className="text-[30px] font-bold text-ink-2">팀원</h1>
+            <h1 className="page-title text-ink-2">팀원</h1>
             <p className="text-[15px] text-muted-2">누가 어떤 이슈를 맡고 있는지 한눈에 봐요</p>
           </div>
           <button
@@ -101,13 +101,13 @@ export default function TeamMembersPage() {
           </div>
 
           <Tabs.Content value="members" className="rounded-[10px] outline-offset-4">
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(320px,372px)] items-start gap-5">
+            <div className="grid grid-cols-1 items-start gap-5 @4xl:grid-cols-[minmax(0,1fr)_minmax(300px,372px)]">
               <div className="min-w-0">
                 <h2 className="sr-only">팀원 목록</h2>
                 {visible.length === 0 ? (
                   <p className="text-[13px] text-muted-2">이 직군에 팀원이 없어요.</p>
                 ) : (
-                  <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                  <ul className="grid grid-cols-1 gap-3 @6xl:grid-cols-2">
                     {visible.map(({ m, load }) => (
                       <MemberCard
                         key={m.id}

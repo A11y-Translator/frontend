@@ -34,7 +34,7 @@ export function VersionIssues({ version, issues, comments, unresolvedTotal, reso
   ]
 
   return (
-    <aside aria-labelledby="version-issues-title" className="flex w-[386px] shrink-0 flex-col gap-4 rounded-[10px] border-l border-[#ececec] bg-web-nav px-6 pt-8 pb-6">
+    <aside aria-labelledby="version-issues-title" className="flex w-full shrink-0 flex-col gap-4 rounded-[10px] border-l @4xl:w-[340px] @6xl:w-[386px] border-[#ececec] bg-web-nav px-6 pt-8 pb-6">
       <div className="flex items-center leading-[1.45] font-bold">
         <h2 id="version-issues-title" className="flex-1 text-lg text-ink-2">
           버전 {version} 이슈 · 코멘트

@@ -40,7 +40,7 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
   const handoffIssue = allIssues.find((i) => i.id === handoffId)
 
   return (
-    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid grid-cols-1 items-start gap-5 @4xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-4">
         <h2 ref={listHeadingRef} tabIndex={-1} className="sr-only">
           내 할 일 목록

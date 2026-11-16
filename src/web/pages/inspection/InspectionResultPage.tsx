@@ -138,7 +138,7 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
         {/* Title row */}
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1 leading-[1.45]">
-            <h1 className="text-[30px] font-bold text-ink-2">접근성 검사</h1>
+            <h1 className="page-title text-ink-2">접근성 검사</h1>
             <p className="text-[15px] text-muted-2">
               버전 {viewingVersion} · {scan.scannedAt} 검사 · 페이지 {scan.pages}개 · {scan.standard} 기준
               {inspection?.source === 'live' && ` · 실제 페이지 검사(axe-core)${inspection.needsReview ? ` · 직접 확인 필요 ${inspection.needsReview}개` : ''}`}
@@ -187,7 +187,7 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
 
         {/* Stats */}
         <section aria-label="검사 요약">
-          <ul className="grid grid-cols-4 gap-4">
+          <ul className="grid grid-cols-2 gap-4 @3xl:grid-cols-4">
             <StatCard label="전체 이슈" value={String(stats.total)}>
               {inspection && !prevInspection ? (
                 '첫 검사'
@@ -218,7 +218,7 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
           </ul>
         </section>
 
-        <div className="flex items-start gap-5">
+        <div className="flex flex-col gap-5 @4xl:flex-row @4xl:items-start">
           {/* Issue list */}
           <section aria-labelledby="issue-list-title" className="flex min-w-0 flex-1 flex-col gap-3">
             <h2 id="issue-list-title" className="sr-only">

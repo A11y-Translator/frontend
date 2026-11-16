@@ -33,18 +33,19 @@ export function Header({
 }: HeaderProps) {
   const navigate = useNavigate()
   return (
-    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-web-header-line bg-white page-x font-pretendard">
-      <button type="button" onClick={() => navigate(-1)} aria-label="뒤로 가기" className="flex size-6 items-center justify-center rounded">
+    // 좁아지면(본문 폭 기준) 제목 → 검사 상태 순으로 숨기고, 프로젝트 이름은 말줄임
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-web-header-line bg-white page-x font-pretendard @2xl:gap-4">
+      <button type="button" onClick={() => navigate(-1)} aria-label="뒤로 가기" className="flex size-6 shrink-0 items-center justify-center rounded">
         <img src={iconBack} alt="" width={24} height={24} />
       </button>
-      <span className="text-base font-medium text-black">{title}</span>
+      <span className="hidden shrink-0 text-base font-medium text-black @2xl:inline">{title}</span>
       {showContext && (
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <nav aria-label="현재 위치" className="flex items-center gap-2">
-            <span className="rounded-lg bg-web-chip py-[5px] pr-2 pl-2.5 text-sm font-semibold text-ink-2">{project}</span>
+          <nav aria-label="현재 위치" className="flex min-w-0 items-center gap-2">
+            <span className="min-w-0 truncate rounded-lg bg-web-chip py-[5px] pr-2 pl-2.5 text-sm font-semibold text-ink-2">{project}</span>
             <span aria-hidden className="text-sm text-[#a3a8b0]">›</span>
             <DropdownMenu.Root>
-              <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-lg bg-web-chip py-[5px] pr-2 pl-2.5 text-sm font-semibold text-ink-2 hover:bg-web-line-2 data-[state=open]:bg-web-line-2">
+              <DropdownMenu.Trigger className="flex shrink-0 items-center gap-1.5 rounded-lg bg-web-chip whitespace-nowrap py-[5px] pr-2 pl-2.5 text-sm font-semibold text-ink-2 hover:bg-web-line-2 data-[state=open]:bg-web-line-2">
                 {version}
                 <span aria-hidden className="text-[11px] font-normal text-[#626873]">▾</span>
                 <span className="sr-only">, 버전 바꾸기</span>
@@ -83,7 +84,7 @@ export function Header({
               </DropdownMenu.Portal>
             </DropdownMenu.Root>
           </nav>
-          <p className="flex items-center gap-1.5 rounded-full bg-success-bg px-2.5 py-2 text-xs font-medium text-success">
+          <p className="hidden shrink-0 items-center gap-1.5 rounded-full bg-success-bg px-2.5 py-2 text-xs font-medium whitespace-nowrap text-success @3xl:flex">
             <img src={statusDot} alt="" width={6} height={6} />
             {status}
           </p>

@@ -41,12 +41,12 @@ export default function VersionReportPage() {
       <Header version={`버전 ${currentVersion}`} project={PROJECT_NAME} versionMenu={versionMenu} viewingVersion={currentVersion} />
       <div className="flex flex-1 flex-col gap-6 bg-white page-x pt-12 pb-10">
         <div className="flex flex-col gap-[3px]">
-          <h1 className="text-[32px] leading-[1.6] font-bold text-black">버전 {currentVersion}</h1>
-          <p className="text-xl leading-[1.45] text-muted">현재 작업 중인 버전</p>
+          <h1 className="page-title text-ink-2">버전 {currentVersion}</h1>
+          <p className="text-[15px] leading-[1.45] text-muted-2">현재 작업 중인 버전</p>
         </div>
 
-        <div className="flex items-start gap-5">
-          <div className="flex min-w-0 flex-1 flex-col gap-8 px-2.5">
+        <div className="flex flex-col gap-5 @4xl:flex-row @4xl:items-start">
+          <div className="flex min-w-0 flex-1 flex-col gap-8 @4xl:px-2.5">
             {/* Version summary */}
             <section aria-label="버전 요약" className="flex flex-col gap-3.5">
               <ul className="grid grid-cols-2 gap-3">

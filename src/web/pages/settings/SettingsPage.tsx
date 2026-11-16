@@ -25,10 +25,10 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-full flex-1 bg-white">
-      <div className="flex w-full flex-col gap-3.5 page-x pt-[30px] pb-12 font-noto">
-        <div className="flex flex-col gap-1 leading-[1.5]">
-          <h1 className="text-[32px] font-bold text-black">설정</h1>
-          <p className="text-lg text-muted">계정, 확장 프로그램 검사 방식, 알림을 관리해요.</p>
+      <div className="flex w-full flex-col gap-3.5 page-x pt-10 pb-12 font-noto">
+        <div className="mb-3 flex flex-col gap-1 leading-[1.5]">
+          <h1 className="page-title text-ink-2">설정</h1>
+          <p className="text-[15px] text-muted-2">계정, 확장 프로그램 검사 방식, 알림을 관리해요.</p>
         </div>
 
         <SettingSection title="계정">

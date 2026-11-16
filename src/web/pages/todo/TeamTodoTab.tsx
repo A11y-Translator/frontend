@@ -34,8 +34,9 @@ export function TeamTodoTab({ issues, allIssues, filter, announce }: Props) {
     })
 
   return (
-    <div className="overflow-hidden rounded-xl border border-web-header-line bg-white">
-      <table className="w-full table-fixed border-collapse text-left leading-[1.45]">
+    // 좁은 화면에서는 표만 가로로 스크롤 (페이지 전체가 밀리지 않게)
+    <div className="overflow-x-auto rounded-xl border border-web-header-line bg-white">
+      <table className="w-full min-w-[680px] table-fixed border-collapse text-left leading-[1.45]">
         <caption className="sr-only">우리 팀 할 일. 직군별로 묶여 있고, 담당자 칸의 버튼으로 담당자를 바꿀 수 있어요.</caption>
         <colgroup>
           <col />

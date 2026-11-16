@@ -200,12 +200,15 @@ function IssueDetail({ issue, issues, comments, project, inspection }: IssueDeta
 
   const threadStyle: CSSProperties = {
     top: `max(8px, min(${anchor.y}%, calc(100% - 300px)))`,
-    ...(anchor.x < 58 ? { left: `calc(${anchor.x}% + 10px)` } : { right: `calc(${100 - anchor.x}% + 38px)` }),
+    // 좁은 화면에서도 말풍선(최대 280px)이 캡처 밖으로 나가지 않도록 좌우 8px 안쪽으로 가둬요
+    ...(anchor.x < 58
+      ? { left: `max(8px, min(calc(${anchor.x}% + 10px), calc(100% - min(280px, 100% - 16px) - 8px)))` }
+      : { right: `max(8px, min(calc(${100 - anchor.x}% + 38px), calc(100% - min(280px, 100% - 16px) - 8px)))` }),
   }
 
   return (
-    <div className="flex flex-1 page-x">
-      <div className="flex min-w-0 flex-1 flex-col gap-3.5 py-5 pr-5">
+    <div className="flex flex-1 flex-col page-x @4xl:flex-row">
+      <div className="flex min-w-0 flex-1 flex-col gap-3.5 py-5 @4xl:pr-5">
         <h1 className="sr-only">이슈 상세: {issue.title}</h1>
 
         {/* URL bar */}
