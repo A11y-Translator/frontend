@@ -32,7 +32,7 @@ export function TodoSummaryCard() {
   const mentionAuthor = memberById(mention?.authorId)
 
   return (
-    <div className="flex min-h-[392px] w-full flex-col rounded-2xl border border-web-line bg-white px-6 pt-5 pb-5 font-noto">
+    <div className="flex min-h-[392px] w-full flex-1 flex-col rounded-2xl border border-web-line bg-white px-6 pt-5 pb-5 font-noto">
       <p className="flex flex-col gap-1 leading-[1.4]">
         <span className="text-sm font-medium text-muted-2">내 할 일</span>
         <span className="flex items-baseline gap-1.5">

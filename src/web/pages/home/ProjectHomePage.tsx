@@ -24,14 +24,14 @@ export default function ProjectHomePage() {
   return (
     <div className="flex w-full flex-col page-x pt-10 pb-8 font-noto">
       {/* 컴포넌트 title (554:9315) */}
-      <div className="flex flex-col gap-1.5 leading-[1.45]">
+      <div className="flex flex-col gap-1.5 leading-[1.45] break-keep">
         <h1 className="page-title text-ink-2">모두가 쓰기 편한 화면, 오늘도 같이 만들어 봐요</h1>
         <p className="text-[15px] text-muted-2">색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인해요</p>
       </div>
 
       <UrlInspectForm className="mt-6" onInspect={(url, multi, onProgress) => createAndInspect(url, undefined, multi, onProgress)} />
 
-      <div className="mt-8 grid grid-cols-1 items-start gap-6 @4xl:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 items-start gap-6 @4xl:grid-cols-2 @4xl:items-stretch">
         <section aria-labelledby="home-recent" className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h2 id="home-recent" className="text-base leading-[1.45] font-semibold text-black">
@@ -50,7 +50,7 @@ export default function ProjectHomePage() {
               </Link>
             </p>
           )}
-          <ul className="grid grid-cols-1 gap-4 @md:grid-cols-2">
+          <ul className="grid grid-cols-2 gap-3 @md:gap-4">
             {recent.map((p) => {
               const active = p.status === 'active'
               return (

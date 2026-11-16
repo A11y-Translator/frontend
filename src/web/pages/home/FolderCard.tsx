@@ -1,5 +1,6 @@
 // Figma: 컴포넌트 / Folder Card (555:1576) — State=Default(회색) / Active(파랑, 종이 미리보기 표시)
-// 피그마 비율(270×275)을 그대로 지키고, 칸 폭에 따라 카드 전체가 같은 비율로 커지고 작아져요 (안쪽 위치는 %, 글자는 카드 폭 기준 cqw).
+// 피그마(270×275) 구성을 그대로 두되, 웹 화면에서 옆 할 일 카드와 높이가 맞도록 세로만 살짝 줄인 270×236 비율.
+// 칸 폭에 따라 카드 전체가 같은 비율로 커지고 작아져요 (안쪽 위치는 %, 글자는 카드 폭 기준 cqw).
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import pocket from '@/web/assets/folder-pocket.svg'
@@ -25,7 +26,7 @@ interface FolderCardProps {
 
 export function FolderCard({ title, status, meta, active = false, preview, to, onTitleChange, className = '' }: FolderCardProps) {
   // @container/folder: 안쪽 글자·위치를 카드 폭 기준(cqw)으로 맞춰, 카드가 커지고 작아져도 피그마 비율이 그대로 유지돼요
-  const frame = `@container/folder relative block aspect-[270/275] overflow-hidden rounded-[min(32px,12cqw)] border bg-linear-to-b shadow-[0_6px_18px_rgba(0,0,0,0.06)] ${
+  const frame = `@container/folder relative block aspect-[270/236] overflow-hidden rounded-[min(32px,12cqw)] border bg-linear-to-b shadow-[0_6px_18px_rgba(0,0,0,0.06)] ${
     active ? 'border-[#8eb1f5] from-[#5f8fee] to-[#7ba4f2]' : 'border-web-line from-[#f1f2f4] to-[#e8eaed]'
   }`
   const titleLook = `max-w-full min-w-0 truncate text-[clamp(15px,8.9cqw,24px)] leading-[1.2] font-semibold ${active ? 'text-white' : 'text-[#16181c]'}`
