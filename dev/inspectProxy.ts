@@ -11,6 +11,8 @@
 // 앱이 쓰는 주소
 //   GET  /__inspect/config         → { ok: true }   개발 서버인지 확인
 //   GET  /__inspect/scan?url=…     → 검사 결과 JSON (shared/api/liveProxy.ts 의 ScanResult) 또는 { error }
+//                                    links: 같은 사이트의 다른 페이지 주소 (여러 페이지 검사 · 자동으로 찾기)
+//                                    여러 페이지 검사는 앱이 이 주소를 페이지마다 한 번씩 부릅니다
 //   GET  /__inspect/shot/<파일>.jpg → 검사 화면 캡처
 //
 // 백엔드가 붙으면(VITE_API_MODE=http) 이 서버는 쓰이지 않습니다.
@@ -36,6 +38,38 @@ function friendlyError(err: unknown) {
   if (/Executable doesn't exist|Chromium distribution 'chrome' is not found|Failed to launch/i.test(text))
     return '실제 검사를 하려면 이 컴퓨터에 Google Chrome 이 설치돼 있어야 해요.'
   return text.split('\n')[0] || '검사하지 못했어요.'
+}
+
+/** 파일 내려받기·이미지 같은, 페이지가 아닌 링크 */
+const NOT_A_PAGE = /\.(pdf|zip|rar|7z|gz|dmg|exe|apk|jpe?g|png|gif|webp|svg|ico|mp3|mp4|mov|avi|webm|docx?|xlsx?|pptx?|hwp|csv|txt|xml|json|rss)$/i
+/** 눌렀을 때 상태를 바꿀 수 있는 링크는 따라가지 않아요 */
+const SIDE_EFFECT = /log-?out|sign-?out|delete|remove|unsubscribe/i
+
+/**
+ * 페이지 안 링크 중 "같은 사이트의 다른 페이지"만 골라요. (여러 페이지 검사 · 자동으로 찾기)
+ * 같은 출처(프로토콜+도메인+포트) · #해시 제거 · 중복 제거 · 지금 페이지 제외 · 최대 50개
+ */
+function sameSiteLinks(links: string[], pageUrl: string): string[] {
+  const base = new URL(pageUrl)
+  const self = base.origin + base.pathname.replace(/\/$/, '') + base.search
+  const out: string[] = []
+  const seen = new Set([self])
+  for (const href of links) {
+    let u: URL
+    try {
+      u = new URL(href)
+    } catch {
+      continue
+    }
+    if (u.origin !== base.origin || NOT_A_PAGE.test(u.pathname) || SIDE_EFFECT.test(u.pathname)) continue
+    u.hash = ''
+    const key = u.origin + u.pathname.replace(/\/$/, '') + u.search
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(key)
+    if (out.length >= 50) break
+  }
+  return out
 }
 
 export function inspectProxy(): Plugin {
@@ -121,6 +155,8 @@ export function inspectProxy(): Plugin {
               title: document.title,
               passes: r.passes.length,
               incomplete: r.incomplete.length,
+              // 여러 페이지 검사의 "자동으로 찾기"용 — 페이지 안 링크 (거르기는 아래 sameSiteLinks 에서)
+              links: Array.from(document.querySelectorAll('a[href]'), (a) => (a as HTMLAnchorElement).href).slice(0, 500),
               textLength: document.body ? document.body.innerText.trim().length : 0,
               elementCount: document.body ? document.body.querySelectorAll('*').length : 0,
               viewport: { w: window.innerWidth, h: window.innerHeight },
@@ -148,7 +184,8 @@ export function inspectProxy(): Plugin {
           const shot = await page.screenshot({ type: 'jpeg', quality: 70, clip: { x: 0, y: 0, ...VIEWPORT } })
           await writeFile(join(SHOT_DIR, shotName), shot)
 
-          res.end(JSON.stringify({ ...result, url: page.url(), screenshotUrl: `/__inspect/shot/${shotName}` }))
+          const { links, ...rest } = result
+          res.end(JSON.stringify({ ...rest, url: page.url(), links: sameSiteLinks(links, page.url()), screenshotUrl: `/__inspect/shot/${shotName}` }))
         } catch (err) {
           res.statusCode = 400
           res.end(JSON.stringify({ error: friendlyError(err) }))

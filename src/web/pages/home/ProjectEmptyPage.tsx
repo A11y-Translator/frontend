@@ -4,18 +4,19 @@
 import { useState } from 'react'
 import { FolderCard } from './FolderCard'
 import { UrlInspectForm } from './UrlInspectForm'
-import { DEFAULT_PROJECT_NAME, useCreateAndInspect } from './useCreateAndInspect'
+import { DEFAULT_PROJECT_NAME, useCreateAndInspect, type MultiPageOptions } from './useCreateAndInspect'
+import type { InspectProgress } from '@/shared/api/types'
 
 export default function ProjectEmptyPage() {
   const createAndInspect = useCreateAndInspect()
   const [name, setName] = useState(DEFAULT_PROJECT_NAME)
   const [inspecting, setInspecting] = useState(false)
 
-  const inspect = async (url: string) => {
+  const inspect = async (url: string, multi?: MultiPageOptions, onProgress?: (p: InspectProgress) => void) => {
     setInspecting(true)
     try {
       // 이름을 안 바꿨으면 도메인을 이름으로 씁니다 (예: example.com)
-      await createAndInspect(url, name)
+      await createAndInspect(url, name, multi, onProgress)
     } finally {
       setInspecting(false)
     }

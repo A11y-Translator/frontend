@@ -6,7 +6,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Header } from '@/web/layout/Header'
 import { actions, useAppState } from '@/shared/store'
 import { memberById, versions as mockVersions } from '@/shared/mocks'
-import type { Issue } from '@/shared/api/types'
+import { screenshotFor, type Issue } from '@/shared/api/types'
 import { DEFAULT_PROJECT_ID, PROJECT_NAME, SCAN } from '@/shared/mocks/scan'
 import { CATEGORY_FILTERS, commentCount, deriveStats, formatScannedAt, isResolved, tagKindOf } from '@/web/common/issueHelpers'
 import { StatusTag } from '@/web/common/StatusTag'
@@ -65,7 +65,9 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
     ? {
         scannedAt: formatScannedAt(inspection.scannedAt),
         pages: inspection.pages.length,
-        pagesNote: inspection.pages.join(' · '),
+        // 페이지가 많으면 앞의 3개만 + "외 N개"
+        pagesNote:
+          inspection.pages.slice(0, 3).join(' · ') + (inspection.pages.length > 3 ? ` 외 ${inspection.pages.length - 3}개` : ''),
         standard: inspection.standard,
         passRate: inspection.passRate,
         mentions: 0,
@@ -107,7 +109,9 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
       setRechecking(true)
       setNotice('')
       try {
-        const next = await actions.reinspect(projectId)
+        const next = await actions.reinspect(projectId, (p) => {
+          if (p.total > 1) setNotice(`재검사 중 · 페이지 ${Math.min(p.done + 1, p.total)}/${p.total} · ${p.page}`)
+        })
         setNotice(`재검사를 마쳤어요. 버전 ${next?.version ?? ''} · 이슈 ${next?.issues.length ?? 0}개`)
       } catch (err) {
         setNotice(err instanceof Error ? err.message : '재검사하지 못했어요.')
@@ -161,7 +165,7 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
           </div>
         </div>
         {inspection?.warning && (
-          <p role="note" className="-mt-4 rounded-[10px] border border-[#f5c26b] bg-[#fff8e6] px-4 py-3 text-sm text-[#7a4d00]">
+          <p role="note" className="-mt-4 rounded-[10px] border border-[#f5c26b] bg-[#fff8e6] px-4 py-3 text-sm whitespace-pre-line text-[#7a4d00]">
             <strong className="font-bold">결과를 확인해 주세요 · </strong>
             {inspection.warning}
           </p>
@@ -307,7 +311,7 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
               onPageChange={setPreviewPage}
               pages={inspection?.pages}
               overlays={inspection?.overlays}
-              screenshotUrl={inspection?.capture?.screenshotUrl}
+              screenshotOf={inspection ? (p) => screenshotFor(inspection, p) : undefined}
             />
           )}
         </div>

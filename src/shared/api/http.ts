@@ -1,8 +1,9 @@
 // 실제 서버 구현. 아래 엔드포인트·응답 형태는 백엔드와 합의 전 "가정"입니다.
 // 백엔드 명세가 나오면 이 파일(경로·필드 매핑)만 고치면 화면은 그대로 동작합니다.
 //
-//   POST {BASE}/projects                    body: { name, url }  → Project
-//   POST {BASE}/projects/{id}/inspections   body: { url }        → Inspection
+//   POST {BASE}/projects                    body: { name, url, extraUrls?, discover? }  → Project
+//   POST {BASE}/projects/{id}/inspections   body: { url, pages? }                       → Inspection
+//        pages: 여러 페이지 검사일 때 검사할 주소 목록 (첫 번째 = url). 서버가 페이지마다 검사해 한 버전으로 합쳐 돌려줌
 //   DELETE {BASE}/projects/{id}                                  → 204
 //   실패 시 { message: string } 와 4xx/5xx 상태 코드
 import type { ApiClient } from './client'
@@ -44,5 +45,6 @@ const post = <T>(path: string, body: unknown) => request<T>('POST', path, body)
 export const httpApi: ApiClient = {
   createProject: (input) => post<Project>('/projects', input),
   deleteProject: (projectId) => request<void>('DELETE', `/projects/${encodeURIComponent(projectId)}`),
-  runInspection: (project) => post<Inspection>(`/projects/${encodeURIComponent(project.id)}/inspections`, { url: project.url }),
+  runInspection: (project) =>
+    post<Inspection>(`/projects/${encodeURIComponent(project.id)}/inspections`, { url: project.url, pages: project.pageUrls }),
 }

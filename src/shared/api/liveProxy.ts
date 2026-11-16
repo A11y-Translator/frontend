@@ -45,6 +45,8 @@ export interface ScanResult {
   viewport?: { w: number; h: number }
   /** 검사 화면 캡처 (1440×1093 jpg) */
   screenshotUrl?: string
+  /** 같은 사이트의 다른 페이지 주소 (최대 50개) — 여러 페이지 검사 · 자동으로 찾기 */
+  links?: string[]
   violations: AxeViolation[]
 }
 

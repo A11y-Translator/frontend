@@ -3,7 +3,7 @@
 // 같은 브라우저 안에서 localStorage 로 공유합니다. 백엔드가 붙으면 이 파일의 액션을 API 호출로 바꾸면 됩니다.
 import { useSyncExternalStore } from 'react'
 import { issues as initialIssues, comments as initialComments, projects as initialProjects } from './mocks'
-import type { Comment, CreateProjectInput, Inspection, Issue, IssueOverlay, IssueStatus, Project, Team } from '@/shared/api/types'
+import type { Comment, CreateProjectInput, Inspection, InspectProgress, Issue, IssueOverlay, IssueStatus, Project, Team } from '@/shared/api/types'
 import { api } from '@/shared/api/client'
 
 const KEY = 'a11y-translator:prototype-state:v1'
@@ -139,10 +139,18 @@ export const actions = {
    * mock / 실제 서버 중 어느 쪽으로 갈지는 shared/api/client.ts 가 정합니다.
    * 실패하면 예외를 그대로 던지니 화면에서 메시지를 보여주세요.
    */
-  async createProjectAndInspect(input: CreateProjectInput): Promise<Project> {
+  async createProjectAndInspect(input: CreateProjectInput, onProgress?: (p: InspectProgress) => void): Promise<Project> {
     const created = await api.createProject(input)
-    const inspection = await api.runInspection(created)
-    const project: Project = { ...created, currentVersion: inspection.version, status: 'active' }
+    const inspection = await api.runInspection(created, 0, onProgress)
+    const project: Project = {
+      ...created,
+      currentVersion: inspection.version,
+      status: 'active',
+      // 여러 페이지 검사: 실제로 검사한 페이지를 고정 → 재검사 때 같은 페이지끼리 비교 (자동 찾기는 첫 검사 한 번만)
+      ...(inspection.captures && Object.keys(inspection.captures).length > 1
+        ? { pageUrls: Object.values(inspection.captures).map((c) => c.url), discover: undefined }
+        : {}),
+    }
     set((s) => ({
       projects: [project, ...s.projects.filter((p) => p.id !== project.id)],
       inspections: { ...s.inspections, [project.id]: inspection },
@@ -151,11 +159,11 @@ export const actions = {
     return project
   },
   /** 새로 만든 프로젝트 재검사 → 다음 버전 */
-  async reinspect(projectId: string): Promise<Inspection | undefined> {
+  async reinspect(projectId: string, onProgress?: (p: InspectProgress) => void): Promise<Inspection | undefined> {
     const project = state.projects.find((p) => p.id === projectId)
     if (!project) return undefined
     const prev = state.inspections[projectId]
-    const fresh = await api.runInspection(project, prev?.version ?? project.currentVersion)
+    const fresh = await api.runInspection(project, prev?.version ?? project.currentVersion, onProgress)
     // 지난 버전에서 직접 "해결됨" 처리한 이슈가 다시 발견되면 해결 상태를 이어받습니다
     const inspection: Inspection = {
       ...fresh,

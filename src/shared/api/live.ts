@@ -1,7 +1,7 @@
 // live 모드 — 개발 서버가 크롬(headless)으로 실제 URL 을 열어 axe-core(WCAG 2.2 AA)로 검사합니다.
 // axe 결과(규칙 위반) 하나 = 이슈 하나. 문제 요소들은 selectors / 캡처 오버레이가 됩니다.
 import type { ApiClient } from './client'
-import type { Category, Inspection, Issue, IssueOverlay, Severity, Team } from './types'
+import { MAX_PAGES, type Category, type Inspection, type InspectProgress, type Issue, type IssueOverlay, type PageCapture, type Severity, type Team } from './types'
 import { mockApi } from './mock'
 import { scanPage, type AxeViolation, type ScanResult } from './liveProxy'
 import { CAPTURE_H, CAPTURE_W } from '@/shared/mocks/scan'
@@ -65,12 +65,20 @@ function wcagOf(tags: string[]) {
 
 const selectorOf = (target: unknown[]) => target.map((t) => (Array.isArray(t) ? t.join(' ') : String(t))).join(' ')
 
-function pathOf(url: string) {
-  const p = new URL(url).pathname.replace(/\/$/, '')
-  return p || '/'
+/** 페이지 경로 (예: /pricing, /board?id=3). 여러 페이지 검사에서 페이지를 구분하는 이름 */
+export function pathOf(url: string) {
+  const u = new URL(url)
+  return (u.pathname.replace(/\/$/, '') || '/') + u.search
 }
 
-export function toInspection(projectId: string, requestedUrl: string, version: number, scan: ScanResult): Inspection {
+/** 경로를 이슈 id 에 넣을 수 있게 (주소창에 그대로 쓸 수 있는 글자만) */
+const slugOf = (page: string) => page.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '') || 'root'
+
+/**
+ * multiPage: 여러 페이지 검사의 한 페이지 — 같은 규칙 위반이 페이지마다 따로 이슈가 되도록 id 에 경로를 넣어요.
+ * (한 페이지 검사는 예전과 같은 id 를 써서, 재검사 때 해결 상태를 그대로 이어받아요)
+ */
+export function toInspection(projectId: string, requestedUrl: string, version: number, scan: ScanResult, multiPage = false): Inspection {
   const page = pathOf(scan.url || requestedUrl)
   const order: Severity[] = ['critical', 'serious', 'moderate', 'minor']
   const sorted = [...scan.violations].sort((a, b) => order.indexOf(a.impact ?? 'moderate') - order.indexOf(b.impact ?? 'moderate'))
@@ -78,7 +86,7 @@ export function toInspection(projectId: string, requestedUrl: string, version: n
   const overlays: IssueOverlay[] = []
   let label = 0
   const issues: Issue[] = sorted.map((v: AxeViolation, idx) => {
-    const id = `${projectId}-${v.id}`
+    const id = multiPage ? `${projectId}-${slugOf(page)}-${v.id}` : `${projectId}-${v.id}`
     const severity: Severity = v.impact ?? 'moderate'
     const ko = KO[v.id]
     const category = categoryOf(v.id)
@@ -149,16 +157,126 @@ export function toInspection(projectId: string, requestedUrl: string, version: n
   }
 }
 
+const SEVERITY_ORDER: Severity[] = ['critical', 'serious', 'moderate', 'minor']
+const BLANK_PAGE = '페이지가 빈 화면으로 열려서 검사할 수 없었어요. 로그인이 필요한 페이지이거나 사이트가 외부 접근을 막고 있을 수 있어요.'
+
+/** 페이지별 검사 결과를 한 번의 검사(버전)로 합칩니다 */
+export function mergePages(
+  projectId: string,
+  requestedUrl: string,
+  version: number,
+  scans: ScanResult[],
+  failedPages: { url: string; reason: string }[],
+): Inspection {
+  const parts = scans.map((s) => toInspection(projectId, s.url, version, s, true))
+  const pages = parts.map((p) => p.pages[0])
+  // 심각도 순 → 같은 심각도면 페이지 순서대로, 번호는 전체에서 다시 매김
+  const issues = parts
+    .flatMap((p) => p.issues)
+    .sort((a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity) || pages.indexOf(a.page) - pages.indexOf(b.page))
+    .map((i, idx) => ({ ...i, no: idx + 1 }))
+
+  const passes = scans.reduce((n, s) => n + s.passes, 0)
+  const violated = scans.reduce((n, s) => n + s.violations.length, 0)
+  const captures: Record<string, PageCapture> = {}
+  parts.forEach((p) => {
+    if (p.capture) captures[p.pages[0]] = p.capture
+  })
+
+  const warnings = [
+    ...parts.filter((p) => p.warning).map((p) => `${p.pages[0]}: ${p.warning}`),
+    ...(failedPages.length ? [`열지 못한 페이지 ${failedPages.length}개는 결과에서 빠졌어요 — ${failedPages.map((f) => `${pathOf(f.url)} (${f.reason})`).join(' · ')}`] : []),
+  ]
+
+  return {
+    id: `${projectId}-v${version}`,
+    projectId,
+    url: requestedUrl,
+    version,
+    scannedAt: new Date().toISOString(),
+    standard: 'WCAG 2.2 AA',
+    pages,
+    passRate: passes + violated ? Math.round((passes / (passes + violated)) * 100) : 100,
+    issues,
+    overlays: parts.flatMap((p) => p.overlays),
+    source: 'live',
+    capture: parts[0].capture,
+    captures,
+    failedPages: failedPages.length ? failedPages : undefined,
+    needsReview: scans.reduce((n, s) => n + s.incomplete, 0),
+    passedRules: passes,
+    warning: warnings.length ? warnings.join('\n') : undefined,
+  }
+}
+
+const pageKey = (u: string) => new URL(u).origin + pathOf(u)
+
+/** 같은 주소(경로)를 두 번 검사하지 않도록 */
+function uniqueByPath(urls: string[]) {
+  const seen = new Set<string>()
+  return urls.filter((u) => {
+    const key = pageKey(u)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+/** 두 페이지씩 동시에 검사 (개발 서버 크롬 하나로 탭 두 개) */
+const CONCURRENCY = 2
+
 export const liveApi: ApiClient = {
   // 프로젝트 저장은 아직 서버가 없어 브라우저에 (mock 과 같음)
   createProject: mockApi.createProject,
   deleteProject: mockApi.deleteProject,
-  async runInspection(project, previousVersion = 0) {
-    const scan = await scanPage(project.url)
-    // 요소가 거의 없으면 빈 화면 — 결과를 만들지 않고 이유를 알려 줍니다
-    if (scan.elementCount < 5) {
-      throw new Error('페이지가 빈 화면으로 열려서 검사할 수 없었어요. 로그인이 필요한 페이지이거나 사이트가 외부 접근을 막고 있을 수 있어요.')
+  async runInspection(project, previousVersion = 0, onProgress?: (p: InspectProgress) => void) {
+    const version = previousVersion + 1
+    const fixed = project.pageUrls?.length ? project.pageUrls : [project.url]
+    // 자동으로 찾기는 첫 검사 때만 — 그 뒤로는 store 가 찾은 페이지를 pageUrls 에 고정해요
+    const discover = previousVersion === 0 ? (project.discover ?? 0) : 0
+
+    // 1) 첫 페이지 — 열리지 않으면 검사 전체를 멈춰요
+    const firstUrl = fixed[0]
+    onProgress?.({ done: 0, total: Math.min(MAX_PAGES, fixed.length + discover), page: pathOf(firstUrl) })
+    const first = await scanPage(firstUrl)
+    if (first.elementCount < 5) throw new Error(BLANK_PAGE)
+
+    // 2) 나머지 페이지: 입력한 페이지 + 첫 페이지 링크에서 자동으로 찾은 페이지 (중복 빼고 최대 MAX_PAGES)
+    // 자동으로 찾기는 이미 넣은 페이지와 겹치지 않는 새 페이지로 discover 개를 채워요
+    const listed = uniqueByPath([first.url, ...fixed.slice(1)])
+    const listedKeys = new Set(listed.map(pageKey))
+    const discovered = discover ? (first.links ?? []).filter((l) => !listedKeys.has(pageKey(l))).slice(0, discover) : []
+    const rest = uniqueByPath([...listed, ...discovered]).slice(1, MAX_PAGES)
+    const total = rest.length + 1
+
+    // 한 페이지만이면 예전과 똑같은 결과 (이슈 id 도 그대로)
+    if (total === 1) {
+      onProgress?.({ done: 1, total: 1, page: pathOf(first.url) })
+      return toInspection(project.id, project.url, version, first)
     }
-    return toInspection(project.id, project.url, previousVersion + 1, scan)
+
+    const scans: (ScanResult | undefined)[] = [first]
+    const failed: { url: string; reason: string }[] = []
+    let done = 1
+    onProgress?.({ done, total, page: pathOf(first.url) })
+    let next = 0
+    const worker = async () => {
+      while (next < rest.length) {
+        const idx = next++
+        const url = rest[idx]
+        try {
+          const s = await scanPage(url)
+          if (s.elementCount < 5) throw new Error('빈 화면')
+          scans[idx + 1] = s
+        } catch (err) {
+          failed.push({ url, reason: err instanceof Error ? err.message : '검사하지 못했어요' })
+        }
+        done += 1
+        onProgress?.({ done, total, page: pathOf(url) })
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, rest.length) }, worker))
+
+    return mergePages(project.id, project.url, version, scans.filter((s): s is ScanResult => !!s), failed)
   },
 }

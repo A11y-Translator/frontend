@@ -6,7 +6,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Header } from '@/web/layout/Header'
 import { actions, findIssueContext, useAppState } from '@/shared/store'
 import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
-import type { Comment, Inspection, Issue, Project } from '@/shared/api/types'
+import { screenshotFor, type Comment, type Inspection, type Issue, type Project } from '@/shared/api/types'
 import { DEFAULT_PROJECT_ID, PROJECT_NAME, SCAN, SITE_URL } from '@/shared/mocks/scan'
 import { formatScannedAt } from '@/web/common/issueHelpers'
 import { useVersionMenu } from '@/web/common/useVersionMenu'
@@ -242,7 +242,7 @@ function IssueDetail({ issue, issues, comments, project, inspection }: IssueDeta
               activeIssueId={issue.id}
               flashSelector={flash}
               overlays={inspection?.overlays}
-              screenshotUrl={inspection?.capture?.screenshotUrl}
+              screenshotUrl={screenshotFor(inspection, issue.page)}
             >
               <button
                 type="button"

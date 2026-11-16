@@ -32,6 +32,42 @@ export function normalizeUrl(input: string): UrlCheck {
   return { ok: true, url, hostname: u.hostname }
 }
 
+/**
+ * 여러 페이지 검사: 한 줄에 하나씩 넣은 추가 페이지를 첫 주소 기준으로 정리합니다.
+ *  - "/pricing", "pricing" → 첫 주소의 사이트 안 경로
+ *  - "example.com/pricing", "https://…" → 그대로 (같은 사이트여야 함)
+ *  - 빈 줄·중복·첫 주소와 같은 주소는 빼요
+ */
+export function parseExtraPages(text: string, mainUrl: string, max: number): { ok: true; urls: string[] } | { ok: false; message: string } {
+  const main = new URL(mainUrl)
+  const seen = new Set([main.origin + (main.pathname.replace(/\/$/, '') || '/') + main.search])
+  const urls: string[] = []
+  for (const line of text.split('\n').map((l) => l.trim()).filter(Boolean)) {
+    // 점이 들어간 도메인으로 시작하면 전체 주소, 아니면 경로로 봅니다
+    const looksAbsolute = /^[a-z][a-z\d+.-]*:\/\//i.test(line) || /^[^/\s]+\.[^/\s]+(\/|$)/.test(line)
+    let u: URL
+    if (looksAbsolute) {
+      const checked = normalizeUrl(line)
+      if (!checked.ok) return { ok: false, message: `"${line}" — ${checked.message}` }
+      u = new URL(checked.url)
+    } else {
+      try {
+        u = new URL(line.startsWith('/') ? line : `/${line}`, main.origin)
+      } catch {
+        return { ok: false, message: `"${line}" — 주소 형식이 올바르지 않아요.` }
+      }
+    }
+    if (u.origin !== main.origin) return { ok: false, message: `"${line}" — 첫 주소(${main.host})와 같은 사이트의 페이지만 함께 검사할 수 있어요.` }
+    u.hash = ''
+    const key = u.origin + (u.pathname.replace(/\/$/, '') || '/') + u.search
+    if (seen.has(key)) continue
+    seen.add(key)
+    urls.push(u.toString().replace(/\/$/, ''))
+  }
+  if (urls.length > max) return { ok: false, message: `함께 검사할 페이지는 ${max}개까지 넣을 수 있어요. (지금 ${urls.length}개)` }
+  return { ok: true, urls }
+}
+
 /** 이름을 비워 두거나 기본값 그대로 두면 도메인을 프로젝트 이름으로 씁니다 */
 export function projectNameFor(name: string, hostname: string, defaultName: string) {
   const n = name.trim()

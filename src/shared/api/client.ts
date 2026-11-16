@@ -2,7 +2,7 @@
 //   live (개발 서버 기본) : 실제 URL 을 개발 서버 프록시로 열어 axe-core 로 검사 — dev/inspectProxy.ts
 //   http                  : 백엔드 서버 (VITE_API_BASE_URL)
 //   mock                  : 임시 규칙으로 만든 결과 (shared/mocks/inspect.ts) — 오프라인 시연용
-import type { CreateProjectInput, Inspection, Project } from './types'
+import type { CreateProjectInput, Inspection, InspectProgress, Project } from './types'
 import { httpApi } from './http'
 import { liveApi } from './live'
 import { mockApi } from './mock'
@@ -10,8 +10,11 @@ import { mockApi } from './mock'
 export interface ApiClient {
   /** 새 프로젝트 만들기 */
   createProject(input: CreateProjectInput): Promise<Project>
-  /** 프로젝트 주소를 검사 (previousVersion 이 있으면 그다음 버전으로) */
-  runInspection(project: Project, previousVersion?: number): Promise<Inspection>
+  /**
+   * 프로젝트 주소를 검사 (previousVersion 이 있으면 그다음 버전으로).
+   * project.pageUrls / discover 가 있으면 여러 페이지를 검사하고, 페이지가 끝날 때마다 onProgress 를 불러요.
+   */
+  runInspection(project: Project, previousVersion?: number, onProgress?: (p: InspectProgress) => void): Promise<Inspection>
   /** 프로젝트 삭제 (검사 기록 포함) */
   deleteProject(projectId: string): Promise<void>
 }

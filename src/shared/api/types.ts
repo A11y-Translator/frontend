@@ -81,6 +81,13 @@ export interface Project {
   status: 'active' | 'done'
   updatedAt: string
   currentVersion: number
+  /**
+   * 여러 페이지 검사: 함께 검사할 페이지 주소 (첫 번째 = url).
+   * 자동 찾기로 고른 페이지도 첫 검사 뒤 여기에 고정돼서, 재검사 때 같은 페이지끼리 비교돼요.
+   */
+  pageUrls?: string[]
+  /** 첫 검사 때 첫 페이지의 같은 사이트 링크에서 페이지를 이만큼 더 찾아 검사 (0/없음 = 안 찾음) */
+  discover?: number
 }
 
 export interface Version {
@@ -107,6 +114,18 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
 
 /* ── 프로젝트 생성 · 검사 (새 프로젝트 화면) ─────────────────────────── */
 
+export interface PageCapture {
+  url: string
+  title?: string
+  screenshotUrl?: string
+}
+
+/** 이 페이지의 검사 화면 캡처 주소 (여러 페이지 검사면 페이지별, 아니면 첫 페이지) */
+export function screenshotFor(inspection: Inspection | undefined, page: string): string | undefined {
+  if (!inspection) return undefined
+  return inspection.captures?.[page]?.screenshotUrl ?? (inspection.pages[0] === page ? inspection.capture?.screenshotUrl : undefined)
+}
+
 /** 캡처(734×557 기준 px) 위 문제 위치 박스 */
 export interface IssueOverlay {
   /** 화면에 보이는 배지 숫자 (페이지 안 순서) */
@@ -125,7 +144,22 @@ export interface CreateProjectInput {
   name: string
   /** normalizeUrl() 을 거친 주소 (https://…) */
   url: string
+  /** 여러 페이지 검사: url 과 같은 사이트의 추가 페이지 주소 (url 은 빼고) */
+  extraUrls?: string[]
+  /** 첫 페이지의 링크에서 페이지를 이만큼 자동으로 더 찾아 검사 */
+  discover?: number
 }
+
+/** 여러 페이지 검사 진행 상황 (검사 중 화면에 "페이지 2/5" 로 보여줌) */
+export interface InspectProgress {
+  done: number
+  total: number
+  /** 지금 검사 중이거나 방금 끝난 페이지 경로 */
+  page: string
+}
+
+/** 한 번에 검사할 수 있는 최대 페이지 수 (개발 서버가 페이지마다 크롬 탭을 열어서 너무 많으면 오래 걸려요) */
+export const MAX_PAGES = 10
 
 /** 한 번의 검사 결과 (POST /projects/:id/inspections 응답) */
 export interface Inspection {
@@ -144,8 +178,12 @@ export interface Inspection {
   overlays: IssueOverlay[]
   /** 어떻게 검사했는지: live = 실제 페이지(axe-core), mock = 임시 규칙, server = 백엔드 */
   source?: 'live' | 'mock' | 'server'
-  /** live 검사: 실제로 연 주소(리다이렉트 반영), 페이지 제목, 검사 화면 캡처(1440×1093) 주소 */
-  capture?: { url: string; title?: string; screenshotUrl?: string }
+  /** live 검사: 실제로 연 주소(리다이렉트 반영), 페이지 제목, 검사 화면 캡처(1440×1093) 주소 — 첫 페이지 */
+  capture?: PageCapture
+  /** 여러 페이지 검사: 페이지 경로 → 그 페이지의 캡처 */
+  captures?: Record<string, PageCapture>
+  /** 여러 페이지 검사: 열지 못한 페이지와 이유 */
+  failedPages?: { url: string; reason: string }[]
   /** live 검사: 통과한 검사 규칙 수 (이슈 0개일 때 "정말 검사했는지" 보여주는 근거) */
   passedRules?: number
   /** live 검사: 사람이 직접 확인해야 하는 항목 수 (axe incomplete) */

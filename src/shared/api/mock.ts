@@ -15,7 +15,7 @@ const today = () => {
 }
 
 export const mockApi: ApiClient = {
-  async createProject({ name, url }) {
+  async createProject({ name, url, extraUrls, discover }) {
     await wait(LATENCY.create)
     const project: Project = {
       id: `p${Date.now().toString(36)}`,
@@ -24,6 +24,9 @@ export const mockApi: ApiClient = {
       status: 'active',
       updatedAt: today(),
       currentVersion: 0,
+      // 여러 페이지 검사 (live 모드에서만 실제로 여러 장을 검사해요. mock 은 첫 페이지만)
+      pageUrls: extraUrls?.length ? [url, ...extraUrls] : undefined,
+      discover: discover || undefined,
     }
     return project
   },

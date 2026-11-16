@@ -16,11 +16,11 @@ interface Props {
   /** 새 프로젝트: 검사한 페이지 목록 (있으면 +3 접기 없이 이것만 탭으로) */
   pages?: string[]
   overlays?: OverlayBox[]
-  /** 실제 페이지 검사의 화면 캡처 (미리보기에 실제 화면) */
-  screenshotUrl?: string
+  /** 실제 페이지 검사의 화면 캡처 주소 (페이지마다 다름 — 여러 페이지 검사) */
+  screenshotOf?: (page: string) => string | undefined
 }
 
-export function InspectionPreview({ issue, page, onPageChange, pages, overlays, screenshotUrl }: Props) {
+export function InspectionPreview({ issue, page, onPageChange, pages, overlays, screenshotOf }: Props) {
   const [overlay, setOverlay] = useState(true)
   // "+3" 을 누르면 나머지 페이지 탭을 펼칩니다
   const [showMore, setShowMore] = useState<boolean>((MORE_PAGES as readonly string[]).includes(page))
@@ -82,7 +82,7 @@ export function InspectionPreview({ issue, page, onPageChange, pages, overlays, 
                 showOverlay={overlay}
                 activeIssueId={issue.id}
                 overlays={overlays}
-                screenshotUrl={screenshotUrl}
+                screenshotUrl={screenshotOf?.(p)}
               />
             </div>
           </Tabs.Content>

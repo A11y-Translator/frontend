@@ -29,7 +29,7 @@ export default function ProjectHomePage() {
         <p className="text-[15px] text-muted-2">색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인해요</p>
       </div>
 
-      <UrlInspectForm className="mt-6" onInspect={(url) => createAndInspect(url)} />
+      <UrlInspectForm className="mt-6" onInspect={(url, multi, onProgress) => createAndInspect(url, undefined, multi, onProgress)} />
 
       <div className="mt-8 grid grid-cols-2 items-start gap-6">
         <section aria-labelledby="home-recent" className="flex flex-col gap-3">
