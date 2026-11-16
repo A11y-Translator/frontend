@@ -14,6 +14,8 @@ import BrowserChrome from './BrowserChrome'
 import DemoSite from './DemoSite'
 
 const SITE_URL = 'webA.github.io/A11y'
+/** 크롬 아이콘 아래 작은 팝업(400×600)으로 뜨는 화면 — 나머지는 오른쪽 사이드 패널 */
+const POPUP_SCREENS: PanelScreen['name'][] = ['login', 'scan', 'summary']
 
 export default function ExtensionDemoPage() {
   const state = useAppState()
@@ -25,6 +27,9 @@ export default function ExtensionDemoPage() {
   const siteRef = useRef<HTMLDivElement>(null)
 
   const loggedIn = screen.name !== 'login'
+  const isPopup = POPUP_SCREENS.includes(screen.name)
+  // 검사가 끝나 결과가 나온 뒤에만 사이트 위에 문제 표시
+  const scanned = loggedIn && screen.name !== 'scan'
   // 지금 상세로 보고 있는 이슈 → 없으면 목록에서 방금 본 이슈
   const selectedId = screen.name === 'fix' ? screen.issueId : screen.name === 'result' ? screen.selectedId ?? null : null
   const emphasizedId = hovered ?? selectedId
@@ -40,8 +45,8 @@ export default function ExtensionDemoPage() {
   const reload = () => {
     setReloading(true)
     window.setTimeout(() => setReloading(false), 600)
-    // 로그인 전에는 그냥 새로고침만
-    if (loggedIn) {
+    // 검사 전에는 그냥 새로고침만
+    if (scanned) {
       setHovered(null)
       setScreen(startRecheck(state.issues, true))
       setPanelOpen(true)
@@ -74,7 +79,7 @@ export default function ExtensionDemoPage() {
         >
           <DemoSite
             issues={state.issues}
-            overlay={overlay && loggedIn && panelOpen}
+            overlay={overlay && scanned && panelOpen}
             emphasizedId={emphasizedId}
             ctaColor={state.previewFix['i1']}
             onHover={setHovered}
@@ -84,8 +89,8 @@ export default function ExtensionDemoPage() {
             }}
           />
         </main>
-        {/* 실제 크롬 확장처럼: 로그인 전에는 아이콘 아래 작은 팝업(폭 360px, 높이는 내용만큼), 검사를 시작하면 오른쪽 사이드 패널(폭 360px, 브라우저 높이)로 열림 */}
-        {panelOpen && screen.name !== 'login' && (
+        {/* 실제 크롬 확장처럼: 로그인·검사·결과 요약은 아이콘 아래 작은 팝업(400×600), 이슈 목록부터는 오른쪽 사이드 패널(폭 360px, 브라우저 높이)로 열림 */}
+        {panelOpen && !isPopup && (
           <aside aria-label="A11y Translator 사이드 패널" className="h-full w-[360px] shrink-0 border-l border-[#ccc]">
             <PanelApp
               screen={screen}
@@ -96,11 +101,11 @@ export default function ExtensionDemoPage() {
             />
           </aside>
         )}
-        {panelOpen && screen.name === 'login' && (
+        {panelOpen && isPopup && (
           <div
             role="dialog"
             aria-label="A11y Translator 확장 프로그램"
-            className="absolute top-[76px] right-3 z-40 max-h-[calc(100%-88px)] w-[360px] overflow-hidden rounded-xl border border-[#ccc] bg-white shadow-[0_8px_28px_rgba(0,0,0,0.18)]"
+            className="absolute top-[76px] right-3 z-40 h-[600px] max-h-[calc(100%-88px)] w-[400px] overflow-hidden rounded-2xl border border-ext-frame bg-white shadow-[0_8px_28px_rgba(0,0,0,0.18)]"
           >
             <PanelApp
               screen={screen}

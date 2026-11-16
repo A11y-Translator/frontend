@@ -10,6 +10,7 @@ import iconGlobe from '@/extension/assets/icon-globe.svg'
 
 export { ContrastOptionGroup } from './ContrastOptionGroup'
 export { CodeCopy } from './CodeCopy'
+export { SelectField } from './SelectField'
 
 /* ───────── 패널 틀 ───────── */
 
@@ -54,6 +55,31 @@ export function PanelCard({ children, className = '', as: Tag = 'section', ...re
 export function Notice({ children, tone = 'info', className = '' }: { children: ReactNode; tone?: 'info' | 'success'; className?: string }) {
   const look = tone === 'info' ? 'bg-[#edf4ff] text-[#175fc2]' : 'bg-success-bg text-success font-medium'
   return <p className={`w-full shrink-0 rounded-lg px-3 py-2.5 text-xs leading-[1.5] ${look} ${className}`}>{children}</p>
+}
+
+/* ───────── 크롬 팝업 (Figma 크롬 섹션 758:3556 · 400×600) ───────── */
+
+/** 로그인·검사 진행 화면의 파란 그라데이션 배경 */
+export function PopupFrame({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={`flex h-full w-full flex-col overflow-y-auto bg-white font-pretendard text-ink-2 ${className}`}
+      style={{ backgroundImage: 'linear-gradient(180deg, rgb(48 134 255 / 0.2) 0%, rgb(255 255 255 / 0) 100%)' }}
+    >
+      {children}
+    </div>
+  )
+}
+
+/** chrome/btn — 팝업 하단의 큰 검정 버튼 (높이 58px, 20px 글자) */
+export function PopupButton({ className = '', ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      className={`flex h-[58px] items-center justify-center rounded-[28px] bg-black px-2.5 font-pretendard text-xl font-semibold tracking-[-0.5px] text-white hover:bg-[#333] aria-disabled:cursor-wait aria-disabled:bg-[#757575] ${className}`}
+      {...rest}
+    />
+  )
 }
 
 /* ───────── ext/Panel Header ───────── */

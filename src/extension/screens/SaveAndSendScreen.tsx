@@ -2,16 +2,11 @@
 // 프로젝트·버전 고르고 옵션 체크 → "저장하고 웹에서 보기" = actions.sendToWeb → 전송 완료 안내 + 웹 할 일 링크
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useAppState, actions } from '@/shared/store'
-import { projects } from '@/shared/mocks'
-import { PanelFrame, PanelHeader, PanelBody, PanelFooter, PanelCard, ExtButton, Notice } from '@/extension/ui'
+import { PanelFrame, PanelHeader, PanelBody, PanelFooter, PanelCard, ExtButton, Notice, SelectField } from '@/extension/ui'
 import { usePanel, useScreenFocus } from '@/extension/panelNav'
-import { scanStats } from '@/extension/scanStats'
+import { PROJECT_OPTIONS, scanStats } from '@/extension/scanStats'
 
 const DOMAIN = 'webA.github.io/A11y'
-// 확장이 연 사이트 이름 + 웹에 있는 프로젝트들
-const PROJECT_OPTIONS = ['Web A 메인', ...new Set(projects.map((p) => p.name))]
-
-const FIELD = 'w-full appearance-none rounded-lg border border-ext-frame bg-white px-3 py-2.5 pr-8 text-sm leading-[1.5] font-medium text-ink-2'
 
 export default function SaveAndSendScreen() {
   const state = useAppState()
@@ -113,21 +108,6 @@ export default function SaveAndSendScreen() {
         )}
       </PanelFooter>
     </PanelFrame>
-  )
-}
-
-function SelectField({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: ReactNode }) {
-  const id = useId()
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs leading-[1.5] font-medium text-muted">{label}</label>
-      <div className="relative">
-        <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={FIELD}>
-          {children}
-        </select>
-        <span aria-hidden className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted">▾</span>
-      </div>
-    </div>
   )
 }
 

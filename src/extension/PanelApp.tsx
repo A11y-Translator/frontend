@@ -1,6 +1,7 @@
 // 확장 사이드 패널 앱. 실제 크롬 사이드 패널에는 주소창이 없으므로 화면 전환은 URL 이 아니라 상태로 합니다.
-// 흐름: 01 로그인 → 02 검사 결과 → 03 이슈 상세·미리 고쳐보기 → 04 결과 저장·웹으로 전송 → (수정 후 새로고침) 07 재검사
-//       02 검사 결과 → 내 체크리스트 (v1/v2 임시)
+// 흐름 (팝업): 01 로그인 → 검사 진행(%) → 검사 결과 요약·저장·웹으로 전송      — Figma 크롬 섹션 758:3556
+//      (사이드 패널): 요약의 분류 칩 → 02 이슈 목록 → 03 이슈 상세·미리 고쳐보기 → 04 결과 저장 → (수정 후 새로고침) 07 재검사
+//       02 이슈 목록 → 내 체크리스트 (v1/v2 임시)
 //
 // screen / overlay 는 "제어·비제어" 둘 다 지원합니다.
 //  - /extension/panel (단독): props 없이 쓰면 패널이 스스로 상태를 가짐
@@ -9,6 +10,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '@/shared/store'
 import { PanelContext, startRecheck, type PanelNav, type PanelScreen } from './panelNav'
 import LoginScreen from './screens/LoginScreen'
+import ScanProgressScreen from './screens/ScanProgressScreen'
+import ScanSummaryScreen from './screens/ScanSummaryScreen'
 import ScanResultScreen from './screens/ScanResultScreen'
 import IssueFixPreviewScreen from './screens/IssueFixPreviewScreen'
 import SaveAndSendScreen from './screens/SaveAndSendScreen'
@@ -72,7 +75,12 @@ export default function PanelApp({
   return (
     <PanelContext.Provider value={value}>
       {screen.name === 'login' && <LoginScreen />}
-      {screen.name === 'result' && <ScanResultScreen selectedId={screen.selectedId} />}
+      {screen.name === 'scan' && <ScanProgressScreen />}
+      {screen.name === 'summary' && <ScanSummaryScreen />}
+      {screen.name === 'result' && (
+        // 칩으로 들어올 때마다 필터를 새로 걸 수 있도록 key 로 다시 마운트
+        <ScanResultScreen key={screen.filter ?? 'all'} selectedId={screen.selectedId} initialFilter={screen.filter} />
+      )}
       {screen.name === 'fix' && <IssueFixPreviewScreen issueId={screen.issueId} />}
       {screen.name === 'save' && <SaveAndSendScreen />}
       {screen.name === 'checklist' && <ChecklistScreen />}

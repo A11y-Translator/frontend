@@ -1,8 +1,11 @@
 // 검사 결과 숫자 계산 (02 결과 · 04 저장 · 07 재검사가 같이 씀)
 // 디자인의 "이슈 24개"는 검사 요약(scanSummary) 기준이고, store 의 issues 는 그중 대표 이슈 목록입니다.
 // 재검사로 새로 해결된 이슈만큼 요약 숫자에서 빼서 "24 → 21" 같은 변화를 보여줍니다.
-import { issues as initialIssues, scanSummary, CURRENT_USER_ID } from '@/shared/mocks'
+import { issues as initialIssues, scanSummary, CURRENT_USER_ID, projects } from '@/shared/mocks'
 import type { Issue, Severity } from '@/shared/api/types'
+
+/** 결과 저장 시 고를 수 있는 프로젝트: 확장이 연 사이트 이름 + 웹에 있는 프로젝트들 (04 저장 · 팝업 결과 요약) */
+export const PROJECT_OPTIONS = ['Web A 메인', ...new Set(projects.map((p) => p.name))]
 
 /** 검사 시점(10:42)에 이미 해결돼 있던 이슈 — 요약 숫자에 포함되지 않음 */
 const resolvedAtScan = new Set(initialIssues.filter((i) => i.status === 'resolved').map((i) => i.id))

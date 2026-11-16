@@ -1,11 +1,18 @@
 import { createContext, useContext, useEffect, useRef, type RefObject } from 'react'
 import { actions } from '@/shared/store'
-import type { Issue } from '@/shared/api/types'
+import type { Category, Issue } from '@/shared/api/types'
 
 export type PanelScreen =
   | { name: 'login' }
-  /** selectedId: 상세에서 돌아왔을 때 방금 본 카드를 표시·포커스 */
-  | { name: 'result'; selectedId?: string }
+  /** 크롬 팝업 · 검사 진행 (Figma 758:3527) */
+  | { name: 'scan' }
+  /** 크롬 팝업 · 검사 결과 요약 + 저장·전송 (Figma 758:3491) */
+  | { name: 'summary' }
+  /**
+   * selectedId: 상세에서 돌아왔을 때 방금 본 카드를 표시·포커스
+   * filter: 요약 화면에서 분류 칩을 눌러 들어왔을 때 처음 걸어 둘 분류
+   */
+  | { name: 'result'; selectedId?: string; filter?: Category }
   | { name: 'fix'; issueId: string }
   | { name: 'save' }
   /** sidebar/checklist (v1/v2 미정 — screens/checklist/index.tsx 에서 버전 선택) */

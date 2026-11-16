@@ -11,11 +11,11 @@ import CategoryChips from './result/CategoryChips'
 
 const SEVERITIES: SeverityLevel[] = ['critical', 'serious', 'moderate', 'minor']
 
-export default function ScanResultScreen({ selectedId }: { selectedId?: string }) {
+export default function ScanResultScreen({ selectedId, initialFilter }: { selectedId?: string; initialFilter?: Category }) {
   const { issues } = useAppState()
   const { go, highlight, recheck } = usePanel()
   const stats = scanStats(issues)
-  const [filter, setFilter] = useState<Category | 'all'>('all')
+  const [filter, setFilter] = useState<Category | 'all'>(initialFilter ?? 'all')
   const titleRef = useScreenFocus<HTMLHeadingElement>()
   const selectedRef = useRef<HTMLButtonElement>(null)
 
