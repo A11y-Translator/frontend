@@ -62,10 +62,11 @@ export const issues: Issue[] = [
 ]
 
 export const comments: Comment[] = [
-  { id: 'c1', issueId: 'i1', authorId: 'hyeseung', body: '보조 버튼만 #616161로 바꿀게요. 브랜드 컬러 영향 없어요.', time: '10분 전', pin: { x: 38, y: 52 } },
-  { id: 'c2', issueId: 'i1', authorId: 'minjun', body: '@혜승 확인했어요. 버전 12에 반영할게요.', time: '5분 전' },
-  { id: 'c3', issueId: 'i4', authorId: 'jiwoo', body: '@서연 폼 레이블 문구 확인 부탁해요', time: '1시간 전' },
-  { id: 'c4', issueId: 'i1', authorId: 'minjun', body: '@서연 #616161로 바꾸면 브랜드 컬러 괜찮을까요?', time: '10분 전' },
+  // threadKey: 캡처 위 1번 위치('자세히 보기' 버튼) 스레드 / /contact 1번 위치(이메일 입력칸) 스레드
+  { id: 'c1', issueId: 'i1', authorId: 'hyeseung', body: '보조 버튼만 #616161로 바꿀게요. 브랜드 컬러 영향 없어요.', time: '10분 전', threadKey: 'marker:/main:1' },
+  { id: 'c2', issueId: 'i1', authorId: 'minjun', body: '@혜승 확인했어요. 버전 12에 반영할게요.', time: '5분 전', threadKey: 'marker:/main:1' },
+  { id: 'c3', issueId: 'i4', authorId: 'jiwoo', body: '@서연 폼 레이블 문구 확인 부탁해요', time: '1시간 전', threadKey: 'marker:/contact:1' },
+  { id: 'c4', issueId: 'i1', authorId: 'minjun', body: '@서연 #616161로 바꾸면 브랜드 컬러 괜찮을까요?', time: '10분 전', threadKey: 'marker:/main:1' },
 ]
 
 /** 검사 요약 (확장 02 · 검사 결과) */

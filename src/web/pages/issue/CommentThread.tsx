@@ -1,15 +1,22 @@
 // Figma: project/issue-detail "Comment thread" (554:12327)
 // 작성자 아바타 · 이름/역할 · @멘션 강조 · 답글 입력(→ actions.addComment)
 // 닫기: ✕ 버튼 (바깥 클릭 · Esc 는 IssueDetailPage 가 처리)
+// 스레드 = 캡처 위 위치 하나 (파란 번호 또는 직접 꽂은 핀). 제목은 IssueDetailPage 가 정해 줌 (예: "#1 색 대비 · 코멘트 2")
+// 해결: 그 위치의 코멘트 논의가 끝났다는 표시. 저장돼서(actions.setThreadResolved) 창을 닫았다 열어도 유지되고,
+//       '남은 코멘트' 숫자에서 빠져요. 새 코멘트를 남기면 다시 열려요. (이슈 자체의 '해결됨'은 오른쪽 패널에서)
 // 멘션: 입력칸에 @ 를 치면 위로 팀원 목록(모두 포함)이 뜨고, 방향키·Enter 또는 클릭으로 고름
 import { useId, useState, type CSSProperties, type FormEvent, type KeyboardEvent, type Ref, type RefObject } from 'react'
+import { Link } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById, members } from '@/shared/mocks'
 import { TEAM_LABEL } from '@/shared/api/types'
-import type { Comment, Issue } from '@/shared/api/types'
+import type { Comment } from '@/shared/api/types'
 import { shortName } from '@/web/common/issueHelpers'
 
 interface CommentThreadProps {
-  issue: Issue
+  /** 제목 줄 (예: "#1 색 대비 · 코멘트 2", "코멘트 핀 · 코멘트 1", "새 코멘트 · 색 대비") */
+  title: string
+  /** 상태 줄에 보일 이슈 제목 */
+  subtitle: string
   comments: Comment[]
   /** 새 핀을 꽂고 답글을 기다리는 중인지 */
   pendingPin: boolean
@@ -17,6 +24,12 @@ interface CommentThreadProps {
   onSubmit: (body: string) => void
   /** ✕ · Esc 로 닫기 */
   onClose: () => void
+  /** 스레드 해결 여부 (store 에 저장된 값) */
+  resolved: boolean
+  /** 없으면 해결 버튼을 숨김 (아직 코멘트가 없는 새 핀) */
+  onResolvedChange?: (resolved: boolean) => void
+  /** 지금 페이지와 다른 이슈의 스레드면 그 이슈 상세 주소 (파란 번호로 연 경우) */
+  detailTo?: string
   style?: CSSProperties
   ref?: Ref<HTMLElement>
 }
@@ -41,14 +54,13 @@ function mentionQuery(text: string, caret: number) {
   return m ? { start: caret - m[2].length - 1, query: m[2] } : null
 }
 
-export function CommentThread({ issue, comments, pendingPin, inputRef, onSubmit, onClose, style, ref }: CommentThreadProps) {
+export function CommentThread({ title, subtitle, comments, pendingPin, inputRef, onSubmit, onClose, resolved, onResolvedChange, detailTo, style, ref }: CommentThreadProps) {
   const [draft, setDraft] = useState('')
   const [mention, setMention] = useState<{ start: number; query: string } | null>(null)
   const [activeIdx, setActiveIdx] = useState(0)
   const listId = useId()
-  const [closed, setClosed] = useState(false)
-  // 새 핀을 꽂으면 접힌 스레드도 펼쳐서 바로 입력할 수 있게
-  const isClosed = closed && !pendingPin
+  // 해결한 스레드는 접어서 보여주고, 새 핀을 꽂으면 펼쳐서 바로 입력할 수 있게 (코멘트를 남기면 다시 열림)
+  const isClosed = resolved && !pendingPin
   const inputId = useId()
   const titleId = useId()
 
@@ -111,7 +123,6 @@ export function CommentThread({ issue, comments, pendingPin, inputRef, onSubmit,
     if (!body) return
     onSubmit(body)
     setDraft('')
-    setClosed(false)
   }
 
   return (
@@ -122,18 +133,20 @@ export function CommentThread({ issue, comments, pendingPin, inputRef, onSubmit,
       className="absolute z-10 flex w-[280px] max-w-[calc(100%-16px)] flex-col gap-2.5 rounded-xl border border-ext-line bg-white px-3.5 py-3 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.12)]"
     >
       <div className="flex items-center text-xs leading-[1.5]">
-        <h2 id={titleId} className="flex-1 font-bold text-black">
-          #{issue.no} {issue.category} · 코멘트 {comments.length}
+        <h2 id={titleId} className="min-w-0 flex-1 truncate font-bold text-black">
+          {title}
         </h2>
-        <button
-          type="button"
-          aria-expanded={!isClosed}
-          onClick={() => setClosed(!isClosed)}
-          className="rounded px-1 font-medium text-[#175fc2] hover:underline"
-        >
-          {isClosed ? '다시 열기' : '해결'}
-          <span className="sr-only"> (코멘트 스레드 {isClosed ? '펼치기' : '해결로 접기'})</span>
-        </button>
+        {onResolvedChange && (
+          <button
+            type="button"
+            aria-pressed={resolved}
+            onClick={() => onResolvedChange(!resolved)}
+            className="shrink-0 rounded px-1 font-medium text-[#175fc2] hover:underline"
+          >
+            {resolved ? '다시 열기' : '해결'}
+            <span className="sr-only"> (이 위치의 코멘트를 {resolved ? '다시 열기' : '해결로 표시하기'})</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onClose}
@@ -147,8 +160,27 @@ export function CommentThread({ issue, comments, pendingPin, inputRef, onSubmit,
         </button>
       </div>
 
+      {/* 상태 줄: 해결됨 표시 · 이슈 제목 · (다른 이슈의 번호면) 그 이슈 상세로 가는 링크 */}
+      {(
+        <div className="-mt-1 flex items-center gap-2 text-[11px] leading-[1.5]">
+          {resolved && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 font-bold text-success">
+              <span aria-hidden>✓</span>해결됨
+            </span>
+          )}
+          <span className="min-w-0 flex-1 truncate text-muted">{subtitle}</span>
+          {detailTo && (
+            <Link to={detailTo} className="shrink-0 font-bold text-[#175fc2] hover:underline">
+              상세 보기 →
+            </Link>
+          )}
+        </div>
+      )}
+
       {isClosed ? (
-        <p className="text-xs text-muted">해결된 스레드예요.</p>
+        <p className="text-xs leading-[1.5] text-muted">
+          이 위치의 논의가 끝났어요. 코멘트 {comments.length}개는 ‘남은 코멘트’에서 빠졌어요. ‘다시 열기’를 누르면 코멘트를 보고 이어서 남길 수 있어요.
+        </p>
       ) : (
         <>
           {comments.length > 0 ? (

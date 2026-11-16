@@ -69,8 +69,8 @@ export default function ProjectHomePage() {
                       </>
                     }
                   />
-                  {/* 링크(카드) 밖에 겹쳐 둔 ⋮ 메뉴 */}
-                  <div className="absolute top-[98px] right-2.5">
+                  {/* 링크(카드) 밖에 겹쳐 둔 ⋮ 메뉴 — 카드 이름 줄(위에서 60%) 오른쪽 */}
+                  <div className="absolute top-[58%] right-[5%]">
                     <ProjectCardMenu project={p} versions={inspectionHistory[p.id]?.length ?? 0} onDark={active} announce={announce} />
                   </div>
                 </li>

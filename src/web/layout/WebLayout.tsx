@@ -1,11 +1,14 @@
 // 웹 공통 틀: 왼쪽 사이드바 + 본문. 헤더는 페이지마다 내용이 달라서 각 페이지에서 <Header /> 를 넣습니다.
 // 확대·축소 없이 실제 크기(1:1)로 그리고, 어떤 화면 폭에서도 유동적으로 바뀝니다.
 //  - 사이드바: 1280px 이상 펼침 · 768~1279px 아이콘만 · 768px 미만 숨김(위쪽 ☰ → 서랍)  — useSidebar
+//    펼치기·접기 버튼 없이 경계를 마우스로 끌어 폭 조절, 아주 좁게 끌면 아이콘만 (SidebarResizer · 키보드 ←/→ · Enter)
 //  - 스크롤은 본문(main) 하나만. 페이지 전체(body)는 스크롤되지 않게 화면 높이에 고정해서 "이중 스크롤"을 막아요.
 //  - 본문은 container query 기준(@container)이라 안쪽 화면은 "본문 폭"에 따라 단을 바꿔요 (예: @4xl:grid-cols-2).
 import * as Dialog from '@radix-ui/react-dialog'
+import { useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Navbar } from './Navbar'
+import { SidebarResizer } from './SidebarResizer'
 import { useSidebar } from './useSidebar'
 
 function MenuIcon() {
@@ -17,7 +20,9 @@ function MenuIcon() {
 }
 
 export function WebLayout() {
-  const { mobile, collapsed, toggle, drawerOpen, setDrawerOpen } = useSidebar()
+  const { mobile, collapsed, toggle, setCollapsed, width, setWidth, drawerOpen, setDrawerOpen } = useSidebar()
+  const navRef = useRef<HTMLElement>(null)
+  const [resizing, setResizing] = useState(false)
 
   return (
     <div className="relative flex h-dvh overflow-hidden bg-web-bg">
@@ -25,7 +30,13 @@ export function WebLayout() {
         본문으로 건너뛰기
       </a>
 
-      {!mobile && <Navbar collapsed={collapsed} onToggle={toggle} />}
+      {!mobile && (
+        // 사이드바 + 오른쪽 경계 끌기 손잡이 (끌어서 폭 조절 · 아주 좁게 끌면 아이콘만)
+        <div className={`relative flex shrink-0 ${resizing ? 'cursor-col-resize select-none' : ''}`}>
+          <Navbar ref={navRef} collapsed={collapsed} onToggle={toggle} width={collapsed ? undefined : (width ?? undefined)} animate={!resizing} />
+          <SidebarResizer navRef={navRef} collapsed={collapsed} setCollapsed={setCollapsed} setWidth={setWidth} onResizingChange={setResizing} />
+        </div>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {mobile && (

@@ -4,7 +4,7 @@
 //  - 접힘(collapsed): 아이콘만 있는 얇은 사이드바 (68px). 메뉴 이름은 화면낭독기용 글자 + 마우스를 올리면 툴팁(title)
 //  - 서랍(drawer): 모바일에서 ☰ 로 여는 메뉴. 펼침과 같고, 접기 대신 닫기 버튼 · 메뉴를 고르면 닫힘
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { useRef } from 'react'
+import { useRef, type Ref } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById, teams } from '@/shared/mocks'
 import { useAppState } from '@/shared/store'
@@ -31,19 +31,15 @@ const MENU = [
 interface NavbarProps {
   /** 아이콘만 보이는 얇은 사이드바 */
   collapsed?: boolean
-  /** 접기/펼치기 (서랍 모드에서는 없음) */
+  /** 펼치기 (접힌 상태에서 검색 아이콘을 누르면 펼치고 검색칸으로 · 서랍 모드에서는 없음) */
   onToggle?: () => void
   /** 서랍 모드: 닫기 버튼과 메뉴 선택 시 호출 */
   onClose?: () => void
-}
-
-/** 사이드바 줄이기/펼치기 아이콘 — 펼쳐져 있으면 «(줄이기), 줄어 있으면 »(펼치기) */
-function PanelIcon({ open }: { open: boolean }) {
-  return (
-    <svg aria-hidden width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <path d={open ? 'M10.5 5.5 6 10l4.5 4.5M15 5.5 10.5 10l4.5 4.5' : 'M5 5.5 9.5 10 5 14.5M9.5 5.5 14 10l-4.5 4.5'} />
-    </svg>
-  )
+  /** 사용자가 경계를 끌어 정한 펼친 폭 (없으면 기본값 --sidebar-w) */
+  width?: number
+  /** 폭 바뀔 때 부드럽게 (끄는 중에는 끔) */
+  animate?: boolean
+  ref?: Ref<HTMLElement>
 }
 
 function CloseIcon() {
@@ -56,7 +52,7 @@ function CloseIcon() {
 
 const ICON_BTN = 'flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-3 hover:bg-white'
 
-export function Navbar({ collapsed = false, onToggle, onClose }: NavbarProps) {
+export function Navbar({ collapsed = false, onToggle, onClose, width, animate = true, ref }: NavbarProps) {
   const me = memberById(CURRENT_USER_ID)!
   const { issues } = useAppState()
   const myOpen = issues.filter((i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved').length
@@ -71,8 +67,10 @@ export function Navbar({ collapsed = false, onToggle, onClose }: NavbarProps) {
 
   return (
     <nav
+      ref={ref}
       aria-label="주 메뉴"
-      className={`flex h-full shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto bg-web-nav py-4 font-pretendard transition-[width] duration-200 ${
+      style={!collapsed && !drawer && width ? { width } : undefined}
+      className={`flex h-full shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto bg-web-nav py-4 font-pretendard ${animate ? 'transition-[width] duration-200' : ''} ${
         collapsed ? 'w-[68px] items-center px-2' : drawer ? 'w-full px-2.5' : 'w-(--sidebar-w) px-2.5'
       }`}
     >
@@ -124,23 +122,11 @@ export function Navbar({ collapsed = false, onToggle, onClose }: NavbarProps) {
           <button type="button" aria-label="알림" title={collapsed ? '알림' : undefined} className={ICON_BTN}>
             <img src={iconNotice} alt="" width={22} height={22} />
           </button>
-          {drawer ? (
+          {/* 사이드바 펼치기·접기 버튼은 없음 — 경계를 끌거나(SidebarResizer) 키보드로 조절. 서랍(모바일)에서만 닫기 버튼 */}
+          {drawer && (
             <button type="button" onClick={onClose} aria-label="메뉴 닫기" className={ICON_BTN}>
               <CloseIcon />
             </button>
-          ) : (
-            onToggle && (
-              <button
-                type="button"
-                onClick={onToggle}
-                aria-label={collapsed ? '사이드바 펼치기' : '사이드바 접기'}
-                aria-expanded={!collapsed}
-                title={collapsed ? '사이드바 펼치기' : '사이드바 접기'}
-                className={ICON_BTN}
-              >
-                <PanelIcon open={!collapsed} />
-              </button>
-            )
           )}
         </div>
       </div>

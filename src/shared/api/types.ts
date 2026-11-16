@@ -72,6 +72,11 @@ export interface Comment {
   body: string
   time: string
   pin?: { x: number; y: number }
+  /**
+   * 어느 스레드의 코멘트인지 — 캡처 위 위치 하나 = 스레드 하나.
+   * 파란 번호(문제 위치)는 markerThreadKey(page, label), 직접 꽂은 핀은 'pin:…' (첫 코멘트 때 만듦)
+   */
+  threadKey?: string
 }
 
 export interface Project {
@@ -113,6 +118,12 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
 }
 
 /* ── 프로젝트 생성 · 검사 (새 프로젝트 화면) ─────────────────────────── */
+
+/** 파란 번호(문제 위치) 스레드 키 — 예: 'marker:/main:1' */
+export const markerThreadKey = (page: string, label: number) => `marker:${page}:${label}`
+
+/** 코멘트가 속한 스레드 키 (예전 데이터처럼 없으면 이슈 단위 'issue:i1') */
+export const threadKeyOf = (c: Pick<Comment, 'threadKey' | 'issueId'>) => c.threadKey ?? `issue:${c.issueId}`
 
 export interface PageCapture {
   url: string

@@ -3,7 +3,7 @@
 // 같은 브라우저 안에서 localStorage 로 공유합니다. 백엔드가 붙으면 이 파일의 액션을 API 호출로 바꾸면 됩니다.
 import { useSyncExternalStore } from 'react'
 import { issues as initialIssues, comments as initialComments, projects as initialProjects } from './mocks'
-import type { Comment, CreateProjectInput, Inspection, InspectProgress, Issue, IssueOverlay, IssueStatus, Project, Team } from '@/shared/api/types'
+import { threadKeyOf, type Comment, type CreateProjectInput, type Inspection, type InspectProgress, type Issue, type IssueOverlay, type IssueStatus, type Project, type Team } from '@/shared/api/types'
 import { api } from '@/shared/api/client'
 
 const KEY = 'a11y-translator:prototype-state:v1'
@@ -22,6 +22,8 @@ export interface AppState {
   inspections: Record<string, Inspection>
   /** 새 프로젝트의 검사 기록 (projectId → 버전 오름차순). 버전 드롭다운에서 지난 버전을 볼 때 씀 */
   inspectionHistory: Record<string, Inspection[]>
+  /** 이슈 상세 · 코멘트 스레드 "해결" (스레드 키 → true, 예: 'marker:/main:1'). 이슈 자체의 해결과는 별개 — 그 위치의 논의가 끝났다는 표시 */
+  resolvedThreads: Record<string, boolean>
 }
 
 const initial = (): AppState => ({
@@ -32,6 +34,7 @@ const initial = (): AppState => ({
   projects: initialProjects,
   inspections: {},
   inspectionHistory: {},
+  resolvedThreads: {},
 })
 
 function load(): AppState {
@@ -43,6 +46,11 @@ function load(): AppState {
       for (const [id, insp] of Object.entries(saved.inspections)) {
         if (!saved.inspectionHistory[id]) saved.inspectionHistory = { ...saved.inspectionHistory, [id]: [insp] }
       }
+      // 위치별 스레드 이전에 저장된 코멘트: 기본 코멘트는 정해진 위치로, 직접 꽂은 핀은 그 핀만의 스레드로
+      const seedKey = new Map(initialComments.map((c) => [c.id, c.threadKey]))
+      saved.comments = saved.comments.map((c) =>
+        c.threadKey ? c : { ...c, threadKey: seedKey.get(c.id) ?? (c.pin ? `pin:${c.id}` : undefined) },
+      )
       return saved
     }
   } catch {
@@ -132,7 +140,15 @@ export const actions = {
     updateIssue(issueId, { assigneeId, ...(team ? { team } : {}) })
   },
   addComment(c: Omit<Comment, 'id'>) {
-    set((s) => ({ comments: [...s.comments, { ...c, id: `c${Date.now()}` }] }))
+    set((s) => ({
+      comments: [...s.comments, { ...c, id: `c${Date.now()}` }],
+      // 해결한 스레드에 새 코멘트를 남기면 논의가 다시 시작된 것이므로 스레드를 다시 열어요
+      resolvedThreads: s.resolvedThreads[threadKeyOf(c)] ? { ...s.resolvedThreads, [threadKeyOf(c)]: false } : s.resolvedThreads,
+    }))
+  },
+  /** 이슈 상세 · 코멘트 스레드 "해결" / "다시 열기" (스레드 키 — 예전 이슈 단위 키도 같이 넘길 수 있게 여러 개) */
+  setThreadResolved(keys: string | string[], resolved: boolean) {
+    set((s) => ({ resolvedThreads: { ...s.resolvedThreads, ...Object.fromEntries([keys].flat().map((k) => [k, resolved])) } }))
   },
   /**
    * 새 프로젝트 화면: 프로젝트 만들기 → 바로 검사 → 결과 저장.

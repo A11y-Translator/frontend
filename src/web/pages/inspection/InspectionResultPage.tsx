@@ -6,7 +6,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Header } from '@/web/layout/Header'
 import { actions, useAppState } from '@/shared/store'
 import { memberById, versions as mockVersions } from '@/shared/mocks'
-import { screenshotFor, type Issue } from '@/shared/api/types'
+import { screenshotFor, threadKeyOf, type Issue } from '@/shared/api/types'
 import { DEFAULT_PROJECT_ID, PROJECT_NAME, SCAN } from '@/shared/mocks/scan'
 import { CATEGORY_FILTERS, commentCount, deriveStats, formatScannedAt, isResolved, tagKindOf } from '@/web/common/issueHelpers'
 import { StatusTag } from '@/web/common/StatusTag'
@@ -56,7 +56,8 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
     ? {
         total: issues.length,
         delta: prevInspection ? issues.length - prevInspection.issues.length : 0,
-        remainingComments: comments.filter((c) => issues.some((i) => i.id === c.issueId)).length,
+        // "해결"한 스레드(위치)의 코멘트는 남은 코멘트에서 빼요
+        remainingComments: comments.filter((c) => issues.some((i) => i.id === c.issueId) && !state.resolvedThreads[threadKeyOf(c)]).length,
       }
     : demoPast
       ? { total: demoPast.issues, delta: demoPast.issues - (demoOlder?.issues ?? demoPast.issues), remainingComments: demoPast.remainingComments }

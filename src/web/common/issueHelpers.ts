@@ -3,7 +3,7 @@
 import { comments as initialComments, issues as initialIssues } from '@/shared/mocks'
 import { SCAN } from '@/shared/mocks/scan'
 import type { AppState } from '@/shared/store'
-import type { Category, Comment, Issue } from '@/shared/api/types'
+import { threadKeyOf, type Category, type Comment, type Issue } from '@/shared/api/types'
 import { bySeverity } from '@/shared/selectors'
 
 export { bySeverity }
@@ -14,7 +14,7 @@ const INITIAL_RESOLVED = initialIssues.filter((i) => i.status === 'resolved').le
 export const isResolved = (i: Issue) => i.status === 'resolved'
 
 /** store 상태로 계산한 요약 숫자 */
-export function deriveStats(state: Pick<AppState, 'issues' | 'comments'>) {
+export function deriveStats(state: Pick<AppState, 'issues' | 'comments' | 'resolvedThreads'>) {
   const resolvedNow = state.issues.filter(isResolved).length
   const resolved = SCAN.baseResolved + Math.max(0, resolvedNow - INITIAL_RESOLVED)
   const total = SCAN.totalIssues
@@ -23,9 +23,17 @@ export function deriveStats(state: Pick<AppState, 'issues' | 'comments'>) {
     resolved,
     unresolved: Math.max(0, total - resolved),
     delta: total - SCAN.prevIssues,
-    // 이번 프로토타입에서 새로 단 코멘트만큼 남은 코멘트도 늘어납니다
-    remainingComments: SCAN.remainingComments + Math.max(0, state.comments.length - initialComments.length),
+    // 이번 프로토타입에서 새로 단 코멘트만큼 늘고, "해결"한 스레드(위치)의 코멘트만큼 줄어요
+    remainingComments: Math.max(
+      0,
+      SCAN.remainingComments + Math.max(0, state.comments.length - initialComments.length) - resolvedThreadComments(state.comments, state.resolvedThreads),
+    ),
   }
+}
+
+/** "해결"한 스레드(위치)의 코멘트 수 (남은 코멘트에서 빼기 위해) */
+export function resolvedThreadComments(comments: Comment[], resolvedThreads: Record<string, boolean>) {
+  return comments.filter((c) => resolvedThreads[threadKeyOf(c)]).length
 }
 
 /** 이슈별 코멘트 수: mocks 의 숫자와 실제 스레드 개수 중 큰 값 (새 코멘트를 달면 늘어남) */
