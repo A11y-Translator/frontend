@@ -1,0 +1,7 @@
+/*
+ * 설치형 확장 사이드 패널 스타일.
+ * 확장 빌드는 src/extension/real 을 기준으로 돌아서, 공용 부품(src/shared · src/extension/ui)에서 쓰는 클래스를
+ * Tailwind 가 놓치지 않도록 src 전체를 살피게 해요.
+ */
+@import "../../shared/styles/index.css";
+@source "../..";
