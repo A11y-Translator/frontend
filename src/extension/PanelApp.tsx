@@ -9,9 +9,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '@/shared/store'
 import { PanelContext, startRecheck, type PanelNav, type PanelScreen } from './panelNav'
-import LoginScreen from './screens/LoginScreen'
-import ScanProgressScreen from './screens/ScanProgressScreen'
-import ScanSummaryScreen from './screens/ScanSummaryScreen'
+import { PopupDemo } from './demo/PopupPreviewPage'
 import ScanResultScreen from './screens/ScanResultScreen'
 import IssueFixPreviewScreen from './screens/IssueFixPreviewScreen'
 import SaveAndSendScreen from './screens/SaveAndSendScreen'
@@ -74,9 +72,7 @@ export default function PanelApp({
 
   return (
     <PanelContext.Provider value={value}>
-      {screen.name === 'login' && <LoginScreen />}
-      {screen.name === 'scan' && <ScanProgressScreen />}
-      {screen.name === 'summary' && <ScanSummaryScreen />}
+      {(screen.name === 'login' || screen.name === 'scan' || screen.name === 'summary') && <PopupDemo key={screen.name} initial={screen.name === 'scan' ? 'scanning' : screen.name === 'summary' ? 'result' : 'login'} onViewResults={() => { window.open('/projects/b/inspection', '_blank', 'noopener,noreferrer') }} />}
       {screen.name === 'result' && (
         // 칩으로 들어올 때마다 필터를 새로 걸 수 있도록 key 로 다시 마운트
         <ScanResultScreen key={screen.filter ?? 'all'} selectedId={screen.selectedId} initialFilter={screen.filter} />

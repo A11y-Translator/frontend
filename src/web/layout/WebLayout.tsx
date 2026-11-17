@@ -6,7 +6,7 @@
 //  - 본문은 container query 기준(@container)이라 안쪽 화면은 "본문 폭"에 따라 단을 바꿔요 (예: @4xl:grid-cols-2).
 import * as Dialog from '@radix-ui/react-dialog'
 import { useRef, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { SidebarResizer } from './SidebarResizer'
 import { useSidebar } from './useSidebar'
@@ -20,6 +20,7 @@ function MenuIcon() {
 }
 
 export function WebLayout() {
+  const inspectionView = useMatch('/projects/:projectId/inspection')
   const { mobile, collapsed, toggle, setCollapsed, width, setWidth, drawerOpen, setDrawerOpen } = useSidebar()
   const navRef = useRef<HTMLElement>(null)
   const [resizing, setResizing] = useState(false)
@@ -30,7 +31,7 @@ export function WebLayout() {
         본문으로 건너뛰기
       </a>
 
-      {!mobile && (
+      {!mobile && !inspectionView && (
         // 사이드바 + 오른쪽 경계 끌기 손잡이 (끌어서 폭 조절 · 아주 좁게 끌면 아이콘만)
         <div className={`relative flex shrink-0 ${resizing ? 'cursor-col-resize select-none' : ''}`}>
           <Navbar ref={navRef} collapsed={collapsed} onToggle={toggle} width={collapsed ? undefined : (width ?? undefined)} animate={!resizing} />
@@ -39,7 +40,7 @@ export function WebLayout() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {mobile && (
+        {mobile && !inspectionView && (
           <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
             {/* 모바일 위쪽 바: ☰ 메뉴 + 서비스 이름 */}
             <div className="flex h-14 shrink-0 items-center gap-2 border-b border-web-header-line bg-white px-3 font-pretendard">

@@ -3,7 +3,7 @@
 웹 접근성 검사 서비스의 프론트엔드 **프로토타입**입니다.
 **① 크롬 확장(작업하는 곳)** 과 **② 협업 웹사이트(기록·분배·리포트)** 화면을 한 프로젝트에서 만듭니다.
 
-- 디자인: Figma `회의` 파일 › Page 4 (구현 · Workflow · 할 일 탭 · sidebar/checklist)
+- 디자인: Figma `회의` 파일 › 작업 › Chrome extension 수정안 및 결과 패널 (기존 다른 화면은 Page 4)
 - 스택: React 19 · TypeScript · Vite · Tailwind CSS v4 · React Router 7 · Radix UI
 - 데이터: 새 프로젝트 검사는 **실제 페이지를 axe-core 로 검사**(개발 서버). 그 외 화면은 **임시 데이터**(`src/shared/mocks`). 화면에 나오는 이슈·숫자·팀원은 예시 사이트를 검사했다고 가정한 값이에요.
 - 서버 연결 없음. 웹 ↔ 확장 데모 흐름은 브라우저 `localStorage` 로만 공유합니다.
@@ -28,7 +28,22 @@ npm run build
 1. `npm run build:ext` → `dist-extension/` 폴더가 생겨요.
 2. 크롬 주소창에 `chrome://extensions` → 오른쪽 위 **개발자 모드** 켜기
 3. **압축해제된 확장 프로그램 로드** → `dist-extension` 폴더 선택
-4. 툴바의 퍼즐 아이콘에서 **A11y Translator** 를 고정 → 검사할 사이트에서 아이콘 클릭 → 오른쪽 사이드 패널에서 **이 탭 검사하기**
+4. 툴바의 퍼즐 아이콘에서 **A11y Translator** 를 고정 → 검사할 사이트에서 아이콘 클릭 → 400×600 팝업에서 **이 페이지 검사하기**
+
+기존 상세·오버레이 토글·위치 보기·JSON 기능은 팝업의 **더 보기(⋮) → 검사 패널 열기**에서 사용할 수 있어요.
+설치형은 로그인 없이 로컬 검사로 시작합니다. 프로젝트·Google 로그인·웹 저장은 연결 전이며, 저장 성공으로 표시하지 않습니다.
+팝업을 닫으면 진행 중인 검사의 결과가 보존되지 않을 수 있어요. 완료된 결과는 팝업을 다시 열면 복원됩니다.
+
+### 새 디자인 확인 및 검사
+
+- `/extension/popup`: 6개 팝업 상태 미리보기. 로그인·진행률은 시연 데이터입니다.
+- `/projects/b/inspection`: 큰 캡처와 오른쪽 목록·상세 패널. 담당자·해결·댓글은 기존 로컬 상태에 저장됩니다.
+- `node scripts/check-design.mjs`: 개발 서버 실행 후 팝업·웹 회귀 검사. `CHECK_URL`로 주소 변경 가능.
+- `node scripts/check-extension.mjs`: `EXT_TEST=1`로 `artifacts.local/extension`에 빌드한 테스트 확장을 임시 Edge 프로필에 설치해 실제 DOM 검사·결과 복원 확인.
+- 브라우저 경로는 `CHROME_PATH`, `EDGE_PATH`, 확장 경로는 `CHECK_EXTENSION`으로 변경할 수 있습니다.
+- 검증 스크린샷은 Git에서 제외한 `artifacts.local/`에 생성합니다.
+
+Figma의 파랑 #5589F3과 흰 글자는 대비가 약 3.36:1입니다. 시안 색을 유지했으며 일반 텍스트 대비 보완은 남아 있습니다.
 
 코드를 고친 뒤에는 다시 `npm run build:ext` 하고 `chrome://extensions` 에서 새로고침(↻) 하세요.
 평소 쓰는 크롬과 섞이지 않게 **테스트용 크롬 프로필**에 설치하는 걸 권장해요.

@@ -3,7 +3,7 @@
 // 기준 크기(734×557)로 그린 뒤 컨테이너 너비에 맞춰 scale 합니다. (스크린샷처럼 동작해야 해서 내부는 절대 위치)
 // 핀·코멘트 같은 조작 요소는 children 으로 받아 확대/축소되지 않는 위 레이어에 % 좌표로 올립니다.
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import iconImage from '@/web/assets/icon-image.svg'
+import { FigmaMainCapture } from './FigmaMainCapture'
 import { CAPTURE_H, CAPTURE_W, OVERLAYS, type OverlayBox } from '@/shared/mocks/scan'
 
 interface SiteCaptureProps {
@@ -21,9 +21,11 @@ interface SiteCaptureProps {
   overlays?: OverlayBox[]
   /** 실제 페이지 검사(live)의 화면 캡처 주소 → 가짜 사이트 대신 실제 화면을 보여줍니다 */
   screenshotUrl?: string
+  onIssueSelect?: (issueId: string) => void
+  issueNumbers?: Record<string, number>
 }
 
-export function SiteCapture({ page, label, showOverlay = true, activeIssueId, flashSelector, className = '', children, overlays = OVERLAYS, screenshotUrl }: SiteCaptureProps) {
+export function SiteCapture({ page, label, showOverlay = true, activeIssueId, flashSelector, className = '', children, overlays = OVERLAYS, screenshotUrl, onIssueSelect, issueNumbers }: SiteCaptureProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(CAPTURE_W)
 
@@ -44,7 +46,7 @@ export function SiteCapture({ page, label, showOverlay = true, activeIssueId, fl
   return (
     <div ref={ref} className={`relative w-full overflow-hidden bg-white ${className}`} style={{ height: CAPTURE_H * scale }}>
       <div
-        role="img"
+        role={onIssueSelect ? 'group' : 'img'}
         aria-label={label}
         className="absolute top-0 left-0 origin-top-left font-noto"
         style={{ width: CAPTURE_W, height: CAPTURE_H, transform: `scale(${scale})` }}
@@ -62,12 +64,10 @@ export function SiteCapture({ page, label, showOverlay = true, activeIssueId, fl
             return (
               <div
                 key={`${o.issueId}-${o.label}-${o.selector}`}
-                className={`absolute rounded-[3px] border-[#3086ff] ${active ? 'border-2 bg-[rgb(48_134_255/0.12)] shadow-[0_0_0_3px_rgb(48_134_255/0.35)]' : 'border bg-[rgb(48_134_255/0.08)]'} ${flash ? 'animate-pulse outline-4 outline-offset-2 outline-[#3086ff]' : ''}`}
+                className={`absolute rounded-[6px] ${active ? 'border-2 border-[#1d4ed8] bg-[rgb(29_78_216/0.08)]' : 'border border-transparent'} ${flash ? 'motion-safe:animate-pulse outline-4 outline-offset-2 outline-[#1d4ed8]' : ''}`}
                 style={{ left: o.x, top: o.y, width: o.w, height: o.h }}
               >
-                <span className="absolute -top-[9px] -left-[9px] flex size-[15px] items-center justify-center rounded-full border border-white bg-[#3086ff] text-[8px] leading-none font-bold text-white">
-                  {o.label}
-                </span>
+                {onIssueSelect ? <button type="button" aria-label={`이슈 ${issueNumbers?.[o.issueId] ?? o.label} 보기: ${o.selector}`} onClick={() => onIssueSelect(o.issueId)} className={`absolute -top-[9px] -right-[9px] grid min-h-6 min-w-6 place-items-center rounded-[5px] border border-white text-[10px] leading-none font-bold text-white ${active ? 'bg-[#1d4ed8]' : 'bg-[#8a8f98]'}`}>{issueNumbers?.[o.issueId] ?? o.label}</button> : <span className={`absolute -top-[9px] -right-[9px] grid size-[15px] place-items-center rounded-[4px] text-[8px] leading-none font-bold text-white ${active ? 'bg-[#1d4ed8]' : 'bg-[#8a8f98]'}`}>{o.label}</span>}
               </div>
             )
           })}
@@ -86,7 +86,7 @@ function FakeSite({ page }: { page: string }) {
         <div className="absolute top-[13px] left-[26.5px] h-[16.3px] w-[65px] rounded-[2.7px] bg-[#333]" />
         <p className="absolute top-[13px] left-[475px] text-[9.5px] leading-[1.5] font-medium whitespace-pre">{'서비스 소개      요금      고객 문의'}</p>
       </div>
-      {page === '/main' && <MainPage />}
+      {page === '/main' && <FigmaMainCapture />}
       {page === '/pricing' && <PricingPage />}
       {page === '/contact' && <ContactPage />}
       {page !== '/main' && page !== '/pricing' && page !== '/contact' && (
@@ -96,38 +96,6 @@ function FakeSite({ page }: { page: string }) {
         </div>
       )}
     </div>
-  )
-}
-
-function MainPage() {
-  return (
-    <>
-      <div className="absolute top-[43.5px] left-0 h-[285.4px] w-full bg-[#f7f7f7]" />
-      <p className="absolute top-[88px] left-[54.4px] text-[27.2px] leading-[1.5] font-bold whitespace-nowrap">
-        모두를 위한
-        <br />더 쉬운 서비스
-      </p>
-      <p className="absolute top-[178px] left-[54.4px] text-[10.9px] leading-[1.5] whitespace-nowrap text-[#9e9e9e]">누구나 편하게 사용할 수 있는 화면을 만들어요.</p>
-      <div className="absolute top-[224.3px] left-[54.4px] flex h-[32.6px] w-[95px] items-center justify-center rounded-full bg-black text-[10.2px] font-bold text-white">시작하기</div>
-      <div className="absolute top-[224.3px] left-[160.4px] flex h-[32.6px] w-[102px] items-center justify-center rounded-full border-[0.68px] border-[#e0e0e0] bg-white text-[10.2px] font-medium text-[#9e9e9e]">
-        자세히 보기
-      </div>
-      <div className="absolute top-[74.8px] left-[407.8px] flex h-[217.5px] w-[271.9px] items-center justify-center rounded-[10.9px] bg-[#d9d9d9]">
-        <img src={iconImage} alt="" width={33} height={33} />
-      </div>
-      <p className="absolute top-[353.4px] left-[54.4px] text-[10.9px] leading-[1.5] font-bold">뉴스레터 구독</p>
-      <div className="absolute top-[377.9px] left-[54.4px] flex h-[32.6px] w-[244.7px] items-center rounded-[5.4px] border-[0.68px] border-[#e0e0e0] bg-white px-[10px] text-[9.5px] text-[#b5b5b5]">
-        이메일을 입력하세요
-      </div>
-      <div className="absolute top-[377.9px] left-[307.2px] flex h-[32.6px] w-[68px] items-center justify-center rounded-[5.4px] bg-black text-[9.5px] font-bold text-white">구독</div>
-      {[54.4, 266.4, 478.5].map((left, i) => (
-        <div key={left} className="absolute top-[441.8px] h-[102px] w-[201.2px] rounded-[8.2px] bg-[#f7f7f7]" style={{ left }}>
-          <div className="absolute top-[10.9px] left-[10.9px] h-[48.9px] w-[179.4px] rounded-[5.4px] bg-[#e0e0e0]" />
-          <p className="absolute top-[66.6px] left-[10.9px] text-[9.5px] leading-[1.5] font-bold">카드 제목 {i + 1}</p>
-          <p className="absolute top-[81.6px] left-[10.9px] text-[8.2px] leading-[1.5] text-[#9e9e9e]">설명 텍스트가 들어가요</p>
-        </div>
-      ))}
-    </>
   )
 }
 

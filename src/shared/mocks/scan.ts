@@ -45,11 +45,11 @@ export type OverlayBox = IssueOverlay
 
 export const OVERLAYS: OverlayBox[] = [
   // /main
-  { label: 1, issueId: 'i1', selector: 'button.cta-secondary', page: '/main', x: 156, y: 220, w: 110, h: 41 },
-  { label: 2, issueId: 'i2', selector: 'img.hero', page: '/main', x: 404, y: 71, w: 280, h: 226 },
-  { label: 3, issueId: 'i3', selector: 'nav .menu-toggle', page: '/main', x: 472, y: 10, w: 158, h: 24 },
-  { label: 4, issueId: 'u4', selector: 'input.subscribe', page: '/main', x: 50, y: 374, w: 253, h: 41 },
-  { label: 5, issueId: 'i1', selector: 'p.hero-sub', page: '/main', x: 50, y: 174, w: 251, h: 24 },
+  { label: 1, issueId: 'i1', selector: 'button.cta-secondary', page: '/main', x: 137, y: 216, w: 98, h: 37 },
+  { label: 2, issueId: 'i2', selector: 'img.hero', page: '/main', x: 397, y: 79, w: 300, h: 199 },
+  { label: 3, issueId: 'i3', selector: 'nav .menu-toggle', page: '/main', x: 412, y: 16, w: 233, h: 21 },
+  { label: 4, issueId: 'u4', selector: 'input.subscribe', page: '/main', x: 36, y: 351, w: 275, h: 37 },
+  { label: 5, issueId: 'i1', selector: 'p.hero-sub', page: '/main', x: 36, y: 183, w: 300, h: 20 },
   // /pricing
   { label: 1, issueId: 'i5', selector: 'a.more', page: '/pricing', x: 60, y: 420, w: 190, h: 30 },
   { label: 2, issueId: 'i8', selector: 'title', page: '/pricing', x: 50, y: 70, w: 240, h: 50 },

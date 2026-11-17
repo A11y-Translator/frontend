@@ -39,6 +39,7 @@ declare namespace chrome {
     function executeScript(details: { target: { tabId: number; allFrames?: boolean }; files: string[] }): Promise<InjectionResult<unknown>[]>
   }
   namespace sidePanel {
+    function open(options: { tabId: number }): Promise<void>
     function setPanelBehavior(behavior: { openPanelOnActionClick: boolean }): Promise<void>
   }
   namespace permissions {

@@ -11,6 +11,7 @@ import VersionReportPage from '@/web/pages/report/VersionReportPage'
 import TeamMembersPage from '@/web/pages/members/TeamMembersPage'
 import SettingsPage from '@/web/pages/settings/SettingsPage'
 import ExtensionDemoPage from '@/extension/demo/ExtensionDemoPage'
+import PopupPreviewPage from '@/extension/demo/PopupPreviewPage'
 import PanelApp from '@/extension/PanelApp'
 import { DemoIndex } from './DemoIndex'
 
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
   },
   // ① 크롬 확장: 가짜 브라우저 + 사이트 + 사이드 패널 데모
   { path: '/extension', element: <ExtensionDemoPage /> },
+  { path: '/extension/popup', element: <PopupPreviewPage /> },
   // 실제 사이드 패널이 보여줄 화면만 단독으로 (나중에 확장 sidepanel.html 이 이걸 렌더)
   {
     path: '/extension/panel',

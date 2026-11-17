@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/PretendardVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
  * 디자인 토큰 — Figma "Page 4" 기준
  * 웹: Pretendard / 확장: Noto Sans KR
@@ -21,6 +29,10 @@
   --color-faint: #b5b9c0;
   --color-placeholder: #b5b5b5;
   --color-accent: #3086ff;
+  --color-ui-primary: #5589f3;
+  --color-ui-bg: #f2f3f5;
+  --color-ui-selected: #eef3ff;
+  --color-ui-focus: #1d4ed8;
   --color-success: #19734b;
   --color-success-bg: #edf8f1;
   --color-danger: #b42318;

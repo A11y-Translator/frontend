@@ -492,7 +492,7 @@ function IssueDetail({ issue, issues, allComments, resolvedThreads, project, ins
         </p>
       </div>
 
-      <IssueSidePanel
+      <IssueSidePanel codeIsEvidence={inspection?.source === 'live'}
         issue={issue}
         order={order}
         resolved={resolved}

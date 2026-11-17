@@ -12,6 +12,7 @@ import PanelApp from '@/extension/PanelApp'
 import { startRecheck, type PanelScreen } from '@/extension/panelNav'
 import BrowserChrome from './BrowserChrome'
 import DemoSite from './DemoSite'
+import { PopupDemo } from './PopupPreviewPage'
 
 const SITE_URL = 'webA.github.io/A11y'
 /** 크롬 아이콘 아래 작은 팝업(400×600)으로 뜨는 화면 — 나머지는 오른쪽 사이드 패널 */
@@ -107,13 +108,7 @@ export default function ExtensionDemoPage() {
             aria-label="A11y Translator 확장 프로그램"
             className="absolute top-[76px] right-3 z-40 h-[600px] max-h-[calc(100%-88px)] w-[400px] overflow-hidden rounded-2xl border border-ext-frame bg-white shadow-[0_8px_28px_rgba(0,0,0,0.18)]"
           >
-            <PanelApp
-              screen={screen}
-              onScreenChange={setScreen}
-              onHighlight={setHovered}
-              overlay={overlay}
-              onOverlayChange={setOverlay}
-            />
+            <PopupDemo onViewResults={() => { window.open('/projects/b/inspection', '_blank', 'noopener,noreferrer'); setPanelOpen(false) }} />
           </div>
         )}
       </div>

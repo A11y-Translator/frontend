@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/blocked" clip-path="url(#clip0_0_16)">
+<path id="Vector" d="M32 64C49.6731 64 64 49.6731 64 32C64 14.3269 49.6731 0 32 0C14.3269 0 0 14.3269 0 32C0 49.6731 14.3269 64 32 64Z" fill="#E9EBEF"/>
+<path id="Vector_2" d="M45 32C45 39.1797 39.1797 45 32 45C24.8203 45 19 39.1797 19 32C19 24.8203 24.8203 19 32 19C39.1797 19 45 24.8203 45 32Z" stroke-width="2.4" stroke="#5C6068"/>
+<path id="Vector_3" d="M23 41L41 23" stroke-width="2.4" stroke-linecap="round" stroke="#5C6068"/>
+</g>
+<defs>
+<clipPath id="clip0_0_16">
+<rect width="64" height="64" fill="white"/>
+</clipPath>
+</defs>
+</svg>

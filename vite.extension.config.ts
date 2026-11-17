@@ -28,7 +28,7 @@ function extensionFiles(): Plugin {
         description: '지금 보고 있는 페이지의 웹 접근성(WCAG 2.2 AA)을 검사하고, 문제 위치를 페이지 위에 표시해요.',
         minimum_chrome_version: '116',
         icons,
-        action: { default_title: 'A11y Translator · 접근성 검사 패널 열기', default_icon: icons },
+        action: { default_title: 'A11y · 접근성 검사', default_icon: icons, default_popup: 'popup.html' },
         side_panel: { default_path: 'sidepanel.html' },
         background: { service_worker: 'background.js', type: 'module' },
         // 최소 권한: 아이콘을 누른 탭만 잠깐(activeTab) · 검사 스크립트 넣기 · 사이드 패널 · 결과 임시 저장
@@ -57,6 +57,7 @@ export default defineConfig({
     modulePreload: false,
     rollupOptions: {
       input: {
+        popup: src('./src/extension/real/popup.html'),
         sidepanel: src('./src/extension/real/sidepanel.html'),
         background: src('./src/extension/real/background.ts'),
       },

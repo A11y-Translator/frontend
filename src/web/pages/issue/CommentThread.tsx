@@ -11,8 +11,10 @@ import { CURRENT_USER_ID, memberById, members } from '@/shared/mocks'
 import { TEAM_LABEL } from '@/shared/api/types'
 import type { Comment } from '@/shared/api/types'
 import { shortName } from '@/web/common/issueHelpers'
+import commentArrow from '@/shared/assets/figma/arrow-right.svg'
 
 interface CommentThreadProps {
+  embedded?: boolean
   /** 제목 줄 (예: "#1 색 대비 · 코멘트 2", "코멘트 핀 · 코멘트 1", "새 코멘트 · 색 대비") */
   title: string
   /** 상태 줄에 보일 이슈 제목 */
@@ -54,7 +56,7 @@ function mentionQuery(text: string, caret: number) {
   return m ? { start: caret - m[2].length - 1, query: m[2] } : null
 }
 
-export function CommentThread({ title, subtitle, comments, pendingPin, inputRef, onSubmit, onClose, resolved, onResolvedChange, detailTo, style, ref }: CommentThreadProps) {
+export function CommentThread({ title, subtitle, comments, pendingPin, inputRef, onSubmit, onClose, resolved, onResolvedChange, detailTo, style, ref, embedded = false }: CommentThreadProps) {
   const [draft, setDraft] = useState('')
   const [mention, setMention] = useState<{ start: number; query: string } | null>(null)
   const [activeIdx, setActiveIdx] = useState(0)
@@ -130,7 +132,7 @@ export function CommentThread({ title, subtitle, comments, pendingPin, inputRef,
       ref={ref}
       aria-labelledby={titleId}
       style={style}
-      className="absolute z-10 flex w-[280px] max-w-[calc(100%-16px)] flex-col gap-2.5 rounded-xl border border-ext-line bg-white px-3.5 py-3 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.12)]"
+      className={embedded ? 'inspection-comments' : 'absolute z-10 flex w-[280px] max-w-[calc(100%-16px)] flex-col gap-2.5 rounded-xl border border-ext-line bg-white px-3.5 py-3 font-noto shadow-[0_6px_18px_rgba(0,0,0,0.12)]'}
     >
       <div className="flex items-center text-xs leading-[1.5]">
         <h2 id={titleId} className="min-w-0 flex-1 truncate font-bold text-black">
@@ -147,7 +149,7 @@ export function CommentThread({ title, subtitle, comments, pendingPin, inputRef,
             <span className="sr-only"> (이 위치의 코멘트를 {resolved ? '다시 열기' : '해결로 표시하기'})</span>
           </button>
         )}
-        <button
+        {!embedded && <button
           type="button"
           onClick={onClose}
           aria-label="코멘트 창 닫기"
@@ -157,11 +159,11 @@ export function CommentThread({ title, subtitle, comments, pendingPin, inputRef,
           <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
             <path d="M2 2l8 8M10 2l-8 8" />
           </svg>
-        </button>
+        </button>}
       </div>
 
       {/* 상태 줄: 해결됨 표시 · 이슈 제목 · (다른 이슈의 번호면) 그 이슈 상세로 가는 링크 */}
-      {(
+      {!embedded && (
         <div className="-mt-1 flex items-center gap-2 text-[11px] leading-[1.5]">
           {resolved && (
             <span className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 font-bold text-success">
@@ -250,7 +252,7 @@ export function CommentThread({ title, subtitle, comments, pendingPin, inputRef,
               aria-expanded={listOpen}
               aria-controls={listOpen ? listId : undefined}
               aria-activedescendant={listOpen ? `${listId}-${options[Math.min(activeIdx, options.length - 1)].id}` : undefined}
-              placeholder={pendingPin ? '새 핀에 코멘트 남기기… @멘션' : '답글 남기기… @멘션'}
+              placeholder={embedded ? '코멘트 입력 · @로 팀원 멘션' : pendingPin ? '새 핀에 코멘트 남기기… @멘션' : '답글 남기기… @멘션'}
               className="min-w-0 flex-1 bg-transparent py-1 text-xs leading-[1.5] text-black outline-none placeholder:text-[#8a8a8a]"
             />
             <button
@@ -258,7 +260,7 @@ export function CommentThread({ title, subtitle, comments, pendingPin, inputRef,
               disabled={!draft.trim()}
               className="shrink-0 rounded-md bg-black px-2 py-1 text-[11px] font-bold text-white disabled:cursor-not-allowed disabled:bg-[#c4c4c4]"
             >
-              등록
+              <span className={embedded ? 'sr-only' : ''}>등록</span>{embedded && <img src={commentArrow} alt="" width="20" height="20" />}
             </button>
           </form>
         </>

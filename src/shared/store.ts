@@ -97,7 +97,17 @@ export function useAppState(): AppState {
 }
 
 const updateIssue = (id: string, patch: Partial<Issue>) =>
-  set((s) => ({ issues: s.issues.map((i) => (i.id === id ? { ...i, ...patch } : i)) }))
+  set((s) => {
+    const inspections = { ...s.inspections }
+    const inspectionHistory = { ...s.inspectionHistory }
+    for (const [pid, inspection] of Object.entries(inspections)) {
+      if (!inspection.issues.some((i) => i.id === id)) continue
+      const next = { ...inspection, issues: inspection.issues.map((i) => i.id === id ? { ...i, ...patch } : i) }
+      inspections[pid] = next
+      inspectionHistory[pid] = (inspectionHistory[pid] ?? [inspection]).map((h) => h.version === next.version ? next : h)
+    }
+    return { issues: s.issues.map((i) => i.id === id ? { ...i, ...patch } : i), inspections, inspectionHistory }
+  })
 
 export const actions = {
   /** 확장 03 · 미리 고쳐보기: 추천 색 선택 */
