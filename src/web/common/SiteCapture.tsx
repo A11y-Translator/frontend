@@ -5,6 +5,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import iconImage from '@/web/assets/icon-image.svg'
 import { CAPTURE_H, CAPTURE_W, OVERLAYS, type OverlayBox } from '@/shared/mocks/scan'
+import { useImageSrc } from '@/shared/api/useImageSrc'
 
 interface SiteCaptureProps {
   page: string
@@ -26,6 +27,7 @@ interface SiteCaptureProps {
 export function SiteCapture({ page, label, showOverlay = true, activeIssueId, flashSelector, className = '', children, overlays = OVERLAYS, screenshotUrl }: SiteCaptureProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(CAPTURE_W)
+  const screenshotSrc = useImageSrc(screenshotUrl)
 
   // 컨테이너 너비가 바뀌면 캡처 배율도 바꿉니다
   useLayoutEffect(() => {
@@ -51,7 +53,7 @@ export function SiteCapture({ page, label, showOverlay = true, activeIssueId, fl
       >
         {screenshotUrl ? (
           // 검사 화면 캡처(1440×1093)를 기준 크기(734×557)에 맞춰 그립니다. 설명은 바깥 role="img" 의 label 이 함
-          <img src={screenshotUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+          <img src={screenshotSrc} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
         ) : (
           <FakeSite page={page} />
         )}

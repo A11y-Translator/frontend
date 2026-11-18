@@ -120,7 +120,7 @@ src/
 | 모드 | 언제 | 하는 일 |
 |---|---|---|
 | `live` (개발 서버 기본) | `npm run dev` | 개발 서버가 **이 컴퓨터의 크롬을 화면 없이 띄워** 페이지를 열고(`dev/inspectProxy.ts`) **axe-core 로 WCAG 2.2 AA 검사** + 화면 캡처 |
-| `http` | 백엔드 연결 후 | `VITE_API_BASE_URL` 서버에 생성·검사 요청 (`shared/api/http.ts`) |
+| `http` | 백엔드와 함께 | 백엔드 서버에 프로젝트 생성·검사 요청 (`shared/api/http.ts`) — 아래 **백엔드 연결** 참고 |
 | `mock` | 오프라인 시연 | URL 로 만든 임시 규칙 결과 (`shared/mocks/inspect.ts`) |
 
 | 파일 | 역할 |
@@ -129,6 +129,8 @@ src/
 | `shared/api/url.ts` | 주소 규칙 (https 자동 보정 · http/https 만 · 도메인 확인) — 모든 모드 공통 |
 | `shared/api/live.ts` | axe 결과 → `Issue` 변환 (한국어 문구, 카테고리, WCAG 번호, 캡처 위 박스, 통과율) |
 | `shared/api/liveProxy.ts` | 개발 서버에 검사 요청 (`/__inspect/scan`) |
+| `shared/api/http.ts` | 백엔드 API 호출 + 서버 응답 → `Project` · `Inspection` 변환 |
+| `shared/api/useImageSrc.ts` | 서버 캡처 이미지를 로그인 토큰으로 받아 `<img>` 에 넣기 |
 | `dev/inspectProxy.ts` | [개발 서버 전용] Playwright(크롬) + axe-core 검사, 캡처는 `node_modules/.a11y-shots/` |
 | `shared/store.ts` | `createProjectAndInspect` · `reinspect` · `setResolved`, 버전 기록 `inspectionHistory` |
 
@@ -139,8 +141,45 @@ live 모드 참고
 - 지금은 입력한 **한 페이지**만 검사해요. 자동 검사가 확인 못 한 항목은 "직접 확인 필요 N개"로 표시돼요.
 - 빌드된 앱(`npm run build`)에는 검사 서버가 없어서 live 모드가 동작하지 않아요 → 백엔드가 같은 방식(Playwright + axe-core)으로 검사하면 돼요. `dev/inspectProxy.ts` 를 그대로 참고하세요.
 
-가정한 백엔드 API: `POST /projects {name,url} → Project`, `POST /projects/:id/inspections {url} → Inspection`
-(타입은 `shared/api/types.ts`). 실패 시 `{ message }` 를 그대로 화면에 보여줍니다.
+### 백엔드 연결 (http 모드)
+
+백엔드: [a11y-translator-backend](https://github.com/JooKyung-Yuh/a11y-translator-backend) 의 `integration` 브랜치 (Django + DRF).
+
+**1. 백엔드 켜기** — 터미널 두 개가 필요해요. 검사는 API 서버가 아니라 **worker 가 따로** 처리합니다.
+
+```bash
+cd a11y-translator-backend/backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && python manage.py migrate   # 처음 한 번
+python manage.py runserver          # 터미널 1 · API 서버 (http://127.0.0.1:8000)
+python manage.py run_scan_worker    # 터미널 2 · 검사 worker (Google Chrome 필요)
+```
+
+**2. 프론트 설정** — `.env.example` 을 `.env.local` 로 복사해서 값을 채웁니다.
+
+```bash
+cp .env.example .env.local    # VITE_API_MODE=http, BACKEND_ORIGIN, 개발 계정
+npm run dev                   # .env.local 을 바꾸면 다시 켜야 해요
+```
+
+**3. 확인** — `/projects/new` 에 주소를 넣고 **검사하기**. 개발자 도구 Network 탭에 `/api/...` 요청이 보이면 연결된 거예요.
+
+어떻게 이어져 있나
+- 브라우저는 같은 주소의 `/api/...` 로 부르고, 개발 서버가 `BACKEND_ORIGIN` 으로 넘겨줍니다 (`vite.config.ts` 의 `server.proxy`). 그래서 백엔드에 CORS 설정이 없어도 돼요.
+- 로그인: Google 로그인이 붙기 전까지는 `.env.local` 의 개발 계정으로 자동 로그인(없으면 가입)하고, 받은 토큰을 `Authorization: Token …` 으로 보냅니다.
+  개발 계정은 개발 서버에서만 읽고 빌드 결과에는 넣지 않아요. 그래서 빌드된 앱의 http 모드는 로그인 화면이 연결될 때까지 동작하지 않습니다.
+- 검사하기 한 번 = `POST /teams/{id}/projects/` → `POST /projects/{id}/pages/` → `POST /projects/{id}/versions/` → `POST /scans/` → `GET /scans/{id}/` 를 `done` 까지 → `GET /scans/{id}/issues/…`
+
+| 증상 | 원인 |
+|---|---|
+| "서버에 연결하지 못했어요" | 백엔드가 꺼져 있거나 `BACKEND_ORIGIN` 포트가 다름 |
+| 60초 뒤 "검사가 시작되지 않았어요" | `run_scan_worker` 를 안 켬 |
+| "내부망이나 이 서버 자신을 가리키는 주소는…" | 백엔드는 `localhost` · 사설 IP 검사를 막아요 (공개 주소로 시도) |
+| `.env.local` 을 바꿨는데 그대로 | `npm run dev` 를 다시 켜야 반영돼요 |
+
+아직 서버와 연결되지 않은 것 (화면은 그대로 임시 데이터 · localStorage)
+- 프로젝트 목록 불러오기(지금은 이 브라우저에서 만든 것만 보임) · 프로젝트 삭제(서버에 API 없음) · 기준 통과율(서버가 통과 규칙 수를 주지 않음)
+- 할 일 · 담당자 · 코멘트 · 알림 · 팀원 · 로그인 화면 — 서버에는 API 가 있고(`tasks`, `comments`, `notifications`, `teams`), `shared/store.ts` 의 `actions` 를 같은 방식으로 바꾸면 돼요.
 
 ## 미정 · 확인 필요
 

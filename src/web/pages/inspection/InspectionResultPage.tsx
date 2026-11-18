@@ -193,17 +193,21 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
                 </>
               )}
             </StatCard>
-            <StatCard label="기준 통과율" value={`${scan.passRate}%`}>
-              <span
-                role="progressbar"
-                aria-label="기준 통과율"
-                aria-valuenow={scan.passRate}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                className="mt-2 block h-1.5 w-full overflow-hidden rounded-[3px] bg-web-line-2"
-              >
-                <span className="block h-full rounded-[3px] bg-ink-2" style={{ width: `${scan.passRate}%` }} />
-              </span>
+            <StatCard label="기준 통과율" value={scan.passRate === undefined ? '–' : `${scan.passRate}%`}>
+              {scan.passRate === undefined ? (
+                '서버 검사에서는 아직 제공되지 않아요'
+              ) : (
+                <span
+                  role="progressbar"
+                  aria-label="기준 통과율"
+                  aria-valuenow={scan.passRate}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  className="mt-2 block h-1.5 w-full overflow-hidden rounded-[3px] bg-web-line-2"
+                >
+                  <span className="block h-full rounded-[3px] bg-ink-2" style={{ width: `${scan.passRate}%` }} />
+                </span>
+              )}
             </StatCard>
             <StatCard label="검사 페이지" value={String(scan.pages)}>
               {scan.pagesNote}
