@@ -13,6 +13,7 @@ import { StatusTag } from '@/web/common/StatusTag'
 import { OpenInChromeLink } from '@/web/common/OpenInChromeLink'
 import { InspectionPreview } from './InspectionPreview'
 import { useVersionMenu } from '@/web/common/useVersionMenu'
+import { ServerInspectionGate } from './ServerInspectionGate'
 
 export default function InspectionResultPage() {
   const { projectId = DEFAULT_PROJECT_ID } = useParams()
@@ -22,7 +23,9 @@ export default function InspectionResultPage() {
   const initialPage = params.get('page') ?? undefined
   // 프로젝트·버전·페이지가 바뀌면 선택·필터 상태를 새로 시작
   return (
-    <InspectionResult key={`${projectId}-${v ?? 'latest'}-${initialPage ?? ''}`} projectId={projectId} requestedVersion={v} initialPage={initialPage} />
+    <ServerInspectionGate projectId={projectId}>
+      <InspectionResult key={`${projectId}-${v ?? 'latest'}-${initialPage ?? ''}`} projectId={projectId} requestedVersion={v} initialPage={initialPage} />
+    </ServerInspectionGate>
   )
 }
 

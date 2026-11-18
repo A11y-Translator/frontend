@@ -15,11 +15,12 @@ import { useCreateAndInspect } from './useCreateAndInspect'
 const RECENT_LIMIT = 4
 
 export default function ProjectHomePage() {
-  const { projects, inspectionHistory } = useAppState()
+  const { projects, inspectionHistory, currentTeamId } = useAppState()
   const [message, announce] = useAnnouncer()
   // 홈에서 URL 을 넣어도 새 프로젝트를 만들고 실제로 검사합니다 (이름 = 도메인)
   const createAndInspect = useCreateAndInspect()
-  const recent = projects.slice(0, RECENT_LIMIT)
+  // 지금 보고 있는 팀 스페이스의 프로젝트만 (팀 정보가 없는 예전 프로젝트는 어디서나 보임)
+  const recent = projects.filter((p) => !p.teamId || p.teamId === currentTeamId).slice(0, RECENT_LIMIT)
 
   return (
     <div className="flex w-full flex-col page-x pt-10 pb-8 font-noto">

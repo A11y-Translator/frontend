@@ -3,12 +3,13 @@
 //
 //   로그인    POST {BASE}/auth/login/  (없는 계정이면 /auth/register/)  → token   ← .env.local 의 개발 계정
 //   팀        GET  {BASE}/teams/       (없으면 POST 로 하나 만듦)
-//   프로젝트  POST {BASE}/teams/{team_id}/projects/   body: { name, base_url }
+//   프로젝트  GET · POST {BASE}/teams/{team_id}/projects/   body: { name, base_url }
+//             GET  {BASE}/projects/{id}/   → 페이지 · 버전 · 최신 버전의 검사
 //   검사      POST {BASE}/projects/{id}/versions/ → POST {BASE}/projects/{id}/pages/ → POST {BASE}/scans/
 //             → GET {BASE}/scans/{scan_id}/ 를 status 가 done / failed 가 될 때까지 (서버의 검사 worker 가 처리)
 //   결과      GET  {BASE}/scans/{scan_id}/issues/ · /issues/{issue_id}/ · /screenshot/
 //   실패 시 { detail: string } 또는 { 필드: [메시지] } 와 4xx/5xx 상태 코드
-import type { ApiClient } from './client'
+import type { ApiClient, ServerReads } from './client'
 import type { Category, Inspection, Issue, IssueOverlay, Project, Severity } from './types'
 import { CAPTURE_H, CAPTURE_W } from '@/shared/mocks/scan'
 
@@ -30,6 +31,7 @@ export class ApiError extends Error {
 
 interface ServerProject {
   project_id: number
+  team_id: number
   name: string
   base_url: string
   updated_at: string
@@ -40,6 +42,12 @@ interface ServerPage {
 interface ServerVersion {
   version_id: number
   version_no: number
+}
+/** GET /projects/{id}/ — 버전은 최신이 앞, latest_scans 는 최신 버전의 검사 */
+interface ServerProjectDetail extends ServerProject {
+  pages: ServerPage[]
+  versions: ServerVersion[]
+  latest_scans: ServerScan[]
 }
 interface ServerScan {
   scan_id: number
@@ -139,7 +147,6 @@ async function authed(method: string, path: string, body?: unknown): Promise<Res
   const res = await send(method, path, body, await getToken())
   if (res.status !== 401) return res
   localStorage.removeItem(TOKEN_KEY)
-  teamId = null
   return send(method, path, body, await getToken())
 }
 
@@ -157,21 +164,6 @@ export async function fetchImage(url: string): Promise<Blob> {
   const res = await authed('GET', url.slice(BASE.length))
   if (!res.ok) throw new ApiError(res.status, '이미지를 불러오지 못했어요.')
   return res.blob()
-}
-
-/* ── 팀 ───────────────────────────────────────────────────────────── */
-
-let teamId: Promise<number> | null = null
-
-/** 프로젝트를 넣을 팀: 내 첫 번째 팀, 없으면 하나 만듭니다 (팀 화면이 서버와 연결되기 전까지) */
-function getTeamId(): Promise<number> {
-  teamId ??= get<{ team_id: number }[]>('/teams/')
-    .then(async (teams) => teams[0]?.team_id ?? (await post<{ team_id: number }>('/teams/', { name: '내 팀' })).team_id)
-    .catch((e) => {
-      teamId = null
-      throw e
-    })
-  return teamId
 }
 
 /* ── 서버 모양 → 화면 모양 ────────────────────────────────────────── */
@@ -194,8 +186,16 @@ function pathOf(url: string) {
   return new URL(url).pathname.replace(/\/$/, '') || '/'
 }
 
-function toProject(p: ServerProject): Project {
-  return { id: String(p.project_id), name: p.name, url: p.base_url, status: 'active', updatedAt: shortDate(p.updated_at), currentVersion: 0 }
+function toProject(p: ServerProject, currentVersion = 0): Project {
+  return {
+    id: String(p.project_id),
+    teamId: String(p.team_id),
+    name: p.name,
+    url: p.base_url,
+    status: 'active',
+    updatedAt: shortDate(p.updated_at),
+    currentVersion,
+  }
 }
 
 function toInspection(project: Project, version: number, scan: ServerScan, details: ServerIssueDetail[]): Inspection {
@@ -285,24 +285,62 @@ async function waitForScan(scanId: number): Promise<ServerScan> {
   }
 }
 
+async function issueDetails(scanId: number): Promise<ServerIssueDetail[]> {
+  const list = await get<ServerIssue[]>(`/scans/${scanId}/issues/`)
+  return Promise.all(list.map((i) => get<ServerIssueDetail>(`/scans/${scanId}/issues/${i.issue_id}/`)))
+}
+
+const projectPath = (projectId: string) => `/projects/${encodeURIComponent(projectId)}`
+
+const server: ServerReads = {
+  async listTeams() {
+    type ServerTeam = { team_id: number; name: string }
+    const teams = await get<ServerTeam[]>('/teams/')
+    // 팀이 있어야 프로젝트를 만들 수 있어서, 하나도 없으면 하나 만듭니다 (팀 만들기 화면이 붙기 전까지)
+    const list = teams.length ? teams : [await post<ServerTeam>('/teams/', { name: '내 팀' })]
+    return list.map((t) => ({ id: String(t.team_id), name: t.name }))
+  },
+  async listProjects(teamId) {
+    const list = await get<ServerProject[]>(`/teams/${encodeURIComponent(teamId)}/projects/`)
+    // 목록 응답에는 버전 번호가 없어서 프로젝트마다 상세를 한 번씩 더 부릅니다
+    const details = await Promise.all(list.map((p) => get<ServerProjectDetail>(`/projects/${p.project_id}/`)))
+    return details.map((d) => toProject(d, d.versions[0]?.version_no ?? 0))
+  },
+  async openProject(projectId) {
+    if (!/^\d+$/.test(projectId)) return undefined // 서버 프로젝트 id 는 숫자 (데모 프로젝트 주소는 서버에 묻지 않음)
+    let detail: ServerProjectDetail
+    try {
+      detail = await get<ServerProjectDetail>(`${projectPath(projectId)}/`)
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) throw new ApiError(404, '프로젝트를 찾을 수 없어요. 지워졌거나 볼 수 있는 권한이 없을 수 있어요.')
+      throw e
+    }
+    const version = detail.versions[0]?.version_no ?? 0
+    const project = toProject(detail, version)
+    const scan = detail.latest_scans.filter((s) => s.status === 'done').pop()
+    return { project, inspection: scan && toInspection(project, version, scan, await issueDetails(scan.scan_id)) }
+  },
+}
+
 export const httpApi: ApiClient = {
-  async createProject(input) {
-    return toProject(await post<ServerProject>(`/teams/${await getTeamId()}/projects/`, { name: input.name, base_url: input.url }))
+  server,
+  async createProject(input, teamId) {
+    // 팀 목록을 받기 전에 눌렀으면 첫 번째 팀에 만듭니다
+    const team = teamId || (await server.listTeams())[0].id
+    return toProject(await post<ServerProject>(`/teams/${encodeURIComponent(team)}/projects/`, { name: input.name, base_url: input.url }))
   },
   async deleteProject() {
     throw new ApiError(501, '서버에는 아직 프로젝트 삭제 기능이 없어요.')
   },
   // 버전 번호는 서버가 정합니다 (version_no = 지금까지 + 1)
   async runInspection(project) {
-    const root = `/projects/${encodeURIComponent(project.id)}`
-    const { pages } = await get<{ pages: ServerPage[] }>(`${root}/`)
+    const root = projectPath(project.id)
+    const { pages } = await get<ServerProjectDetail>(`${root}/`)
     // 지금은 프로젝트 = 주소 하나라 페이지도 하나 (같은 주소를 두 번 등록하면 서버가 409)
     const page = pages[0] ?? (await post<ServerPage>(`${root}/pages/`, { url: project.url }))
     const version = await post<ServerVersion>(`${root}/versions/`)
     const queued = await post<ServerScan>('/scans/', { target_url: project.url, version_id: version.version_id, page_id: page.page_id })
     const scan = await waitForScan(queued.scan_id)
-    const list = await get<ServerIssue[]>(`/scans/${scan.scan_id}/issues/`)
-    const details = await Promise.all(list.map((i) => get<ServerIssueDetail>(`/scans/${scan.scan_id}/issues/${i.issue_id}/`)))
-    return toInspection(project, version.version_no, scan, details)
+    return toInspection(project, version.version_no, scan, await issueDetails(scan.scan_id))
   },
 }

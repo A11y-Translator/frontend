@@ -74,8 +74,16 @@ export interface Comment {
   pin?: { x: number; y: number }
 }
 
+/** 팀 스페이스 (왼쪽 위 전환 목록) */
+export interface TeamSpace {
+  id: string
+  name: string
+}
+
 export interface Project {
   id: string
+  /** 속한 팀 스페이스. 없으면(예전에 저장된 프로젝트) 어느 팀에서나 보여요 */
+  teamId?: string
   name: string
   url: string
   status: 'active' | 'done'

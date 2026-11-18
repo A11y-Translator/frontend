@@ -168,6 +168,9 @@ npm run dev                   # .env.local 을 바꾸면 다시 켜야 해요
 - 브라우저는 같은 주소의 `/api/...` 로 부르고, 개발 서버가 `BACKEND_ORIGIN` 으로 넘겨줍니다 (`vite.config.ts` 의 `server.proxy`). 그래서 백엔드에 CORS 설정이 없어도 돼요.
 - 로그인: Google 로그인이 붙기 전까지는 `.env.local` 의 개발 계정으로 자동 로그인(없으면 가입)하고, 받은 토큰을 `Authorization: Token …` 으로 보냅니다.
   개발 계정은 개발 서버에서만 읽고 빌드 결과에는 넣지 않아요. 그래서 빌드된 앱의 http 모드는 로그인 화면이 연결될 때까지 동작하지 않습니다.
+- 웹 화면을 열면 `GET /teams/` 로 팀 스페이스 목록을, `GET /teams/{id}/projects/` 로 지금 팀의 프로젝트 목록을 받아 옵니다. 왼쪽 위에서 팀을 바꾸면 그 팀의 목록을 다시 받아요.
+- 이 브라우저에 없는 검사 결과(다른 사람이 검사한 프로젝트 등)는 프로젝트를 열 때 `GET /projects/{id}/` 로 받아 옵니다. 다른 팀의 프로젝트 주소로 바로 들어가면 그 팀으로 바뀌어요.
+- 서버 모드는 브라우저 저장소를 따로 씁니다(`a11y-translator:server-state:v1`). 서버에서 받은 것의 사본이라 지워도 다시 받아 와요.
 - 검사하기 한 번 = `POST /teams/{id}/projects/` → `POST /projects/{id}/pages/` → `POST /projects/{id}/versions/` → `POST /scans/` → `GET /scans/{id}/` 를 `done` 까지 → `GET /scans/{id}/issues/…`
 
 | 증상 | 원인 |
@@ -178,7 +181,8 @@ npm run dev                   # .env.local 을 바꾸면 다시 켜야 해요
 | `.env.local` 을 바꿨는데 그대로 | `npm run dev` 를 다시 켜야 반영돼요 |
 
 아직 서버와 연결되지 않은 것 (화면은 그대로 임시 데이터 · localStorage)
-- 프로젝트 목록 불러오기(지금은 이 브라우저에서 만든 것만 보임) · 프로젝트 삭제(서버에 API 없음) · 기준 통과율(서버가 통과 규칙 수를 주지 않음)
+- 팀 스페이스 추가하기(이름 입력 화면이 없음) · 프로젝트 삭제(서버에 API 없음) · 기준 통과율(서버가 통과 규칙 수를 주지 않음)
+- 지난 버전의 검사 결과(서버에서는 최신 버전만 받아 옴 · 그 전 버전은 이 브라우저에서 검사한 것만 보임)
 - 할 일 · 담당자 · 코멘트 · 알림 · 팀원 · 로그인 화면 — 서버에는 API 가 있고(`tasks`, `comments`, `notifications`, `teams`), `shared/store.ts` 의 `actions` 를 같은 방식으로 바꾸면 돼요.
 
 ## 미정 · 확인 필요
