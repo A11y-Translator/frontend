@@ -13,6 +13,7 @@ import { StatusTag } from '@/web/common/StatusTag'
 import { OpenInChromeLink } from '@/web/common/OpenInChromeLink'
 import { InspectionPreview } from './InspectionPreview'
 import { useVersionMenu } from '@/web/common/useVersionMenu'
+import { ServerInspectionGate } from './ServerInspectionGate'
 
 export default function InspectionResultPage() {
   const { projectId = DEFAULT_PROJECT_ID } = useParams()
@@ -22,7 +23,9 @@ export default function InspectionResultPage() {
   const initialPage = params.get('page') ?? undefined
   // 프로젝트·버전·페이지가 바뀌면 선택·필터 상태를 새로 시작
   return (
-    <InspectionResult key={`${projectId}-${v ?? 'latest'}-${initialPage ?? ''}`} projectId={projectId} requestedVersion={v} initialPage={initialPage} />
+    <ServerInspectionGate projectId={projectId}>
+      <InspectionResult key={`${projectId}-${v ?? 'latest'}-${initialPage ?? ''}`} projectId={projectId} requestedVersion={v} initialPage={initialPage} />
+    </ServerInspectionGate>
   )
 }
 
@@ -193,17 +196,21 @@ function InspectionResult({ projectId, requestedVersion, initialPage }: { projec
                 </>
               )}
             </StatCard>
-            <StatCard label="기준 통과율" value={`${scan.passRate}%`}>
-              <span
-                role="progressbar"
-                aria-label="기준 통과율"
-                aria-valuenow={scan.passRate}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                className="mt-2 block h-1.5 w-full overflow-hidden rounded-[3px] bg-web-line-2"
-              >
-                <span className="block h-full rounded-[3px] bg-ink-2" style={{ width: `${scan.passRate}%` }} />
-              </span>
+            <StatCard label="기준 통과율" value={scan.passRate === undefined ? '–' : `${scan.passRate}%`}>
+              {scan.passRate === undefined ? (
+                '서버 검사에서는 아직 제공되지 않아요'
+              ) : (
+                <span
+                  role="progressbar"
+                  aria-label="기준 통과율"
+                  aria-valuenow={scan.passRate}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  className="mt-2 block h-1.5 w-full overflow-hidden rounded-[3px] bg-web-line-2"
+                >
+                  <span className="block h-full rounded-[3px] bg-ink-2" style={{ width: `${scan.passRate}%` }} />
+                </span>
+              )}
             </StatCard>
             <StatCard label="검사 페이지" value={String(scan.pages)}>
               {scan.pagesNote}

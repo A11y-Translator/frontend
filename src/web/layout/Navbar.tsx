@@ -1,8 +1,9 @@
 // Figma: 컴포넌트 / Navbar (554:9041) + card/team (팀 스페이스 전환, 554:10338)
+import { useEffect, useState } from 'react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Link, NavLink } from 'react-router-dom'
-import { CURRENT_USER_ID, memberById, teams } from '@/shared/mocks'
-import { useAppState } from '@/shared/store'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
+import { actions, useAppState } from '@/shared/store'
 import iconFolder from '@/web/assets/icon-folder.svg'
 import iconReport from '@/web/assets/icon-report.svg'
 import iconTodo from '@/web/assets/icon-todo.svg'
@@ -25,7 +26,23 @@ const MENU = [
 
 export function Navbar() {
   const me = memberById(CURRENT_USER_ID)!
-  const { issues } = useAppState()
+  const { issues, teams, currentTeamId } = useAppState()
+  const navigate = useNavigate()
+  const [teamError, setTeamError] = useState('')
+  const currentTeam = teams.find((t) => t.id === currentTeamId)
+  const showError = (e: unknown) => setTeamError(e instanceof Error ? e.message : '팀 스페이스를 불러오지 못했어요.')
+
+  // 서버 모드: 웹 화면을 열 때 팀 스페이스와 프로젝트 목록을 서버에서 받아 옵니다 (다른 모드에서는 아무 일도 안 함)
+  useEffect(() => {
+    actions.syncFromServer().catch(showError)
+  }, [])
+
+  // 팀을 바꾸면 그 팀의 프로젝트 목록(홈)으로 갑니다
+  const switchTeam = (teamId: string) => {
+    setTeamError('')
+    actions.switchTeam(teamId).catch(showError)
+    navigate('/')
+  }
   const myOpen = issues.filter((i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved').length
 
   return (
@@ -35,7 +52,7 @@ export function Navbar() {
         <DropdownMenu.Root>
           <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-lg text-[15px] font-medium text-black">
             <img src={workspaceAvatar} alt="" width={24} height={24} />
-            A11y Team
+            <span className="max-w-[150px] truncate">{currentTeam?.name ?? 'A11y Team'}</span>
             <img src={iconDropdown} alt="" width={19} height={19} />
             <span className="sr-only">팀 스페이스 바꾸기</span>
           </DropdownMenu.Trigger>
@@ -47,7 +64,7 @@ export function Navbar() {
             >
               <div className="flex flex-col gap-0.5">
                 <DropdownMenu.Label className="p-2.5 text-base font-semibold text-white">팀 스페이스</DropdownMenu.Label>
-                <DropdownMenu.RadioGroup value="a11y" className="flex flex-col gap-1">
+                <DropdownMenu.RadioGroup value={currentTeamId} onValueChange={switchTeam} className="flex flex-col gap-1">
                   {teams.map((t) => (
                     <DropdownMenu.RadioItem
                       key={t.id}
@@ -55,7 +72,7 @@ export function Navbar() {
                       className="flex h-11 cursor-pointer items-center gap-3.5 rounded-[10px] px-2 text-[13px] font-medium text-white outline-none data-[highlighted]:bg-[#464646] data-[state=checked]:bg-[#464646]"
                     >
                       <span className="flex size-8 items-center justify-center rounded-full bg-avatar text-[13px] font-bold text-muted">
-                        {t.initial}
+                        {t.name.charAt(0)}
                       </span>
                       {t.name}
                     </DropdownMenu.RadioItem>
@@ -73,6 +90,12 @@ export function Navbar() {
           <img src={iconNotice} alt="" width={22} height={22} />
         </button>
       </div>
+
+      {teamError && (
+        <p role="alert" className="rounded-lg bg-white px-2.5 py-2 text-xs leading-[1.45] text-[#b3261e]">
+          {teamError}
+        </p>
+      )}
 
       {/* 검색 */}
       <label className="flex items-center gap-2 rounded-xl bg-web-search px-2.5 py-2">

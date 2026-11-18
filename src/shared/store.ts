@@ -2,11 +2,15 @@
 // 확장에서 "웹으로 전송"하면 웹의 할 일에 나타나고, 재검사하면 웹 리포트도 바뀌는 흐름을 보여주기 위한 것.
 // 같은 브라우저 안에서 localStorage 로 공유합니다. 백엔드가 붙으면 이 파일의 액션을 API 호출로 바꾸면 됩니다.
 import { useSyncExternalStore } from 'react'
-import { issues as initialIssues, comments as initialComments, projects as initialProjects } from './mocks'
-import type { Comment, CreateProjectInput, Inspection, Issue, IssueOverlay, IssueStatus, Project, Team } from '@/shared/api/types'
+import { issues as initialIssues, comments as initialComments, projects as initialProjects, teams as initialTeams } from './mocks'
+import type { Comment, CreateProjectInput, Inspection, Issue, IssueOverlay, IssueStatus, Project, Team, TeamSpace } from '@/shared/api/types'
 import { api } from '@/shared/api/client'
 
-const KEY = 'a11y-translator:prototype-state:v1'
+/** 서버에 저장하는 모드(http)인지. 이때 팀·프로젝트 목록은 서버에서 받아 오고, 아래 저장소는 그 사본(캐시)이에요 */
+export const SERVER_MODE = !!api.server
+
+// 서버 모드는 저장소를 따로 씁니다 (모드를 바꿔도 프로토타입에서 만든 프로젝트가 지워지지 않게)
+const KEY = SERVER_MODE ? 'a11y-translator:server-state:v1' : 'a11y-translator:prototype-state:v1'
 
 export interface AppState {
   issues: Issue[]
@@ -16,7 +20,10 @@ export interface AppState {
   /** 확장 "페이지에서 미리 고쳐보기"로 적용 중인 색 (issueId → color) */
   previewFix: Record<string, string>
   currentVersion: number
-  /** 프로젝트 목록 (최근 것이 앞) */
+  /** 팀 스페이스 목록과 지금 보고 있는 팀 */
+  teams: TeamSpace[]
+  currentTeamId: string
+  /** 프로젝트 목록 (최근 것이 앞). 서버 모드에서는 지금 팀의 프로젝트만 */
   projects: Project[]
   /** 새로 만든 프로젝트의 최신 검사 결과 (projectId → 검사). 기존 데모 프로젝트B 는 issues 를 그대로 씀 */
   inspections: Record<string, Inspection>
@@ -29,7 +36,9 @@ const initial = (): AppState => ({
   comments: initialComments,
   previewFix: {},
   currentVersion: 11,
-  projects: initialProjects,
+  teams: SERVER_MODE ? [] : initialTeams,
+  currentTeamId: SERVER_MODE ? '' : initialTeams[0].id,
+  projects: SERVER_MODE ? [] : initialProjects,
   inspections: {},
   inspectionHistory: {},
 })
@@ -88,6 +97,16 @@ export function useAppState(): AppState {
   return useSyncExternalStore(subscribe, () => state)
 }
 
+/** 진행 중인 서버 동기화 (팀 → 프로젝트 목록). 검사 결과를 받기 전에 이걸 기다립니다 */
+let syncing: Promise<void> | undefined
+
+/** 지금 팀의 프로젝트 목록을 서버에서 다시 받습니다. 받는 사이 팀을 또 바꿨으면 버려요 */
+async function loadProjects(teamId: string) {
+  if (!api.server) return
+  const projects = await api.server.listProjects(teamId)
+  if (state.currentTeamId === teamId) set({ projects })
+}
+
 const updateIssue = (id: string, patch: Partial<Issue>) =>
   set((s) => ({ issues: s.issues.map((i) => (i.id === id ? { ...i, ...patch } : i)) }))
 
@@ -140,9 +159,10 @@ export const actions = {
    * 실패하면 예외를 그대로 던지니 화면에서 메시지를 보여주세요.
    */
   async createProjectAndInspect(input: CreateProjectInput): Promise<Project> {
-    const created = await api.createProject(input)
+    const teamId = state.currentTeamId
+    const created = await api.createProject(input, teamId)
     const inspection = await api.runInspection(created)
-    const project: Project = { ...created, currentVersion: inspection.version, status: 'active' }
+    const project: Project = { teamId, ...created, currentVersion: inspection.version, status: 'active' }
     set((s) => ({
       projects: [project, ...s.projects.filter((p) => p.id !== project.id)],
       inspections: { ...s.inspections, [project.id]: inspection },
@@ -209,6 +229,47 @@ export const actions = {
       }
       return { issues: s.issues.map(patch), inspections, inspectionHistory }
     })
+  },
+  /** 서버 모드: 팀 스페이스 목록과 지금 팀의 프로젝트 목록을 서버에서 받아 옵니다 (웹 화면을 열 때 한 번) */
+  syncFromServer(): Promise<void> {
+    const server = api.server
+    if (!server) return Promise.resolve()
+    syncing = (async () => {
+      const teams = await server.listTeams()
+      const currentTeamId = teams.some((t) => t.id === state.currentTeamId) ? state.currentTeamId : teams[0].id
+      set({ teams, currentTeamId })
+      await loadProjects(currentTeamId)
+    })()
+    return syncing
+  },
+  /** 팀 스페이스 바꾸기. 서버 모드면 그 팀의 프로젝트 목록을 받아 옵니다 */
+  async switchTeam(teamId: string) {
+    if (teamId === state.currentTeamId) return
+    set(SERVER_MODE ? { currentTeamId: teamId, projects: [] } : { currentTeamId: teamId })
+    await loadProjects(teamId)
+  },
+  /**
+   * 서버 모드: 이 브라우저에 없는(또는 서버보다 오래된) 검사 결과를 받아 옵니다.
+   * 예: 다른 사람이 검사한 프로젝트, 저장소를 비운 뒤 다시 연 프로젝트.
+   */
+  async loadInspection(projectId: string) {
+    if (!api.server) return
+    await (syncing ?? actions.syncFromServer())
+    const known = state.projects.find((p) => p.id === projectId)
+    const local = state.inspections[projectId]
+    if (known && local && local.version >= known.currentVersion) return
+    const opened = await api.server.openProject(projectId)
+    if (!opened) return
+    // 다른 팀의 프로젝트 주소로 바로 들어왔으면 그 팀으로 바꾸고, 목록에 없던 프로젝트면 목록을 다시 받습니다
+    const { teamId } = opened.project
+    if (teamId && teamId !== state.currentTeamId) await actions.switchTeam(teamId)
+    else if (!known) await loadProjects(state.currentTeamId)
+    const latest = opened.inspection
+    if (!latest || (local && local.version >= latest.version)) return
+    set((s) => ({
+      inspections: { ...s.inspections, [projectId]: latest },
+      inspectionHistory: { ...s.inspectionHistory, [projectId]: [...(s.inspectionHistory[projectId] ?? []), latest] },
+    }))
   },
   /** 데모 초기화 */
   reset() {
