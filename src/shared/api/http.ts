@@ -4,7 +4,7 @@
 //   로그인    POST {BASE}/auth/login/  (없는 계정이면 /auth/register/)  → token   ← .env.local 의 개발 계정
 //   팀        GET  {BASE}/teams/       (없으면 POST 로 하나 만듦)
 //   프로젝트  GET · POST {BASE}/teams/{team_id}/projects/   body: { name, base_url }
-//             GET  {BASE}/projects/{id}/   → 페이지 · 버전 · 최신 버전의 검사
+//             GET · DELETE {BASE}/projects/{id}/   → 페이지 · 버전 · 최신 버전의 검사 / 삭제(204)
 //   검사      POST {BASE}/projects/{id}/versions/ → POST {BASE}/projects/{id}/pages/ → POST {BASE}/scans/
 //             → GET {BASE}/scans/{scan_id}/ 를 status 가 done / failed 가 될 때까지 (서버의 검사 worker 가 처리)
 //   결과      GET  {BASE}/scans/{scan_id}/issues/ · /issues/{issue_id}/ · /screenshot/
@@ -153,6 +153,7 @@ async function authed(method: string, path: string, body?: unknown): Promise<Res
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const res = await authed(method, path, body)
   if (!res.ok) throw new ApiError(res.status, messageOf(await res.json().catch(() => null)))
+  if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
 
@@ -329,9 +330,8 @@ export const httpApi: ApiClient = {
     const team = teamId || (await server.listTeams())[0].id
     return toProject(await post<ServerProject>(`/teams/${encodeURIComponent(team)}/projects/`, { name: input.name, base_url: input.url }))
   },
-  async deleteProject() {
-    throw new ApiError(501, '서버에는 아직 프로젝트 삭제 기능이 없어요.')
-  },
+  // 팀 관리자나 프로젝트를 만든 사람만 지울 수 있어요 (아니면 서버가 403 과 안내 문구를 줌)
+  deleteProject: (projectId) => request<void>('DELETE', `${projectPath(projectId)}/`),
   // 버전 번호는 서버가 정합니다 (version_no = 지금까지 + 1)
   async runInspection(project) {
     const root = projectPath(project.id)
