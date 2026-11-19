@@ -5,12 +5,10 @@
 //  - 서랍(drawer): 모바일에서 ☰ 로 여는 메뉴. 펼침과 같고, 접기 대신 닫기 버튼 · 메뉴를 고르면 닫힘
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useRef, type Ref } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById, teams } from '@/shared/mocks'
-import { useAppState } from '@/shared/store'
 import iconFolder from '@/web/assets/icon-folder.svg'
 import iconReport from '@/web/assets/icon-report.svg'
-import iconTodo from '@/web/assets/icon-todo.svg'
 import iconGroup from '@/web/assets/icon-group.svg'
 import iconSetting from '@/web/assets/icon-setting.svg'
 import iconNotice from '@/web/assets/icon-notice.svg'
@@ -21,8 +19,6 @@ import workspaceAvatar from '@/web/assets/workspace-avatar.svg'
 
 const MENU = [
   { to: '/', label: '프로젝트', icon: iconFolder, end: true },
-  // 디자인 Navbar 에는 없지만 구조도의 '할 일' 메뉴를 위해 추가 (내 할 일 개수 배지)
-  { to: '/todo', label: '할 일', icon: iconTodo, badge: true },
   { to: '/report', label: '리포트', icon: iconReport },
   { to: '/members', label: '팀원', icon: iconGroup },
   { to: '/settings', label: '설정', icon: iconSetting },
@@ -54,8 +50,6 @@ const ICON_BTN = 'flex size-8 shrink-0 items-center justify-center rounded-lg te
 
 export function Navbar({ collapsed = false, onToggle, onClose, width, animate = true, ref }: NavbarProps) {
   const me = memberById(CURRENT_USER_ID)!
-  const { issues } = useAppState()
-  const myOpen = issues.filter((i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved').length
   const searchRef = useRef<HTMLInputElement>(null)
   const drawer = !!onClose
 
@@ -70,7 +64,7 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
       ref={ref}
       aria-label="주 메뉴"
       style={!collapsed && !drawer && width ? { width } : undefined}
-      className={`flex h-full shrink-0 flex-col gap-3 overflow-x-hidden overflow-y-auto bg-web-nav py-4 font-pretendard ${animate ? 'transition-[width] duration-200' : ''} ${
+      className={`flex h-full shrink-0 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-web-nav py-4 font-pretendard ${animate ? 'transition-[width] duration-200' : ''} ${
         collapsed ? 'w-[68px] items-center px-2' : drawer ? 'w-full px-2.5' : 'w-(--sidebar-w) px-2.5'
       }`}
     >
@@ -137,7 +131,7 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
           <img src={iconSearch} alt="" width={20} height={20} />
         </button>
       ) : (
-        <label className="flex items-center gap-2 rounded-xl bg-web-search px-2.5 py-2">
+        <label className="flex items-center gap-2 rounded-xl bg-web-search px-2.5 py-3">
           <img src={iconSearch} alt="" width={20} height={20} />
           <span className="sr-only">검색</span>
           <input
@@ -152,7 +146,6 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
       {/* 메뉴 */}
       <ul className={`flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
         {MENU.map((m) => {
-          const badge = 'badge' in m && m.badge && myOpen > 0
           return (
             <li key={m.to}>
               <NavLink
@@ -162,7 +155,7 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
                 title={collapsed ? m.label : undefined}
                 className={({ isActive }) =>
                   `relative flex items-center rounded-xl text-[15px] font-medium tracking-[-0.3px] whitespace-nowrap text-black ${
-                    collapsed ? 'size-11 justify-center' : 'gap-2 px-1 py-0.5'
+                    collapsed ? 'size-11 justify-center' : 'gap-2 px-1 py-1'
                   } ${isActive ? 'bg-white' : 'hover:bg-white/60'}`
                 }
               >
@@ -170,18 +163,6 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
                   <img src={m.icon} alt="" width={22} height={22} />
                 </span>
                 {collapsed ? <span className="sr-only">{m.label}</span> : m.label}
-                {badge &&
-                  (collapsed ? (
-                    <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-black px-1 text-[10px] leading-4 font-semibold text-white">
-                      {myOpen}
-                      <span className="sr-only">개 남음</span>
-                    </span>
-                  ) : (
-                    <span className="mr-2 ml-auto rounded-full bg-black px-2 py-0.5 text-xs font-semibold text-white">
-                      {myOpen}
-                      <span className="sr-only">개 남음</span>
-                    </span>
-                  ))}
               </NavLink>
             </li>
           )
@@ -189,18 +170,6 @@ export function Navbar({ collapsed = false, onToggle, onClose, width, animate = 
       </ul>
 
       <div className="flex-1" />
-
-      {/* 디자인에 없는 진입점: 크롬 확장 프로그램 데모 (확장 화면은 웹과 다른 곳이라 URL 로만 이동) */}
-      <Link
-        to="/extension"
-        title={collapsed ? '확장 프로그램 열기' : undefined}
-        className={`flex items-center rounded-xl border border-web-line bg-white text-sm font-medium whitespace-nowrap text-black hover:bg-web-chip ${
-          collapsed ? 'size-11 justify-center' : 'gap-2.5 px-3 py-2.5'
-        }`}
-      >
-        <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-md bg-black text-xs font-bold text-white">A</span>
-        {collapsed ? <span className="sr-only">확장 프로그램 열기</span> : '확장 프로그램 열기'}
-      </Link>
 
       {/* 사용자 */}
       <div className={`flex items-center gap-2.5 ${collapsed ? 'justify-center py-1' : 'p-2'}`} title={collapsed ? `${me.name} · ${me.role}` : undefined}>

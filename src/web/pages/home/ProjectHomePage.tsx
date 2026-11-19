@@ -1,94 +1,191 @@
-// Figma: project /home (533:7094)
-// 변형 554:11755 / 554:11230 은 팀 스페이스 드롭다운이 열린 상태 → Navbar.tsx 에 이미 구현됨.
-// 상단 "Browser chrome" 과 왼쪽 Navbar 는 WebLayout 이 담당하므로 여기서는 본문만 그립니다.
-// 글자·카드 크기는 할 일 등 다른 웹 화면과 맞췄습니다 (제목 30px, 설명 15px, 카드 모서리 12~16px).
-import { Link } from 'react-router-dom'
-import { useAppState } from '@/shared/store'
-import { FolderCard } from './FolderCard'
-import { TodoSummaryCard } from './TodoSummaryCard'
-import { ProjectCardMenu } from './ProjectCardMenu'
+import { useState } from 'react'
+import * as Popover from '@radix-ui/react-popover'
+import { Link, useNavigate } from 'react-router-dom'
+import { actions, findIssueContext, useAppState, workspaceIssues } from '@/shared/store'
+import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
+import { MentionNotice } from '@/web/common/MentionNotice'
 import { useAnnouncer } from '@/web/common/useAnnouncer'
 import { LiveToast } from '@/web/common/LiveToast'
+import { ProjectCardMenu } from './ProjectCardMenu'
 import { UrlInspectForm } from './UrlInspectForm'
 import { useCreateAndInspect } from './useCreateAndInspect'
-
-const RECENT_LIMIT = 4
+import folderBack from '@/web/assets/prototype-folder-back.svg'
+import folderGlass from '@/web/assets/prototype-folder-glass.svg'
+import folderGrayBack from '@/web/assets/prototype-folder-gray-back.svg'
+import folderGrayGlass from '@/web/assets/prototype-folder-gray-glass.svg'
+import folderHighlight from '@/web/assets/prototype-folder-highlight.svg'
+import folderIcon from '@/web/assets/icon-folder.svg'
 
 export default function ProjectHomePage() {
-  const { projects, inspectionHistory } = useAppState()
+  const state = useAppState()
+  const { projects, inspectionHistory } = state
+  const [projectId, setProjectId] = useState('')
+  const [query, setQuery] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [showAll, setShowAll] = useState(false)
   const [message, announce] = useAnnouncer()
-  // 홈에서 URL 을 넣어도 새 프로젝트를 만들고 실제로 검사합니다 (이름 = 도메인)
   const createAndInspect = useCreateAndInspect()
-  const recent = projects.slice(0, RECENT_LIMIT)
-
+  const navigate = useNavigate()
+  const selected = projects.find((p) => p.id === projectId)
+  const mine = workspaceIssues(state).filter(
+    (i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved',
+  )
   return (
-    <div className="flex w-full flex-col page-x pt-10 pb-8 font-noto">
-      {/* 컴포넌트 title (554:9315) */}
-      <div className="flex flex-col gap-1.5 leading-[1.45] break-keep">
-        <h1 className="page-title text-ink-2">모두가 쓰기 편한 화면, 오늘도 같이 만들어 봐요</h1>
-        <p className="text-[15px] text-muted-2">색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인해요</p>
-      </div>
-
-      <UrlInspectForm className="mt-6" onInspect={(url, multi, onProgress) => createAndInspect(url, undefined, multi, onProgress)} />
-
-      <div className="mt-8 grid grid-cols-1 items-start gap-6 @4xl:grid-cols-2 @4xl:items-stretch">
-        <section aria-labelledby="home-recent" className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 id="home-recent" className="text-base leading-[1.45] font-semibold text-black">
-              최근 프로젝트
+    <div className="prototype-page prototype-home">
+      <section className="prototype-hero" aria-labelledby="home-title">
+        <h1 id="home-title">링크 하나로 시작하는 접근성 점검</h1>
+        <p>색 대비, 대체 텍스트, 키보드 접근까지 한 번에 확인</p>
+        <UrlInspectForm
+          className="prototype-hero-form"
+          projectPicker={
+            <Popover.Root open={pickerOpen} onOpenChange={setPickerOpen}>
+              <Popover.Trigger className="prototype-project-trigger">
+                <img src={folderIcon} alt="" />
+                {selected?.name ?? '프로젝트 선택'} <span aria-hidden>⌄</span>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content sideOffset={8} align="start" className="prototype-project-picker">
+                  <label>
+                    <span className="sr-only">프로젝트 검색</span>
+                    <input
+                      placeholder="프로젝트 검색"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProjectId('')
+                      setPickerOpen(false)
+                    }}
+                  >
+                    ＋ 새 프로젝트로 검사
+                  </button>
+                  {projects
+                    .filter((p) => p.name.includes(query))
+                    .map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        aria-pressed={p.id === projectId}
+                        onClick={() => {
+                          setProjectId(p.id)
+                          setPickerOpen(false)
+                        }}
+                      >
+                        <img src={folderIcon} alt="" />
+                        {p.name}
+                        {p.id === projectId && <span>✓</span>}
+                      </button>
+                    ))}
+                  {!projects.some((p) => p.name.includes(query)) && <p>검색 결과가 없어요.</p>}
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
+          }
+          onInspect={async (url, multi, onProgress) => {
+            if (!selected) return createAndInspect(url, undefined, multi, onProgress)
+            const result = await actions.reinspect(selected.id, onProgress, {
+              url,
+              extraUrls: multi?.extraUrls,
+              discover: multi?.discover,
+            })
+            if (!result) throw new Error('프로젝트를 찾을 수 없어요. 다시 선택해 주세요.')
+            navigate(`/projects/${selected.id}/inspection`)
+          }}
+        />
+      </section>
+      <div className="prototype-home-columns">
+        <section className="prototype-projects" aria-labelledby="home-projects">
+          <div className="prototype-section-heading">
+            <h2 id="home-projects">
+              프로젝트 <span>{projects.length}</span>
             </h2>
-            {/* 디자인에 없는 진입점: 첫 검사(빈 프로젝트) 화면으로 */}
-            <Link to="/projects/new" className="rounded text-sm leading-[1.4] font-medium text-muted-2 hover:text-black">
-              + 새 프로젝트
-            </Link>
+            <button type="button" onClick={() => setShowAll(!showAll)}>
+              {showAll ? '접기' : '전체보기'}
+            </button>
           </div>
-          {recent.length === 0 && (
-            <p className="rounded-xl border border-dashed border-web-line px-4 py-8 text-center text-sm text-muted-2">
-              프로젝트가 없어요.{' '}
-              <Link to="/projects/new" className="font-bold text-ink-2 underline">
-                새 프로젝트 만들기
-              </Link>
-            </p>
-          )}
-          <ul className="grid grid-cols-2 gap-3 @md:gap-4">
-            {recent.map((p) => {
-              const active = p.status === 'active'
+          <ul className="prototype-project-grid">
+            {projects.slice(0, showAll ? undefined : 4).map((p, index) => {
+              const people = [
+                ...new Set(
+                  (
+                    state.inspections[p.id]?.issues ??
+                    state.issues.filter((i) => i.version === p.currentVersion)
+                  ).flatMap((i) => (i.assigneeId ? [i.assigneeId] : [])),
+                ),
+              ].slice(0, 2)
               return (
-                <li key={p.id} className="relative">
-                  <FolderCard
-                    to={`/projects/${p.id}/inspection`}
-                    active={active}
-                    title={p.name}
-                    status={active ? '진행중' : '완료됨'}
-                    preview={`${p.url.replace(/^https?:\/\//, '')}\n버전 ${p.currentVersion} 검사 중`}
-                    meta={
-                      <>
-                        최근 수정일<span aria-hidden> | </span>
-                        <span className="sr-only">, </span>
-                        {p.updatedAt}
-                      </>
-                    }
-                  />
-                  {/* 링크(카드) 밖에 겹쳐 둔 ⋮ 메뉴 — 카드 이름 줄(위에서 60%) 오른쪽 */}
-                  <div className="absolute top-[58%] right-[5%]">
-                    <ProjectCardMenu project={p} versions={inspectionHistory[p.id]?.length ?? 0} onDark={active} announce={announce} />
+                <li key={p.id}>
+                  <Link to={`/projects/${p.id}/inspection`} className="prototype-folder-link">
+                    <div className="prototype-folder" aria-hidden="true">
+                      <img
+                        className="prototype-folder-back"
+                        src={index % 2 === 0 ? folderBack : folderGrayBack}
+                        alt=""
+                      />
+                      <span className="prototype-folder-paper" />
+                      <img
+                        className="prototype-folder-front"
+                        src={index % 2 === 0 ? folderGlass : folderGrayGlass}
+                        alt=""
+                      />
+                      <img className="prototype-folder-front" src={folderHighlight} alt="" />
+                      <span className="prototype-folder-avatars">
+                        {people.map((id) => (
+                          <span key={id}>{memberById(id)?.initial}</span>
+                        ))}
+                      </span>
+                      <span className="prototype-folder-date">{p.updatedAt} 수정</span>
+                    </div>
+                    <span className="prototype-folder-label">
+                      <b>{p.name}</b>
+                      <small>{p.status === 'active' ? '진행중' : '완료됨'}</small>
+                    </span>
+                  </Link>
+                  <div className="prototype-folder-menu">
+                    <ProjectCardMenu
+                      project={p}
+                      versions={inspectionHistory[p.id]?.length ?? 0}
+                      announce={announce}
+                    />
                   </div>
                 </li>
               )
             })}
           </ul>
-        </section>
-
-        <section aria-labelledby="home-todo" className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 id="home-todo" className="text-base leading-[1.45] font-semibold text-black">
-              할 일
-            </h2>
-            <Link to="/todo/mine" className="rounded font-noto text-sm leading-[1.4] font-medium text-muted-2 hover:text-ink">
-              <span className="sr-only">할 일 </span>전체 보기 <span aria-hidden>→</span>
+          {!projects.length && (
+            <Link className="prototype-empty" to="/projects/new">
+              ＋ 새 프로젝트 만들기
             </Link>
+          )}
+        </section>
+        <section aria-labelledby="home-todos">
+          <div className="prototype-section-heading">
+            <h2 id="home-todos">
+              할일 <span>{mine.length}</span>
+            </h2>
+            <Link to="/todo/mine">전체보기</Link>
           </div>
-          <TodoSummaryCard />
+          <MentionNotice />
+          <ul className="prototype-home-todos">
+            {mine.slice(0, 3).map((i) => (
+              <li key={i.id}>
+                <Link to={`/issues/${i.id}`}>
+                  <b className="prototype-tag">
+                    {findIssueContext(state, i.id).project?.name ??
+                      projects.find((p) => p.currentVersion === i.version)?.name ??
+                      '프로젝트'}
+                  </b>
+                  <span>{i.title}</span>
+                  {i.priority === 'high' && <b className="inspection-important">중요</b>}
+                  <small>›</small>
+                </Link>
+              </li>
+            ))}
+            {!mine.length && <li className="prototype-empty">남은 할 일이 없어요.</li>}
+          </ul>
         </section>
       </div>
       <LiveToast message={message} />

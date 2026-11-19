@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="210.909" height="103.485" viewBox="0 0 210.909 103.485" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Glass / Highlight" d="M98.1816 0.34082H202.728C204.807 0.340893 206.801 1.16579 208.271 2.63379C209.742 4.10205 210.568 6.0937 210.568 8.16992V91.6846C210.568 94.7238 209.359 97.6389 207.207 99.7881C205.055 101.937 202.135 103.145 199.091 103.145H11.8184C8.77426 103.145 5.85451 101.937 3.70215 99.7881C1.54982 97.6389 0.340848 94.7238 0.34082 91.6846V17.248C0.34082 15.4126 1.07118 13.6515 2.37109 12.3535C3.67095 11.0556 5.43403 10.3262 7.27246 10.3262H73.6367C78.7606 10.3261 82.2549 7.75834 85.7656 5.27051C89.2879 2.77449 92.8454 0.340873 98.1816 0.34082Z" stroke="url(#paint0_linear_0_20)" stroke-width="0.681818"/>
+<defs>
+<linearGradient id="paint0_linear_0_20" x1="105.455" y1="0" x2="105.455" y2="103.485" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.8"/>
+<stop offset="0.5" stop-color="white" stop-opacity="0.1"/>
+<stop offset="1" stop-color="white" stop-opacity="0.05"/>
+</linearGradient>
+</defs>
+</svg>

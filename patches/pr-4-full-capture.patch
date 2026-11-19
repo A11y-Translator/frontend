@@ -1,0 +1,22 @@
+--- a/src/shared/api/http.ts
++++ b/src/shared/api/http.ts
+@@ -11,7 +11,7 @@
+ //   실패 시 { detail: string } 또는 { 필드: [메시지] } 와 4xx/5xx 상태 코드
+ import type { ApiClient, ServerReads } from './client'
+ import type { Category, Inspection, Issue, IssueOverlay, Project, Severity } from './types'
+-import { CAPTURE_H, CAPTURE_W } from '@/shared/mocks/scan'
++import { CAPTURE_W } from '@/shared/mocks/scan'
+ 
+ export const BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
+ const TOKEN_KEY = 'a11y-translator:token'
+@@ -210,8 +210,8 @@
+     const id = `${project.id}-${d.rule_id}`
+     const category = CATEGORY[d.category] ?? '문서 구조'
+     for (const e of d.elements) {
+-      // 캡처에 보이는 첫 화면 안에 있는 요소만 박스로 표시 (화면 밖 요소는 서버가 좌표를 null 로 줌)
+-      if (e.bbox_x === null || e.bbox_y === null || e.bbox_y * scale > CAPTURE_H) continue
++      // 전체 캡처 안의 좌표를 유지합니다. 서버가 좌표를 주지 않은 요소만 제외합니다.
++      if (e.bbox_x === null || e.bbox_y === null) continue
+       label += 1
+       overlays.push({
+         label,

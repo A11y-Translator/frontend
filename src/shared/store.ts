@@ -2,8 +2,23 @@
 // 확장에서 "웹으로 전송"하면 웹의 할 일에 나타나고, 재검사하면 웹 리포트도 바뀌는 흐름을 보여주기 위한 것.
 // 같은 브라우저 안에서 localStorage 로 공유합니다. 백엔드가 붙으면 이 파일의 액션을 API 호출로 바꾸면 됩니다.
 import { useSyncExternalStore } from 'react'
-import { issues as initialIssues, comments as initialComments, projects as initialProjects } from './mocks'
-import { threadKeyOf, type Comment, type CreateProjectInput, type Inspection, type InspectProgress, type Issue, type IssueOverlay, type IssueStatus, type Project, type Team } from '@/shared/api/types'
+import {
+  issues as initialIssues,
+  comments as initialComments,
+  projects as initialProjects,
+} from './mocks'
+import {
+  threadKeyOf,
+  type Comment,
+  type CreateProjectInput,
+  type Inspection,
+  type InspectProgress,
+  type Issue,
+  type IssueOverlay,
+  type IssueStatus,
+  type Project,
+  type Team,
+} from '@/shared/api/types'
 import { api } from '@/shared/api/client'
 
 const KEY = 'a11y-translator:prototype-state:v1'
@@ -44,12 +59,15 @@ function load(): AppState {
       const saved = { ...initial(), ...JSON.parse(raw) } as AppState
       // 기록 기능 이전에 저장된 상태: 최신 검사만 있으면 그것을 기록으로
       for (const [id, insp] of Object.entries(saved.inspections)) {
-        if (!saved.inspectionHistory[id]) saved.inspectionHistory = { ...saved.inspectionHistory, [id]: [insp] }
+        if (!saved.inspectionHistory[id])
+          saved.inspectionHistory = { ...saved.inspectionHistory, [id]: [insp] }
       }
       // 위치별 스레드 이전에 저장된 코멘트: 기본 코멘트는 정해진 위치로, 직접 꽂은 핀은 그 핀만의 스레드로
       const seedKey = new Map(initialComments.map((c) => [c.id, c.threadKey]))
       saved.comments = saved.comments.map((c) =>
-        c.threadKey ? c : { ...c, threadKey: seedKey.get(c.id) ?? (c.pin ? `pin:${c.id}` : undefined) },
+        c.threadKey
+          ? c
+          : { ...c, threadKey: seedKey.get(c.id) ?? (c.pin ? `pin:${c.id}` : undefined) },
       )
       return saved
     }
@@ -96,17 +114,35 @@ export function useAppState(): AppState {
   return useSyncExternalStore(subscribe, () => state)
 }
 
+/** 최신 검사 결과를 우선해 홈·할 일에도 실제 검사 이슈를 보여줍니다. */
+export function workspaceIssues(s: AppState): Issue[] {
+  return [
+    ...new Map(
+      [...s.issues, ...Object.values(s.inspections).flatMap((i) => i.issues)].map((i) => [i.id, i]),
+    ).values(),
+  ]
+}
+
 const updateIssue = (id: string, patch: Partial<Issue>) =>
   set((s) => {
     const inspections = { ...s.inspections }
     const inspectionHistory = { ...s.inspectionHistory }
     for (const [pid, inspection] of Object.entries(inspections)) {
       if (!inspection.issues.some((i) => i.id === id)) continue
-      const next = { ...inspection, issues: inspection.issues.map((i) => i.id === id ? { ...i, ...patch } : i) }
+      const next = {
+        ...inspection,
+        issues: inspection.issues.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+      }
       inspections[pid] = next
-      inspectionHistory[pid] = (inspectionHistory[pid] ?? [inspection]).map((h) => h.version === next.version ? next : h)
+      inspectionHistory[pid] = (inspectionHistory[pid] ?? [inspection]).map((h) =>
+        h.version === next.version ? next : h,
+      )
     }
-    return { issues: s.issues.map((i) => i.id === id ? { ...i, ...patch } : i), inspections, inspectionHistory }
+    return {
+      issues: s.issues.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+      inspections,
+      inspectionHistory,
+    }
   })
 
 export const actions = {
@@ -153,25 +189,36 @@ export const actions = {
     set((s) => ({
       comments: [...s.comments, { ...c, id: `c${Date.now()}` }],
       // 해결한 스레드에 새 코멘트를 남기면 논의가 다시 시작된 것이므로 스레드를 다시 열어요
-      resolvedThreads: s.resolvedThreads[threadKeyOf(c)] ? { ...s.resolvedThreads, [threadKeyOf(c)]: false } : s.resolvedThreads,
+      resolvedThreads: s.resolvedThreads[threadKeyOf(c)]
+        ? { ...s.resolvedThreads, [threadKeyOf(c)]: false }
+        : s.resolvedThreads,
     }))
   },
   /** 이슈 상세 · 코멘트 스레드 "해결" / "다시 열기" (스레드 키 — 예전 이슈 단위 키도 같이 넘길 수 있게 여러 개) */
   setThreadResolved(keys: string | string[], resolved: boolean) {
-    set((s) => ({ resolvedThreads: { ...s.resolvedThreads, ...Object.fromEntries([keys].flat().map((k) => [k, resolved])) } }))
+    set((s) => ({
+      resolvedThreads: {
+        ...s.resolvedThreads,
+        ...Object.fromEntries([keys].flat().map((k) => [k, resolved])),
+      },
+    }))
   },
   /**
    * 새 프로젝트 화면: 프로젝트 만들기 → 바로 검사 → 결과 저장.
    * mock / 실제 서버 중 어느 쪽으로 갈지는 shared/api/client.ts 가 정합니다.
    * 실패하면 예외를 그대로 던지니 화면에서 메시지를 보여주세요.
    */
-  async createProjectAndInspect(input: CreateProjectInput, onProgress?: (p: InspectProgress) => void): Promise<Project> {
+  async createProjectAndInspect(
+    input: CreateProjectInput,
+    onProgress?: (p: InspectProgress) => void,
+  ): Promise<Project> {
     const created = await api.createProject(input)
     const inspection = await api.runInspection(created, 0, onProgress)
     const project: Project = {
       ...created,
       currentVersion: inspection.version,
       status: 'active',
+      discover: undefined,
       // 여러 페이지 검사: 실제로 검사한 페이지를 고정 → 재검사 때 같은 페이지끼리 비교 (자동 찾기는 첫 검사 한 번만)
       ...(inspection.captures && Object.keys(inspection.captures).length > 1
         ? { pageUrls: Object.values(inspection.captures).map((c) => c.url), discover: undefined }
@@ -185,23 +232,59 @@ export const actions = {
     return project
   },
   /** 새로 만든 프로젝트 재검사 → 다음 버전 */
-  async reinspect(projectId: string, onProgress?: (p: InspectProgress) => void): Promise<Inspection | undefined> {
+  async reinspect(
+    projectId: string,
+    onProgress?: (p: InspectProgress) => void,
+    input?: Pick<CreateProjectInput, 'url' | 'extraUrls' | 'discover'>,
+  ): Promise<Inspection | undefined> {
     const project = state.projects.find((p) => p.id === projectId)
     if (!project) return undefined
     const prev = state.inspections[projectId]
-    const fresh = await api.runInspection(project, prev?.version ?? project.currentVersion, onProgress)
+    const target = input
+      ? {
+          ...project,
+          url: input.url,
+          pageUrls: [input.url, ...(input.extraUrls ?? [])],
+          discover: input.discover,
+        }
+      : project
+    const fresh = await api.runInspection(
+      target,
+      prev?.version ?? project.currentVersion,
+      onProgress,
+    )
     // 지난 버전에서 직접 "해결됨" 처리한 이슈가 다시 발견되면 해결 상태를 이어받습니다
     const inspection: Inspection = {
       ...fresh,
       issues: fresh.issues.map((i) => {
         const before = prev?.issues.find((p) => p.id === i.id)
-        return before?.status === 'resolved' ? { ...i, status: 'resolved', reopenStatus: before.reopenStatus } : i
+        return before?.status === 'resolved'
+          ? { ...i, status: 'resolved', reopenStatus: before.reopenStatus }
+          : i
       }),
     }
     set((s) => ({
-      projects: s.projects.map((p) => (p.id === projectId ? { ...p, currentVersion: inspection.version } : p)),
+      projects: s.projects.map((p) =>
+        p.id === projectId
+          ? {
+              ...target,
+              currentVersion: inspection.version,
+              status: 'active',
+              discover: undefined,
+              ...(inspection.captures
+                ? {
+                    pageUrls: Object.values(inspection.captures).map((c) => c.url),
+                    discover: undefined,
+                  }
+                : {}),
+            }
+          : p,
+      ),
       inspections: { ...s.inspections, [projectId]: inspection },
-      inspectionHistory: { ...s.inspectionHistory, [projectId]: [...(s.inspectionHistory[projectId] ?? []), inspection] },
+      inspectionHistory: {
+        ...s.inspectionHistory,
+        [projectId]: [...(s.inspectionHistory[projectId] ?? []), inspection],
+      },
     }))
     return inspection
   },
@@ -213,7 +296,11 @@ export const actions = {
       const inspectionHistory = { ...s.inspectionHistory }
       delete inspections[projectId]
       delete inspectionHistory[projectId]
-      return { projects: s.projects.filter((p) => p.id !== projectId), inspections, inspectionHistory }
+      return {
+        projects: s.projects.filter((p) => p.id !== projectId),
+        inspections,
+        inspectionHistory,
+      }
     })
   },
   /**
@@ -239,7 +326,9 @@ export const actions = {
         if (!insp.issues.some((i) => i.id === issueId)) continue
         const next = { ...insp, issues: insp.issues.map(patch) }
         inspections[pid] = next
-        inspectionHistory[pid] = (s.inspectionHistory[pid] ?? [insp]).map((h) => (h.version === next.version ? next : h))
+        inspectionHistory[pid] = (s.inspectionHistory[pid] ?? [insp]).map((h) =>
+          h.version === next.version ? next : h,
+        )
       }
       return { issues: s.issues.map(patch), inspections, inspectionHistory }
     })
@@ -251,7 +340,10 @@ export const actions = {
 }
 
 /** 이슈 id 로 그 이슈가 속한 검사(새 프로젝트)를 찾습니다. 없으면 기존 데모 데이터(issues) 쪽 이슈 */
-export function findIssueContext(s: AppState, issueId: string | undefined): {
+export function findIssueContext(
+  s: AppState,
+  issueId: string | undefined,
+): {
   issue?: Issue
   issues: Issue[]
   overlays?: IssueOverlay[]

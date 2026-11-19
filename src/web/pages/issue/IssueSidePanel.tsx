@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import * as Popover from '@radix-ui/react-popover'
-import { actions } from '@/shared/store'
+import { actions, useAppState, workspaceIssues } from '@/shared/store'
 import { CURRENT_USER_ID, memberById, members } from '@/shared/mocks'
 import type { Issue } from '@/shared/api/types'
 import { DEFAULT_PROJECT_ID, OVERLAYS, type OverlayBox } from '@/shared/mocks/scan'
@@ -40,6 +40,8 @@ export function IssueSidePanel({
   children,
 }: Props) {
   const navigate = useNavigate()
+  const state = useAppState()
+  const [memberQuery, setMemberQuery] = useState('')
   const assignee = memberById(issue.assigneeId)
   const index = order.findIndex((i) => i.id === issue.id)
   const [assignOpen, setAssignOpen] = useState(false)
@@ -136,24 +138,57 @@ export function IssueSidePanel({
                   align="start"
                 >
                   <p className="p-2 text-xs text-muted-2">담당자 고르기</p>
+                  <input
+                    aria-label="담당자 검색"
+                    placeholder="이름, 이메일 검색"
+                    value={memberQuery}
+                    onChange={(e) => setMemberQuery(e.target.value)}
+                    className="mb-2 w-full rounded-lg bg-web-chip p-2 text-sm"
+                  />
                   <ul>
-                    {members.map((m) => (
-                      <li key={m.id}>
-                        <button
-                          type="button"
-                          className="flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm hover:bg-[#eef3ff]"
-                          aria-pressed={m.id === issue.assigneeId}
-                          onClick={() => assign(m.id)}
-                        >
-                          <span className="inspection-avatar">{m.initial}</span>
-                          {m.name}
-                          {m.id === issue.assigneeId && (
-                            <span className="ml-auto text-xs">현재</span>
-                          )}
-                        </button>
-                      </li>
-                    ))}
+                    {members
+                      .filter((m) =>
+                        `${m.name} ${m.email}`.toLowerCase().includes(memberQuery.toLowerCase()),
+                      )
+                      .map((m) => (
+                        <li key={m.id}>
+                          <button
+                            type="button"
+                            className="flex w-full items-center gap-2 rounded-lg p-2 text-left text-sm hover:bg-[#eef3ff]"
+                            aria-pressed={m.id === issue.assigneeId}
+                            onClick={() => assign(m.id)}
+                          >
+                            <span className="inspection-avatar">{m.initial}</span>
+                            {m.name}
+                            <small className="ml-auto text-muted-2">
+                              할일{' '}
+                              {
+                                workspaceIssues(state).filter(
+                                  (i) => i.assigneeId === m.id && i.status !== 'resolved',
+                                ).length
+                              }
+                            </small>
+                            {m.id === issue.assigneeId && (
+                              <span className="ml-auto text-xs">현재</span>
+                            )}
+                          </button>
+                        </li>
+                      ))}
                   </ul>
+                  {issue.assigneeId && (
+                    <button
+                      type="button"
+                      className="mt-2 w-full border-t border-ext-line p-2 text-left text-sm"
+                      onClick={() => {
+                        if (readOnly) return
+                        actions.changeAssignee(issue.id, undefined)
+                        setAssignOpen(false)
+                        setNotice('담당자 배정을 해제했어요.')
+                      }}
+                    >
+                      담당자 해제
+                    </button>
+                  )}
                 </Popover.Content>
               </Popover.Portal>
             </Popover.Root>

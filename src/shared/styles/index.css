@@ -38,7 +38,7 @@
   --color-danger: #b42318;
 
   /* 웹 */
-  --color-web-bg: #f0f0f0;
+  --color-web-bg: #f2f3f5;
   --color-web-nav: #fafafa;
   --color-web-search: #ededed;
   --color-web-line: #e2e4e8;
@@ -69,14 +69,10 @@
 }
 
 :root {
-  /*
-   * 웹 레이아웃 크기 — 확대·축소(zoom) 없이 실제 크기(1:1)로 그리고, 화면 폭에 따라 유동적으로.
-   * 사이드바: 1375px 이하 220px → 1550px 이상에서 248px (피그마 280px 은 1440 기준으로 넓어서 살짝 줄임)
-   * 본문: 최대 1200px, 좌우 여백은 화면 폭의 3.2% (20~48px)
-   */
-  --sidebar-w: clamp(220px, 16vw, 248px);
-  --page-max: 1200px;
-  --gutter: clamp(16px, 3.2vw, 48px);
+  /* Figma 프로토타입: 사이드바 280px · 본문 1096px · 여백 32px */
+  --sidebar-w: 280px;
+  --page-max: 1096px;
+  --gutter: clamp(16px, 2.23vw, 32px);
 }
 
 @layer base {

@@ -12,7 +12,7 @@ import {
 } from '@/shared/mocks/scan'
 import { screenshotFor, type Issue } from '@/shared/api/types'
 import { CATEGORY_FILTERS, formatScannedAt, isResolved } from '@/web/common/issueHelpers'
-import { SiteCapture } from '@/web/common/SiteCapture'
+import { SiteCapture, type SiteCaptureHandle } from '@/web/common/SiteCapture'
 import { IssueSidePanel } from '@/web/pages/issue/IssueSidePanel'
 import { CommentThread } from '@/web/pages/issue/CommentThread'
 import back from '@/shared/assets/figma/chevron-left.svg'
@@ -73,6 +73,7 @@ function InspectionResult({
   const [flash, setFlash] = useState<string>()
   const inputRef = useRef<HTMLInputElement>(null)
   const captureRef = useRef<HTMLDivElement>(null)
+  const siteCaptureRef = useRef<SiteCaptureHandle>(null)
   const listHeadingRef = useRef<HTMLHeadingElement>(null)
   const inPage = issues.filter((i) => i.page === page)
   const filter = CATEGORY_FILTERS.find((f) => f.id === category) ?? CATEGORY_FILTERS[0]
@@ -186,6 +187,7 @@ function InspectionResult({
             </div>
           ) : (
             <SiteCapture
+              ref={siteCaptureRef}
               page={page}
               label={`${page} 검사 시점 화면`}
               overlays={boxes}
@@ -249,6 +251,7 @@ function InspectionResult({
             onLocate={(selector) => {
               setOverlay(true)
               setFlash(selector)
+              siteCaptureRef.current?.scrollToIssue(selected.id, selector)
               captureRef.current?.scrollIntoView({
                 block: 'nearest',
                 behavior: matchMedia('(prefers-reduced-motion: reduce)').matches

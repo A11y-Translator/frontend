@@ -71,7 +71,7 @@ export interface Comment {
   authorId: string
   body: string
   time: string
-  pin?: { x: number; y: number }
+  pin?: { x: number; y: number; height?: number }
   /**
    * 어느 스레드의 코멘트인지 — 캡처 위 위치 하나 = 스레드 하나.
    * 파란 번호(문제 위치)는 markerThreadKey(page, label), 직접 꽂은 핀은 'pin:…' (첫 코멘트 때 만듦)

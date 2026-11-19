@@ -10,6 +10,7 @@ import { Outlet, useMatch } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { SidebarResizer } from './SidebarResizer'
 import { useSidebar } from './useSidebar'
+import './prototype.css'
 
 function MenuIcon() {
   return (

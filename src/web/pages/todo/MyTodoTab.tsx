@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
 import type { Comment, Issue } from '@/shared/api/types'
 import { Avatar, SeverityChip } from './TodoBits'
+import { IssueCompletion } from './IssueCompletion'
 import { TodoHandoffModal } from './TodoHandoffModal'
 import { byNo, bySeverity, hasFix, mentionsOf, TEAM_SHORT } from './todoUtils'
 
@@ -20,9 +21,24 @@ interface Props {
 }
 
 const GROUPS = [
-  { key: 'doing', title: '진행 중', empty: '진행 중인 할 일이 없어요', match: (i: Issue) => i.status === 'in_progress' || i.status === 'review' },
-  { key: 'todo', title: '할 일', empty: '남은 할 일이 없어요', match: (i: Issue) => i.status === 'todo' },
-  { key: 'done', title: '완료 · 자동 해결', empty: '아직 완료한 할 일이 없어요', match: (i: Issue) => i.status === 'resolved' },
+  {
+    key: 'doing',
+    title: '진행 중',
+    empty: '진행 중인 할 일이 없어요',
+    match: (i: Issue) => i.status === 'in_progress' || i.status === 'review',
+  },
+  {
+    key: 'todo',
+    title: '할 일',
+    empty: '남은 할 일이 없어요',
+    match: (i: Issue) => i.status === 'todo',
+  },
+  {
+    key: 'done',
+    title: '완료 · 자동 해결',
+    empty: '아직 완료한 할 일이 없어요',
+    match: (i: Issue) => i.status === 'resolved',
+  },
 ] as const
 
 export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props) {
@@ -49,12 +65,21 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
           const items = issues.filter(g.match).sort(sorter)
           const headingId = `mine-group-${g.key}`
           return (
-            <section key={g.key} aria-labelledby={headingId} className="overflow-hidden rounded-xl border border-web-header-line bg-white">
-              <h3 id={headingId} className="bg-web-chip px-5 py-3.5 text-sm leading-[1.45] font-bold text-ink-2">
+            <section
+              key={g.key}
+              aria-labelledby={headingId}
+              className="overflow-hidden rounded-xl border border-web-header-line bg-white"
+            >
+              <h3
+                id={headingId}
+                className="bg-web-chip px-5 py-3.5 text-sm leading-[1.45] font-bold text-ink-2"
+              >
                 {g.title} {items.length}
               </h3>
               {items.length === 0 ? (
-                <p className="border-t border-web-line-2 px-5 py-4 text-[13px] text-muted-2">{g.empty}</p>
+                <p className="border-t border-web-line-2 px-5 py-4 text-[13px] text-muted-2">
+                  {g.empty}
+                </p>
               ) : (
                 <ul>
                   {items.map((i) => (
@@ -76,7 +101,10 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
       </div>
 
       <aside aria-label="내 진행 상황" className="flex flex-col gap-4">
-        <section aria-labelledby="mine-progress" className="flex flex-col gap-2.5 rounded-xl border border-web-header-line bg-white px-5 py-[18px] leading-[1.45]">
+        <section
+          aria-labelledby="mine-progress"
+          className="flex flex-col gap-2.5 rounded-xl border border-web-header-line bg-white px-5 py-[18px] leading-[1.45]"
+        >
           <h2 id="mine-progress" className="text-[13px] font-medium text-[#626873]">
             이번 버전 내 진행률
           </h2>
@@ -95,32 +123,48 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
             aria-valuetext={`${issues.length}개 중 ${done}개 완료 (${pct}%)`}
             className="h-2 w-full overflow-hidden rounded bg-web-line-2"
           >
-            <div className="h-full rounded bg-ink-2 transition-[width]" style={{ width: `${pct}%` }} />
+            <div
+              className="h-full rounded bg-ink-2 transition-[width]"
+              style={{ width: `${pct}%` }}
+            />
           </div>
           <p className="text-xs text-[#626873]">
-            {doing > 0 ? `다음 재검사 때 진행 중 ${doing}개가 자동으로 확인돼요` : '진행 중인 할 일이 없어요'}
+            {doing > 0
+              ? `다음 재검사 때 진행 중 ${doing}개가 자동으로 확인돼요`
+              : '진행 중인 할 일이 없어요'}
           </p>
         </section>
 
-        <section aria-labelledby="mine-mentions" className="overflow-hidden rounded-xl border border-web-header-line bg-white">
+        <section
+          aria-labelledby="mine-mentions"
+          className="overflow-hidden rounded-xl border border-web-header-line bg-white"
+        >
           <div className="flex items-center bg-web-chip px-5 py-3.5 leading-[1.45] font-bold">
             <h2 id="mine-mentions" className="flex-1 text-sm text-ink-2">
               나를 멘션한 코멘트
             </h2>
             {mentions.length > 0 && (
-              <Link to={`/issues/${mentions[0].issueId}`} className="rounded text-xs text-[#175fc2] hover:underline">
+              <Link
+                to={`/issues/${mentions[0].issueId}`}
+                className="rounded text-xs text-[#175fc2] hover:underline"
+              >
                 모두 보기
               </Link>
             )}
           </div>
           {mentions.length === 0 ? (
-            <p className="border-t border-web-line-2 px-5 py-4 text-xs text-muted-2">아직 나를 멘션한 코멘트가 없어요</p>
+            <p className="border-t border-web-line-2 px-5 py-4 text-xs text-muted-2">
+              아직 나를 멘션한 코멘트가 없어요
+            </p>
           ) : (
             <ul>
               {mentions.map((c) => {
                 const author = memberById(c.authorId)
                 return (
-                  <li key={c.id} className="flex items-start gap-2.5 border-t border-web-line-2 px-5 py-3 leading-[1.45]">
+                  <li
+                    key={c.id}
+                    className="flex items-start gap-2.5 border-t border-web-line-2 px-5 py-3 leading-[1.45]"
+                  >
                     <Avatar initial={author?.initial ?? '?'} size={26} />
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <p className="flex items-start">
@@ -129,7 +173,10 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
                         </span>
                         <span className="text-[11px] whitespace-nowrap text-muted-2">{c.time}</span>
                       </p>
-                      <Link to={`/issues/${c.issueId}`} className="rounded text-xs text-ink-3 hover:underline">
+                      <Link
+                        to={`/issues/${c.issueId}`}
+                        className="rounded text-xs text-ink-3 hover:underline"
+                      >
                         {c.body}
                       </Link>
                     </div>
@@ -161,7 +208,15 @@ export function MyTodoTab({ issues, comments, allIssues, sort, announce }: Props
   )
 }
 
-function MineRow({ issue: i, commentCount, onHandoff }: { issue: Issue; commentCount: number; onHandoff: (btn: HTMLButtonElement) => void }) {
+function MineRow({
+  issue: i,
+  commentCount,
+  onHandoff,
+}: {
+  issue: Issue
+  commentCount: number
+  onHandoff: (btn: HTMLButtonElement) => void
+}) {
   const resolved = i.status === 'resolved'
   const urgent = i.due?.includes('오늘')
   const meta = resolved
@@ -170,14 +225,7 @@ function MineRow({ issue: i, commentCount, onHandoff }: { issue: Issue; commentC
 
   return (
     <li className="flex items-center gap-3.5 border-t border-web-line-2 px-5 py-3 leading-[1.45]">
-      {/* 상태 동그라미는 장식 — 상태는 그룹 제목(진행 중/할 일/완료)으로 전달 */}
-      {resolved ? (
-        <span aria-hidden className="flex size-[18px] shrink-0 items-center justify-center rounded-full border border-success bg-success text-[10px] font-bold text-white">
-          ✓
-        </span>
-      ) : (
-        <span aria-hidden className="size-[18px] shrink-0 rounded-full border border-[#c4c9d1] bg-white" />
-      )}
+      <IssueCompletion issue={i} />
       <SeverityChip severity={i.severity} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <Link
@@ -193,9 +241,15 @@ function MineRow({ issue: i, commentCount, onHandoff }: { issue: Issue; commentC
       {!resolved && (
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-3.5 gap-y-1 text-xs">
           {i.savedFix ? (
-            <span className="rounded-md bg-[#edf4ff] px-2 py-0.5 font-medium text-[#175fc2]">수정안 저장됨</span>
+            <span className="rounded-md bg-[#edf4ff] px-2 py-0.5 font-medium text-[#175fc2]">
+              수정안 저장됨
+            </span>
           ) : (
-            commentCount > 0 && <span className="rounded-md bg-web-chip px-2 py-0.5 font-medium text-[#626873]">코멘트 {commentCount}</span>
+            commentCount > 0 && (
+              <span className="rounded-md bg-web-chip px-2 py-0.5 font-medium text-[#626873]">
+                코멘트 {commentCount}
+              </span>
+            )
           )}
           {i.due && (
             <span className={`font-medium ${urgent ? 'text-danger' : 'text-[#626873]'}`}>
@@ -207,7 +261,11 @@ function MineRow({ issue: i, commentCount, onHandoff }: { issue: Issue; commentC
           <Link to="/extension" className="rounded font-bold text-[#175fc2] hover:underline">
             크롬에서 열기<span className="sr-only">: {i.title}</span>
           </Link>
-          <button type="button" onClick={(e) => onHandoff(e.currentTarget)} className="rounded font-bold text-[#626873] hover:text-ink-2 hover:underline">
+          <button
+            type="button"
+            onClick={(e) => onHandoff(e.currentTarget)}
+            className="rounded font-bold text-[#626873] hover:text-ink-2 hover:underline"
+          >
             넘기기<span className="sr-only">: {i.title}</span>
           </button>
         </div>

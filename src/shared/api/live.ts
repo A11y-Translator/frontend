@@ -232,8 +232,8 @@ export const liveApi: ApiClient = {
   async runInspection(project, previousVersion = 0, onProgress?: (p: InspectProgress) => void) {
     const version = previousVersion + 1
     const fixed = project.pageUrls?.length ? project.pageUrls : [project.url]
-    // 자동으로 찾기는 첫 검사 때만 — 그 뒤로는 store 가 찾은 페이지를 pageUrls 에 고정해요
-    const discover = previousVersion === 0 ? (project.discover ?? 0) : 0
+    // 명시적으로 요청한 검사에만 사용하고, store가 검사 후 찾은 페이지를 고정합니다.
+    const discover = project.discover ?? 0
 
     // 1) 첫 페이지 — 열리지 않으면 검사 전체를 멈춰요
     const firstUrl = fixed[0]
