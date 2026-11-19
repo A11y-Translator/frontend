@@ -102,11 +102,15 @@ export default function ProjectHomePage() {
             <h2 id="home-projects">
               프로젝트 <span>{projects.length}</span>
             </h2>
-            <button type="button" onClick={() => setShowAll(!showAll)}>
-              {showAll ? '접기' : '전체보기'}
-            </button>
+            {/* 4개를 넘을 때만 펼치기 버튼 — 펼침 상태를 화면낭독기에도 알려 줍니다 */}
+            {projects.length > 4 && (
+              <button type="button" aria-expanded={showAll} aria-controls="home-project-grid" onClick={() => setShowAll(!showAll)}>
+                {showAll ? '접기' : '전체보기'}
+                <span className="sr-only"> (프로젝트 {projects.length}개{showAll ? ' 중 4개만 보기' : ' 모두 보기'})</span>
+              </button>
+            )}
           </div>
-          <ul className="prototype-project-grid">
+          <ul id="home-project-grid" className="prototype-project-grid">
             {projects.slice(0, showAll ? undefined : 4).map((p, index) => {
               const people = [
                 ...new Set(
