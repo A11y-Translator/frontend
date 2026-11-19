@@ -8,6 +8,8 @@ import { CAPTURE_H, CAPTURE_W } from '@/shared/mocks/scan'
 
 /** 검사 화면 폭(1440) → 캡처(734px) 좌표로 줄이는 비율 */
 const VIEWPORT_W = 1440
+/** 예전 검사 서버(첫 화면만 찍던 때)의 캡처 높이 — captureHeight 가 없는 결과용 */
+const FIRST_SCREEN_H = (CAPTURE_H / CAPTURE_W) * VIEWPORT_W
 const SCALE = CAPTURE_W / VIEWPORT_W
 
 /** 자주 나오는 axe 규칙의 한국어 문구. 없으면 axe 의 영어 설명을 그대로 씁니다 */
@@ -92,8 +94,8 @@ export function toInspection(projectId: string, requestedUrl: string, version: n
     const category = categoryOf(v.id)
     for (const n of v.nodes) {
       const r = n.rect
-      // 캡처에 보이는 첫 화면(위쪽) 안에 있는 요소만 박스로 표시
-      if (!r || r.y * SCALE > CAPTURE_H) continue
+      // 캡처 이미지 안에 있는 요소는 페이지 어디에 있든 박스로 표시 (캡처는 페이지 전체, 최대 16000px)
+      if (!r || r.y >= (scan.captureHeight ?? FIRST_SCREEN_H)) continue
       label += 1
       overlays.push({
         label,
