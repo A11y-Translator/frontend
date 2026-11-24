@@ -1,0 +1,139 @@
+/*
+ * Oreum(main2)의 "웹 접근성 검사" 화면 안에 끼워졌을 때(iframe)만 쓰는 모양.
+ * html.embedded 가 붙었을 때만 적용돼서, 이 앱을 따로 열면(localhost:5173) 원래 모양 그대로예요.
+ *
+ * 색: 선명한 파랑 → "종이색 + 먹색 + 회청색(Oreum 체크포인트 색 #9fc3d3 계열)" 의 차분한 조합 (초록 없음)
+ *   바탕 #f3f2ee · 카드 #ffffff · 글자 #17181a · 주 버튼 먹색(#17181a)+흰색
+ *   강조 글자 회청색 #2f5a6b (밝은 바탕 위 대비 6:1 이상) · 선택/칩 바탕 #e6eef1
+ * 비율: 좁은 틀 안에서 한 화면에 더 많이 보이도록 여백·히어로·폴더 카드를 조금 줄임
+ */
+html.embedded {
+  --color-accent: #2f5a6b;
+  --color-ui-primary: #17181a;
+  --color-ui-bg: #f3f2ee;
+  --color-ui-selected: #e6eef1;
+  --color-ui-focus: #2f5a6b;
+  --color-web-bg: #f3f2ee;
+  --color-web-chip: #f7f6f2;
+  --color-web-line: #e4e2da;
+  --color-web-line-2: #ecebe4;
+  --color-tag-info-bg: #e3eef2;
+  --color-tag-info-line: #9fc3d3;
+  --color-tag-info-text: #2f5a6b;
+}
+html.embedded body {
+  background: #f3f2ee;
+}
+
+/* ── 색 ─────────────────────────────────────────── */
+html.embedded .prototype-primary,
+html.embedded .prototype-url-submit {
+  background: #17181a;
+  color: #ffffff;
+}
+html.embedded .prototype-primary:hover,
+html.embedded .prototype-url-submit:hover {
+  background: #2a2c30;
+}
+html.embedded .prototype-hero {
+  background:
+    radial-gradient(ellipse at 75% 20%, #f1f4f5 0, transparent 55%),
+    linear-gradient(120deg, #e7ecee, #dfe6ea 55%, #e9edef);
+}
+/* 히어로 배경 그림·폴더 그림(파랑)은 그림 파일이라 채도만 낮춰 회청색으로 */
+html.embedded .prototype-hero::before {
+  filter: hue-rotate(-18deg) saturate(0.3);
+}
+html.embedded .prototype-folder-back {
+  filter: hue-rotate(-18deg) saturate(0.38) brightness(0.96);
+}
+/* 앞장은 보랏빛이 섞인 반투명 그림 */
+html.embedded .prototype-folder-front {
+  filter: hue-rotate(-30deg) saturate(0.35) drop-shadow(0 8px 6px #00000008);
+}
+html.embedded .prototype-url-box {
+  box-shadow: 0 12px 24px #2f5a6b14;
+}
+html.embedded .prototype-project-picker button[aria-pressed='true'],
+html.embedded .prototype-suggestion-table .prototype-proposed {
+  background: #e6eef1;
+}
+html.embedded .prototype-avatar,
+html.embedded .prototype-folder-avatars > span {
+  background: #dbe6ea;
+  color: #2f5a6b;
+}
+html.embedded .prototype-folder-avatars > span:nth-child(2) {
+  background: #e6e4ee;
+  color: #4d4a6b;
+}
+html.embedded .prototype-folder-date {
+  background: #f1f5f7cc;
+  color: #2f5a6b;
+}
+html.embedded .prototype-folder-label small,
+html.embedded .prototype-text-link,
+html.embedded .prototype-proposed h4,
+html.embedded .text-\[\#175fc2\],
+html.embedded .text-\[\#1d4ed8\] {
+  color: #2f5a6b;
+}
+html.embedded .prototype-location-elements button b,
+html.embedded .bg-\[\#1d4ed8\] {
+  background: #2f5a6b;
+}
+html.embedded .bg-\[\#edf4ff\] {
+  background: #e6eef1;
+}
+html.embedded .todo-completion:checked {
+  border-color: #17181a;
+  background-color: #17181a;
+}
+
+/* ── 비율 ────────────────────────────────────────── */
+html.embedded .prototype-page {
+  padding: 20px 28px 28px;
+}
+html.embedded .prototype-home {
+  padding-top: 4px;
+}
+html.embedded .prototype-hero {
+  min-height: 0;
+  padding: 30px 8.4% 24px;
+  border-radius: 32px;
+}
+html.embedded .prototype-hero > p {
+  font-size: 16px;
+}
+html.embedded .prototype-hero-form {
+  margin-top: 18px;
+}
+html.embedded .prototype-url-box {
+  min-height: 104px;
+  padding: 16px 12px 12px 24px;
+  border-radius: 20px;
+}
+html.embedded .prototype-url-box > input {
+  font-size: 20px;
+}
+html.embedded .prototype-home-columns {
+  gap: 32px;
+  margin-top: 44px;
+}
+html.embedded .prototype-projects {
+  padding-inline: 4px;
+}
+html.embedded .prototype-section-heading > a,
+html.embedded .prototype-section-heading > button {
+  font-size: 14px;
+}
+/* 폴더 카드: 한 줄에 3개씩 → 두 줄이 한 화면에 들어와요 */
+@media (min-width: 900px) {
+  html.embedded .prototype-project-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 14px;
+  }
+  html.embedded .prototype-folder-label {
+    font-size: 14px;
+  }
+}
