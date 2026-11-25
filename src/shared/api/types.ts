@@ -85,6 +85,8 @@ export interface Project {
   url: string
   status: 'active' | 'done'
   updatedAt: string
+  /** 만든 시각 (ISO). 예전에 저장된 프로젝트에는 없을 수 있어요 */
+  createdAt?: string
   currentVersion: number
   /**
    * 여러 페이지 검사: 함께 검사할 페이지 주소 (첫 번째 = url).

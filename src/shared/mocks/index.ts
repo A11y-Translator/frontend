@@ -21,10 +21,10 @@ export const teams = [
 ]
 
 export const projects: Project[] = [
-  { id: 'b', name: '프로젝트B', url: 'webA.github.io/A11y', status: 'active', updatedAt: '26.11.11', currentVersion: 11 },
-  { id: 'a', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 10 },
-  { id: 'a2', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 8 },
-  { id: 'a3', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 6 },
+  { id: 'b', createdAt: '2026-09-01T09:00:00+09:00', name: '프로젝트B', url: 'webA.github.io/A11y', status: 'active', updatedAt: '26.11.11', currentVersion: 11 },
+  { id: 'a', createdAt: '2026-05-12T09:00:00+09:00', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 10 },
+  { id: 'a2', createdAt: '2026-04-03T09:00:00+09:00', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 8 },
+  { id: 'a3', createdAt: '2026-03-02T09:00:00+09:00', name: '프로젝트A', url: 'webA.github.io/A11y', status: 'done', updatedAt: '26.07.09', currentVersion: 6 },
 ]
 
 export const versions: Version[] = [

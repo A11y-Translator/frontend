@@ -4,6 +4,7 @@ import { WebLayout } from '@/web/layout/WebLayout'
 import LoginPage from '@/web/pages/auth/LoginPage'
 import ProjectHomePage from '@/web/pages/home/ProjectHomePage'
 import ProjectEmptyPage from '@/web/pages/home/ProjectEmptyPage'
+import ProjectListPage from '@/web/pages/projects/ProjectListPage'
 import InspectionResultPage from '@/web/pages/inspection/InspectionResultPage'
 import IssueDetailPage from '@/web/pages/issue/IssueDetailPage'
 import TodoPage from '@/web/pages/todo/TodoPage'
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
     element: <WebLayout />,
     children: [
       { path: '/', element: <ProjectHomePage /> },
+      { path: '/projects', element: <ProjectListPage /> },
       { path: '/projects/new', element: <ProjectEmptyPage /> },
       { path: '/projects/:projectId/inspection', element: <InspectionResultPage /> },
       { path: '/issues/:issueId', element: <IssueDetailPage /> },

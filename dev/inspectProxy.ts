@@ -5,7 +5,7 @@
 // 백엔드가 할 일을 개발 중에 대신 하는 것이라, 백엔드도 같은 방식(Playwright + axe-core)으로 만들면 됩니다.
 //
 //  - 진짜 브라우저에서 열기 때문에 React/Vite 같은 SPA, 지연 로딩, CORS 문제 없이 그대로 그려집니다.
-//  - 검사 화면(1440×1093)을 찍어 node_modules/.a11y-shots/ 에 저장 → 미리보기·이슈 상세 캡처로 씁니다.
+//  - 검사 화면을 페이지 전체(폭 1440, 최대 16000px)로 찍어 node_modules/.a11y-shots/ 에 저장 → 미리보기·이슈 상세 캡처로 씁니다.
 //  - 크롬이 없으면 오류 메시지로 알려 줍니다. (playwright-core 는 브라우저를 내려받지 않음)
 //
 // 앱이 쓰는 주소
@@ -26,6 +26,8 @@ import type { Browser } from 'playwright-core'
 const require = createRequire(import.meta.url)
 /** 캡처 크기: 화면 속 가짜 사이트와 같은 비율(734×557)을 데스크톱 폭 1440 으로 */
 const VIEWPORT = { width: 1440, height: 1093 }
+/** 페이지 전체 캡처 최대 높이 — 백엔드와 같은 기준(16000px). 그 아래 요소는 위치 박스 없이 목록에만 나와요 */
+const MAX_CAPTURE_H = 16_000
 const GOTO_TIMEOUT_MS = 25_000
 const SHOT_DIR = join(process.cwd(), 'node_modules', '.a11y-shots')
 
@@ -129,6 +131,18 @@ export function inspectProxy(): Plugin {
           // SPA 가 데이터를 받아 다 그릴 때까지 조금 더 (최대 5초)
           await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {})
           await page.waitForTimeout(500)
+          // 페이지 전체 캡처 전에 끝까지 한 번 내려 봅니다 — 스크롤해야 불러오는(lazy) 이미지·내용이 그려지게
+          await page
+            .evaluate(async (maxH) => {
+              const step = Math.round(window.innerHeight * 0.9)
+              for (let y = 0; y < Math.min(document.documentElement.scrollHeight, maxH); y += step) {
+                window.scrollTo(0, y)
+                await new Promise((r) => setTimeout(r, 80))
+              }
+              window.scrollTo(0, 0)
+            }, MAX_CAPTURE_H)
+            .catch(() => {})
+          await page.waitForLoadState('networkidle', { timeout: 3_000 }).catch(() => {})
 
           await page.addScriptTag({ content: axeSource })
           const result = await page.evaluate(async () => {
@@ -181,11 +195,23 @@ export function inspectProxy(): Plugin {
           })
 
           const shotName = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.jpg`
-          const shot = await page.screenshot({ type: 'jpeg', quality: 70, clip: { x: 0, y: 0, ...VIEWPORT } })
+          // 첫 화면만이 아니라 페이지 전체(최대 16000px)를 찍습니다 — 아래쪽 문제의 위치도 캡처에 보이게
+          const pageHeight = await page.evaluate(() =>
+            Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0),
+          )
+          const captureHeight = Math.min(Math.max(pageHeight, VIEWPORT.height), MAX_CAPTURE_H)
+          const shot = await page.screenshot({
+            type: 'jpeg',
+            quality: 70,
+            fullPage: true,
+            clip: { x: 0, y: 0, width: VIEWPORT.width, height: captureHeight },
+          })
           await writeFile(join(SHOT_DIR, shotName), shot)
 
           const { links, ...rest } = result
-          res.end(JSON.stringify({ ...rest, url: page.url(), links: sameSiteLinks(links, page.url()), screenshotUrl: `/__inspect/shot/${shotName}` }))
+          res.end(
+            JSON.stringify({ ...rest, url: page.url(), links: sameSiteLinks(links, page.url()), screenshotUrl: `/__inspect/shot/${shotName}`, captureHeight }),
+          )
         } catch (err) {
           res.statusCode = 400
           res.end(JSON.stringify({ error: friendlyError(err) }))
