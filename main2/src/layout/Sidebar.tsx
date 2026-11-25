@@ -1,4 +1,4 @@
-// Figma: Sidebar (970:605) — 검은 사이드바. 시작하기 · 메인보드 · 알림 / 원정대(방) / 도구 / 나
+// Figma: Sidebar (970:605) — 검은 사이드바 (밝은 테마에서도 사이드바는 어두운 색: theme-dark). 시작하기 · 메인보드 · 알림 / 원정대(방) / 도구 / 나
 // 모양 3가지 (AppLayout · useSidebar 가 정함)
 //  - 펼침: 피그마 그대로 (폭 --sidebar-w, 기본 220px)
 //  - 접힘(collapsed): 얇은 사이드바 (64px). 메뉴는 짧은 표시(점·첫 글자)만, 이름은 화면낭독기 글자 + 툴팁(title)
@@ -82,7 +82,7 @@ export function Sidebar({ collapsed = false, onClose, width, animate = true, wor
       ref={ref}
       aria-label="주 메뉴"
       style={!collapsed && !drawer && width ? { width } : undefined}
-      className={`flex h-full shrink-0 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-nav pt-6 pb-5 ${animate ? 'transition-[width] duration-200' : ''} ${
+      className={`theme-dark flex h-full shrink-0 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-nav pt-6 pb-5 ${animate ? 'transition-[width] duration-200' : ''} ${
         collapsed ? 'w-16 items-center px-2' : drawer ? 'w-full px-3' : 'w-(--sidebar-w) px-3'
       }`}
     >

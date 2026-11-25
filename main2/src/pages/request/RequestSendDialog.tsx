@@ -257,6 +257,7 @@ export function RequestSendDialog({ open, onOpenChange, from, onSent, mode = 're
                   value={linkDraft}
                   onChange={(e) => setLinkDraft(e.target.value)}
                   onKeyDown={onLinkKey}
+                  // eslint-disable-next-line jsx-a11y/no-autofocus -- 사용자가 방금 연 입력칸으로 포커스를 옮겨요
                   autoFocus
                   aria-label="참고 링크 주소"
                   aria-invalid={errors.link ? true : undefined}
@@ -268,7 +269,7 @@ export function RequestSendDialog({ open, onOpenChange, from, onSent, mode = 're
                 <button
                   type="button"
                   onClick={addLink}
-                  className="shrink-0 rounded-[15px] border border-line bg-white/[0.08] px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink hover:bg-fill-3"
+                  className="shrink-0 rounded-[15px] border border-line bg-fill-2 px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink hover:bg-fill-3"
                 >
                   추가
                 </button>

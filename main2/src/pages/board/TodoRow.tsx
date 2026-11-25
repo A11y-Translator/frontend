@@ -23,12 +23,12 @@ export function TodoRow({ label, source, checked, onChange, tone }: Props) {
   // 출처 칩: 시트에서는 AI 추천만 연보라, 루트 상세에서는 둘 다 회색
   const tag =
     source === 'ai' && tone === 'sheet'
-      ? 'border border-[rgb(236_232_253/0.22)] bg-[rgb(236_232_253/0.13)] text-role-front'
+      ? 'border border-role-design/25 bg-role-design-bg text-role-front'
       : 'bg-fill-3 text-muted'
 
   return (
     <label
-      className={`relative flex min-h-[30px] w-full cursor-pointer items-center gap-2 rounded-xl border border-line px-2.5 py-[6px] hover:border-white/20 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-summit ${tone === 'route' ? 'bg-surface' : 'bg-fill'}`}
+      className={`relative flex min-h-[30px] w-full cursor-pointer items-center gap-2 rounded-xl border border-line px-2.5 py-[6px] hover:border-ink/20 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-summit ${tone === 'route' ? 'bg-surface' : 'bg-fill'}`}
     >
       <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <span aria-hidden className={`flex size-4 shrink-0 items-center justify-center rounded-full ${box}`}>

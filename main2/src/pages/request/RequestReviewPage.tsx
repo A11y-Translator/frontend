@@ -68,7 +68,7 @@ export function RequestReviewPage() {
                 <RequestReviewCard card={card} steps={stepsOf(live ?? card)} onConfirm={confirm} onFix={fix} />
               ) : (
                 // 없는 요청 (주소가 틀렸거나 예시 데이터로 되돌려 지워짐)
-                <div className="flex w-full flex-col items-start gap-3 rounded-[20px] border border-white/[0.06] bg-white/[0.03] px-4 py-[18px] @2xl:px-5">
+                <div className="flex w-full flex-col items-start gap-3 rounded-[20px] border border-line bg-fill px-4 py-[18px] @2xl:px-5">
                   <h2 className="text-sm leading-normal font-semibold text-ink">요청을 찾을 수 없어요</h2>
                   <p className="text-[13px] leading-normal text-muted">주소를 다시 확인해 주세요. 지금 확인할 것은 오른쪽 “받을 것”에 있어요.</p>
                   <Link to="/rooms/front" className={REQUEST_ENTRY}>

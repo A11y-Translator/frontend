@@ -46,7 +46,7 @@ export function RequestReviewCard({ card, steps, onConfirm, onFix }: Props) {
   }
 
   return (
-    <article aria-labelledby={`${id}-title`} className="flex w-full flex-col items-start gap-3.5 rounded-[20px] border border-white/[0.06] bg-white/[0.03] px-4 py-[18px] @2xl:px-5">
+    <article aria-labelledby={`${id}-title`} className="flex w-full flex-col items-start gap-3.5 rounded-[20px] border border-line bg-fill px-4 py-[18px] @2xl:px-5">
       <div className="flex items-center gap-2.5">
         <RoleAvatar name={lastSent?.author ?? card.maker} role={card.fromRole} />
         <div className="flex min-w-0 flex-col items-start gap-0.5 leading-normal">
@@ -68,7 +68,7 @@ export function RequestReviewCard({ card, steps, onConfirm, onFix }: Props) {
       {note && <p className="text-[13px] leading-normal text-ink">바뀐 점 · {note}</p>}
 
       {sent ? (
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-normal font-medium text-[#f1c28d]">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-normal font-medium text-due">
           수정 요청을 보냈어요 · {makerRoom} 방에도 올라갔어요
           <Link to={requestPath(card.id)} className="rounded text-muted underline underline-offset-2 hover:text-ink">
             요청 상세 보기
@@ -97,8 +97,8 @@ export function RequestReviewCard({ card, steps, onConfirm, onFix }: Props) {
               onClick={() => setFixOpen((v) => !v)}
               aria-expanded={fixOpen}
               aria-controls={`${id}-fix`}
-              className={`rounded-xl border px-[18px] py-[11px] text-sm leading-normal font-semibold whitespace-nowrap text-[#f1c28d] transition ${
-                fixOpen ? 'border-summit bg-[rgb(52_62_43/0.95)]' : 'border-line bg-fill hover:bg-fill-3'
+              className={`rounded-xl border px-[18px] py-[11px] text-sm leading-normal font-semibold whitespace-nowrap text-due transition ${
+                fixOpen ? 'border-summit bg-fill-3' : 'border-line bg-fill hover:bg-fill-3'
               }`}
             >
               수정 요청
@@ -126,7 +126,7 @@ export function RequestReviewCard({ card, steps, onConfirm, onFix }: Props) {
                 </p>
                 <button
                   type="submit"
-                  className="ml-auto shrink-0 rounded-[15px] border border-line bg-white/[0.08] px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink transition hover:bg-fill-3"
+                  className="ml-auto shrink-0 rounded-[15px] border border-line bg-fill-2 px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink transition hover:bg-fill-3"
                 >
                   보내기
                 </button>

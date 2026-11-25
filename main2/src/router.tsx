@@ -8,6 +8,7 @@ import { StartPage } from '@/pages/start/StartPage'
 import { RouteMapPage } from '@/pages/start/RouteMapPage'
 import { MainBoardPage } from '@/pages/board/MainBoardPage'
 import { RouteDetailPage } from '@/pages/board/RouteDetailPage'
+import { FlowPage } from '@/pages/flow/FlowPage'
 import { AllRoomPage } from '@/pages/rooms/AllRoomPage'
 import { DesignRoomPage } from '@/pages/rooms/DesignRoomPage'
 import { FrontRoomPage } from '@/pages/rooms/FrontRoomPage'
@@ -63,7 +64,8 @@ export const router = createBrowserRouter([
       { path: '/start', element: <StartPage /> }, // 시작하기/default
       { path: '/start/route', element: <RouteMapPage /> }, // 시작하기/map (추천 루트 · 3D 산)
       { path: '/board', element: <MainBoardPage /> }, // 01 메인 (+ Sheet · 2구간 할 일 추천)
-      { path: '/route', element: <RouteDetailPage /> }, // 01-2 루트 · 심플 노드 · 산
+      { path: '/flow', element: <FlowPage /> }, // 01-2 흐름 · 노드 보기 (흐름 전체 보기)
+      { path: '/route', element: <RouteDetailPage /> }, // (예전 01-2) 원정대 흐름 · 산길 보기
       { path: '/rooms/all', element: <AllRoomPage /> }, // 11 전체 방
       { path: '/rooms/design', element: <DesignRoomPage /> }, // 03 디자인 방
       { path: '/rooms/front', element: <FrontRoomPage /> }, // 05 프론트 방 · GitHub 연결

@@ -21,12 +21,12 @@ const TONE: Record<HistoryKind, string> = {
   question: PLAIN,
   comment: PLAIN,
   unblock: PLAIN,
-  accept: 'bg-[rgb(40_60_67/0.95)] text-checkpoint-text',
-  deliver: 'bg-[rgb(52_62_43/0.95)] text-summit',
-  redeliver: 'bg-[rgb(52_62_43/0.95)] text-summit',
-  fix: 'bg-[rgb(52_62_43/0.95)] text-[#f1c28d]',
-  confirm: 'bg-[rgb(37_62_54/0.95)] text-summit',
-  block: 'bg-[rgb(255_166_155/0.13)] text-blocked',
+  accept: 'bg-role-front-bg text-checkpoint-text',
+  deliver: 'bg-fill-3 text-ink',
+  redeliver: 'bg-fill-3 text-ink',
+  fix: 'bg-fill-3 text-due',
+  confirm: 'bg-role-back-bg text-ink',
+  block: 'bg-danger/10 text-blocked',
 }
 
 const EMPTY: Record<Filter, { title: string; text: string }> = {
@@ -85,7 +85,7 @@ export function NotificationsPage() {
             <p className="text-[15px] font-semibold text-ink">{EMPTY[filter].title}</p>
             <p className="text-[13px] text-muted">{EMPTY[filter].text}</p>
             {filter !== 'all' && all.length > 0 && (
-              <button type="button" onClick={() => setFilter('all')} className="mt-2 rounded text-[13px] font-semibold text-summit underline-offset-4 hover:underline">
+              <button type="button" onClick={() => setFilter('all')} className="mt-2 rounded text-[13px] font-semibold text-ink underline-offset-4 hover:underline">
                 전체 알림 보기
               </button>
             )}
@@ -124,7 +124,7 @@ function Row({ item }: { item: Notification }) {
       <Link
         to={item.to}
         onClick={() => markRead([item.id])}
-        className={`relative flex flex-col gap-1.5 rounded-2xl border px-3.5 py-3 leading-normal transition hover:border-white/20 hover:bg-fill-2 ${
+        className={`relative flex flex-col gap-1.5 rounded-2xl border px-3.5 py-3 leading-normal transition hover:border-ink/20 hover:bg-fill-2 ${
           item.read ? 'border-line bg-transparent' : 'border-line bg-fill'
         }`}
       >
@@ -140,7 +140,7 @@ function Row({ item }: { item: Notification }) {
         <span className={`text-[13px] break-words ${item.read ? 'text-muted' : 'text-ink'}`}>
           <span className="font-semibold">{item.actor}</span> · {item.text}
         </span>
-        {item.to.endsWith('/review') && <span className="text-xs font-semibold text-summit">확인하러 가기 ›</span>}
+        {item.to.endsWith('/review') && <span className="text-xs font-semibold text-ink">확인하러 가기 ›</span>}
       </Link>
     </li>
   )

@@ -116,8 +116,8 @@ const COMPARE = '/rooms/front/compare'
 /* ───────── 11 전체 방 ───────── */
 
 export const ALL_ROOM = {
-  title: '전체 원정대',
-  count: '6명',
+  title: '전체 방',
+  count: '6명 · 세 방의 대화를 한곳에서',
   placeholder: '모두에게 메시지 · @디자인 처럼 방을 골라 보낼 수 있어요',
   targets: [
     { value: 'all', label: '전체' },
@@ -141,12 +141,13 @@ export const ALL_ROOM = {
     { kind: 'event', id: 'e2', tone: 'request', chip: '요청', text: '프론트 → 디자인 · 회원 정보 수정 화면 시안 · 11/21까지', to: MEMBER_EDIT },
     { kind: 'message', id: 'm5', author: '박서연', role: 'design', time: '10분 전', timeStyle: 'relative', text: '마이페이지 시안 오늘 6시까지 마무리할게요' },
   ] satisfies FeedItem[],
-  sideTitle: '원정대 상황',
+  sideTitle: '방별 상황',
   // 피그마 순서 그대로. 요약 문구는 넘겨주기 카드에서 만들어요 (./roomFlows 의 roomSummary)
   rooms: [
+    // Figma "11 전체 방" 순서 · 숫자 (메인보드 방 카드와 같은 값)
+    { role: 'design', newLabel: '새 메시지 3' },
     { role: 'front', newLabel: '새 메시지 5' },
-    { role: 'back', newLabel: '새 메시지 3' },
-    { role: 'design', newLabel: '새 메시지 1' },
+    { role: 'back', newLabel: '새 메시지 1' },
   ] satisfies { role: RoleId; newLabel: string }[],
   note: { title: '전체 방에 쓴 메시지', text: '세 방 모두에 공지로 올라가요. 방을 골라 보내면 그 방에만 올라가요' },
 }
@@ -154,7 +155,7 @@ export const ALL_ROOM = {
 /* ───────── 03 디자인 방 ───────── */
 
 export const DESIGN_ROOM = {
-  title: '디자인',
+  title: '디자인 방',
   count: '2명',
   placeholder: '메시지 입력',
   feed: [
@@ -173,7 +174,7 @@ export const DESIGN_ROOM = {
       ],
     },
   ] satisfies FeedItem[],
-  sideTitle: '현재 흐름',
+  sideTitle: '이 방의 흐름',
   views: [
     { value: 'list', label: '목록 보기' },
     { value: 'files', label: '링크/파일 보기' },
@@ -183,7 +184,7 @@ export const DESIGN_ROOM = {
 /* ───────── 05 프론트 방 · GitHub 연결 ───────── */
 
 export const FRONT_ROOM = {
-  title: '프론트',
+  title: '프론트 방',
   count: '4명',
   github: 'GitHub 연결됨 · campus-app',
   placeholder: '메시지 입력 · PR 링크를 붙이면 진행 상황이 보여요',
@@ -216,17 +217,17 @@ export const FRONT_ROOM = {
       ],
     },
   ] satisfies FeedItem[],
-  sideTitle: '현재 흐름',
+  sideTitle: '이 방의 흐름',
   note: { title: 'GitHub 자동 연결', text: 'PR이 병합·배포되면 연결된 넘겨주기가 자동으로 전달됨으로 바뀌어요' },
 }
 
 /* ───────── 백 방 (피그마 디자인 없음 — 다른 방 데이터에서 백과 관련된 것만 옮김) ───────── */
 
 export const BACK_ROOM = {
-  title: '백',
+  title: '백 방',
   count: '2명',
   placeholder: '메시지 입력',
-  sideTitle: '현재 흐름',
+  sideTitle: '이 방의 흐름',
   states: [
     { value: 'empty', label: '비어 있음' },
     { value: 'loading', label: '불러오는 중' },

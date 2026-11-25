@@ -1,26 +1,17 @@
-// 피그마 "11 전체 방 · 내추럴" — 세 방의 소식이 한곳에 모이는 방 + 오른쪽 "원정대 상황".
+// 피그마 "11 전체 방" — 세 방의 소식이 한곳에 모이는 방 + 오른쪽 "방별 상황" · 오른쪽 위 방 바로가기(전체 · 디자인 · 프론트 · 백).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ROLE, type RoleId } from '@/data/mock'
-import dotFront from '@/assets/rooms/dot-room-a.svg'
-import dotBack from '@/assets/rooms/dot-room-b.svg'
-import dotDesign from '@/assets/rooms/dot-room-c.svg'
+import { ROLE } from '@/data/mock'
 import titleDots from '@/assets/rooms/title-dots-all.svg'
 import { RoomFeed, RoomShell } from './RoomShell'
 import { NoteCard, SidePanel } from './RoomSidePanel'
-import { useRequests } from '@/data/requestStore'
+import { isOpen, useRequests } from '@/data/requestStore'
 import { ALL_ROOM } from './roomData'
 import { roomSummary } from './roomFlows'
 import { useRoomFeed } from './useRoomFeed'
 
 type Target = (typeof ALL_ROOM.targets)[number]['value']
 
-// 방 카드 색 (점 · AI 요약 바탕/테두리/글자 · AI 칩 글자)
-const ROOM_CARD: Record<RoleId, { dot: string; box: string; ai: string }> = {
-  front: { dot: dotFront, box: 'border-[rgb(236_232_253/0.22)] bg-[rgb(236_232_253/0.13)] text-role-front', ai: 'text-role-front' },
-  back: { dot: dotBack, box: 'border-[rgb(185_252_255/0.22)] bg-[rgb(185_252_255/0.13)] text-role-back', ai: 'text-[#dff4f5]' },
-  design: { dot: dotDesign, box: 'border-[rgb(242_255_155/0.22)] bg-[rgb(242_255_155/0.13)] text-role-design', ai: 'text-role-design' },
-}
 
 export function AllRoomPage() {
   const feed = useRoomFeed(ALL_ROOM.feed, 'all')
@@ -56,6 +47,18 @@ export function AllRoomPage() {
       count={ALL_ROOM.count}
       gap="tight"
       icon={<img src={titleDots} alt="" className="h-[7px] w-[27px] shrink-0" />}
+      headerExtra={
+        <nav aria-label="방 바로가기" className="ml-auto flex items-center gap-0.5 rounded-[14px] bg-fill-2 p-[3px]">
+          <span aria-current="page" className="rounded-[11px] bg-surface px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
+            전체
+          </span>
+          {(['design', 'front', 'back'] as const).map((r) => (
+            <Link key={r} to={ROLE[r].path} className="rounded-[11px] px-2.5 py-1 text-xs font-medium text-muted hover:text-ink">
+              {ROLE[r].label}
+            </Link>
+          ))}
+        </nav>
+      }
       feed={
         <RoomFeed
           label="전체 원정대 대화"
@@ -75,33 +78,35 @@ export function AllRoomPage() {
         <SidePanel title={ALL_ROOM.sideTitle} gapClass="gap-5" footer={<NoteCard {...ALL_ROOM.note} />}>
           <ul className="flex w-full flex-col gap-3">
             {ALL_ROOM.rooms.map((room) => {
-              const tone = ROOM_CARD[room.role]
+              const role = ROLE[room.role]
+              const open = requests.filter(isOpen)
+              const sent = open.filter((c) => c.fromRole === room.role).length
+              const recv = open.filter((c) => c.toRole === room.role).length
               return (
                 <li key={room.role}>
-                  <Link
-                    to={ROLE[room.role].path}
-                    className="flex w-full flex-col gap-2.5 rounded-2xl border border-line bg-fill px-4 py-3.5 leading-normal transition hover:bg-fill-3"
-                  >
+                  <Link to={role.path} className="flex w-full flex-col gap-2.5 rounded-2xl border border-line bg-surface px-4 py-3.5 leading-normal transition hover:border-ink/25">
                     <span className="flex w-full items-center justify-between gap-2">
                       <span className="flex items-center gap-2">
-                        <img src={tone.dot} alt="" className="size-[9px]" />
+                        <span aria-hidden className="size-[9px] rounded-full" style={{ background: role.color }} />
                         <span className="text-[15px] font-bold text-ink">
-                          {ROLE[room.role].label}
-                          <span className="sr-only"> 방으로 이동</span>
+                          {role.label} 방<span className="sr-only">으로 이동</span>
                         </span>
                       </span>
                       <span className="flex items-center gap-2">
-                        <span className="px-[7px] py-0.5 text-[10px] font-semibold whitespace-nowrap text-muted">{room.newLabel}</span>
+                        <span className="rounded-full bg-ink px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-canvas">{room.newLabel}</span>
                         <span aria-hidden className="text-lg font-medium text-muted">
                           ›
                         </span>
                       </span>
                     </span>
-                    <span className={`flex w-full items-center gap-2 rounded-[14px] border px-3 py-2.5 ${tone.box}`}>
-                      <span className={`shrink-0 rounded-lg bg-[rgb(52_62_43/0.95)] px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-[0.4px] ${tone.ai}`}>
+                    <span className="flex w-full items-center gap-2 rounded-[14px] px-3 py-2.5" style={{ background: role.bg }}>
+                      <span className="shrink-0 rounded-lg bg-surface px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.4px]" style={{ color: role.color }}>
                         AI<span className="sr-only"> 진행 요약</span>
                       </span>
-                      <span className="min-w-0 flex-1 text-[13px] font-medium">{roomSummary(requests, room.role)}</span>
+                      <span className="min-w-0 flex-1 text-[13px] font-medium text-ink">{roomSummary(requests, room.role)}</span>
+                    </span>
+                    <span className="text-xs text-muted">
+                      보낼 것 {sent} · 받을 것 {recv}
                     </span>
                   </Link>
                 </li>

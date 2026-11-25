@@ -74,7 +74,7 @@ export function DesignRoomPage() {
                           <SourceChip className="bg-fill-3">FIGMA</SourceChip>
                           <span className="text-sm font-semibold text-ink">{file.title}</span>
                         </span>
-                        <span className="text-[11px] text-[#a3a3a3]">{file.path}</span>
+                        <span className="text-[11px] text-muted">{file.path}</span>
                       </span>
                       <span className="shrink-0 text-xs font-semibold whitespace-nowrap text-muted">{file.version}</span>
                     </button>

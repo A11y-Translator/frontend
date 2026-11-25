@@ -66,6 +66,10 @@ export function RoomShell({ title, count, icon, headerExtra, feed, side, gap = '
             <span className="sr-only">인원 </span>
             {count}
           </p>
+          {/* 기획 문서 ↗ — 모든 방 제목 옆 (Figma 03 · 07 · 11). 기획안은 시작하기 화면에 있어요 */}
+          <Link to="/start" className="ml-1 inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:bg-fill-2">
+            기획 문서 <span aria-hidden>↗</span>
+          </Link>
         </div>
         {headerExtra}
       </header>
@@ -244,13 +248,13 @@ export function MessageRow({
 const EVENT: Record<EventItem['tone'], { box: string; chip: string; text: string }> = {
   handoff: {
     box: 'rounded-xl border-line bg-fill',
-    chip: 'rounded-[8.5px] bg-[rgb(40_60_67/0.95)] px-[7px] py-0.5 text-[11px] font-semibold text-checkpoint-text',
+    chip: 'rounded-[8.5px] bg-role-front-bg px-[7px] py-0.5 text-[11px] font-semibold text-checkpoint-text',
     text: 'font-medium text-ink',
   },
   request: {
-    box: 'rounded-[16.5px] border-[rgb(255_140_132/0.22)] bg-[rgb(255_140_132/0.13)]',
-    chip: 'rounded-[8.5px] border border-[rgb(255_166_155/0.22)] bg-[rgb(255_166_155/0.13)] px-[7px] py-0.5 text-[11px] font-semibold text-blocked',
-    text: 'font-semibold text-[#ff8c84]',
+    box: 'rounded-[16.5px] border-danger/25 bg-danger/10',
+    chip: 'rounded-[8.5px] border border-danger/25 bg-danger/10 px-[7px] py-0.5 text-[11px] font-semibold text-blocked',
+    text: 'font-semibold text-danger',
   },
   github: {
     box: 'rounded-xl border-line bg-fill',
@@ -306,7 +310,7 @@ export function Composer({ placeholder, onSend, label = '메시지 입력', lead
   }
 
   return (
-    <form onSubmit={submit} className="flex shrink-0 items-center gap-2.5 rounded-xl border border-line py-2.5 pr-2.5 pl-3 focus-within:border-white/25">
+    <form onSubmit={submit} className="flex shrink-0 items-center gap-2.5 rounded-xl border border-line py-2.5 pr-2.5 pl-3 focus-within:border-ink/20">
       {leading}
       <input
         ref={inputRef}

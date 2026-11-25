@@ -31,7 +31,7 @@ export function LinkChip({ item }: { item: LinkAttachment }) {
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="sr-only">끝난 단계:</span>
           {item.stages.map((s) => (
-            <span key={s} className="flex items-center gap-1.5 text-[11px] font-medium text-summit">
+            <span key={s} className="flex items-center gap-1.5 text-[11px] font-medium text-ink">
               <img src={dotStage} alt="" className="size-[7px]" />
               {s}
             </span>
@@ -83,9 +83,9 @@ export function FigmaPreviewCard({ item }: { item: FigmaAttachment }) {
   const mark = MARK[item.thumb]
   return (
     <div className="@container w-full max-w-[460px] overflow-clip rounded-[20px] border border-line bg-fill">
-      <div aria-hidden className="relative h-[150px] w-full overflow-clip bg-white/[0.03]">
+      <div aria-hidden className="relative h-[150px] w-full overflow-clip bg-fill">
         {item.thumb === 'login' ? <LoginThumb /> : <img src={thumbMypage} alt="" className="absolute top-[6px] left-[54px] h-[142px] w-[90px] max-w-none" />}
-        <div className={`absolute left-[66px] w-[66px] rounded border-[1.5px] border-dashed border-[#e8710a] bg-[rgb(232_113_10/0.08)] ${mark.area}`} />
+        <div className={`absolute left-[66px] w-[66px] rounded border-[1.5px] border-dashed border-[#e8710a] bg-due/10 ${mark.area}`} />
         {/* 설명 칩은 카드가 좁으면 숨김 (글자는 아래 sr-only 로 읽힘) */}
         <div className={`absolute left-[136px] hidden h-[1.5px] w-10 bg-[#e8710a] @[340px]:block ${mark.leader}`} />
         <div className={`absolute left-[180px] hidden items-center rounded-[13px] border border-[#f9c9a3] bg-fill-3 px-2.5 py-[5px] @[340px]:flex ${mark.chip}`}>
@@ -104,14 +104,14 @@ export function FigmaPreviewCard({ item }: { item: FigmaAttachment }) {
             <SourceChip className="bg-fill-3">FIGMA</SourceChip>
             <span className="text-sm leading-normal font-semibold text-ink">{item.title}</span>
           </div>
-          <span className="text-[11px] leading-normal text-[#a3a3a3]">{item.path}</span>
+          <span className="text-[11px] leading-normal text-muted">{item.path}</span>
         </div>
         {item.external && (
           <button
             type="button"
             onClick={soon('Figma에서 열기')}
             aria-label={`${item.title} Figma에서 열기`}
-            className="-m-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-medium text-[#a3a3a3] hover:bg-fill-2 hover:text-ink"
+            className="-m-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-medium text-muted hover:bg-fill-2 hover:text-ink"
           >
             <span aria-hidden>↗</span>
           </button>
@@ -122,7 +122,7 @@ export function FigmaPreviewCard({ item }: { item: FigmaAttachment }) {
 }
 
 const STAGE: Record<StageState, { marker: string; text: string; sr: string }> = {
-  done: { marker: markerDone, text: 'font-medium text-summit', sr: '완료' },
+  done: { marker: markerDone, text: 'font-medium text-ink', sr: '완료' },
   current: { marker: markerCurrent, text: 'font-bold text-checkpoint-text', sr: '진행 중' },
   todo: { marker: markerTodo, text: 'font-medium text-muted', sr: '예정' },
 }
@@ -175,7 +175,7 @@ export function PrCard({ item }: { item: PrAttachment }) {
       <PrStages stages={item.stages} />
       <Link
         to={badge.to}
-        className={`flex max-w-full flex-wrap items-center gap-x-1.5 bg-[rgb(52_62_43/0.95)] px-2.5 py-1.5 leading-normal transition hover:brightness-125 ${
+        className={`flex max-w-full flex-wrap items-center gap-x-1.5 bg-fill-3 px-2.5 py-1.5 leading-normal transition hover:brightness-125 ${
           badge.tone === 'auto' ? 'rounded-[13px] text-role-design' : 'rounded-xl text-blocked'
         }`}
       >
@@ -196,7 +196,7 @@ export function HandoffBadge({ item, id }: { item: HandoffAttachment; id?: strin
     <Link
       id={id}
       to={item.to}
-      className="flex max-w-full flex-wrap items-center gap-x-1.5 rounded-[13px] bg-[rgb(40_60_67/0.95)] px-2.5 py-1.5 text-xs leading-normal text-role-front transition hover:brightness-125"
+      className="flex max-w-full flex-wrap items-center gap-x-1.5 rounded-[13px] bg-role-front-bg px-2.5 py-1.5 text-xs leading-normal text-role-front transition hover:brightness-125"
     >
       <span className="font-semibold">{strong}</span>
       <span>{rest}</span>

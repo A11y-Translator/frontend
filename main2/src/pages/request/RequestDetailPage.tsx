@@ -29,11 +29,11 @@ import { recordsOf, stepsOf, summaryOf } from './requestView'
 // 기록 종류 칩의 색 (요청 · 질문 / 수락 / 전달 · 다시 전달 / 수정 요청 / 확인 / 막힘)
 const TONE: Record<RecordTone, string> = {
   plain: 'bg-fill-2 text-ink',
-  accept: 'bg-[rgb(40_60_67/0.95)] text-checkpoint-text',
-  deliver: 'bg-[rgb(52_62_43/0.95)] text-summit',
-  fix: 'bg-[rgb(52_62_43/0.95)] text-[#f1c28d]',
-  confirm: 'bg-[rgb(37_62_54/0.95)] text-summit',
-  blocked: 'bg-[rgb(255_166_155/0.13)] text-blocked',
+  accept: 'bg-role-front-bg text-checkpoint-text',
+  deliver: 'bg-fill-3 text-ink',
+  fix: 'bg-fill-3 text-due',
+  confirm: 'bg-role-back-bg text-ink',
+  blocked: 'bg-danger/10 text-blocked',
 }
 
 const STEP_LINK =
@@ -92,7 +92,7 @@ export function RequestDetailPage() {
                 <div className="flex shrink-0 flex-col items-center">
                   <RoleAvatar name={r.author} role={r.role} />
                   {/* 다음 기록으로 이어지는 선 (마지막 기록에는 없음) */}
-                  {i < records.length - 1 && <span aria-hidden className="min-h-10 w-[1.5px] flex-1 rounded-xl bg-white/10" />}
+                  {i < records.length - 1 && <span aria-hidden className="min-h-10 w-[1.5px] flex-1 rounded-xl bg-fill-2" />}
                 </div>
                 <div className="flex min-w-0 flex-col items-start gap-1 pt-1 pb-3.5">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 leading-normal">
@@ -125,7 +125,7 @@ export function RequestDetailPage() {
             {summary.rest.map((row) => (
               <div key={row.label} className="flex flex-col gap-1">
                 <dt className="text-xs text-muted">{row.label}</dt>
-                <dd className={`text-[15px] font-semibold ${row.good ? 'text-summit' : 'text-ink'}`}>{row.value}</dd>
+                <dd className={`text-[15px] font-semibold ${row.good ? 'text-ink' : 'text-ink'}`}>{row.value}</dd>
               </div>
             ))}
             {/* 기획안 §4 · §7-5: 소속 구간(시퀀스) · 링크 · 막힘 — 피그마 10번 화면에는 없는 줄 */}
@@ -360,6 +360,7 @@ function RequestActions({ card }: { card: HandoffCard }) {
               type="text"
               value={value}
               onChange={(e) => setValue(e.target.value)}
+              // eslint-disable-next-line jsx-a11y/no-autofocus -- 사용자가 방금 연 입력칸으로 포커스를 옮겨요
               autoFocus
               aria-label={form === 'propose' ? '제안할 날짜' : '막힌 이유 (선택)'}
               aria-invalid={error ? true : undefined}
@@ -370,7 +371,7 @@ function RequestActions({ card }: { card: HandoffCard }) {
             />
             <button
               type="submit"
-              className="shrink-0 rounded-[15px] border border-line bg-white/[0.08] px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink hover:bg-fill-3"
+              className="shrink-0 rounded-[15px] border border-line bg-fill-2 px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-ink hover:bg-fill-3"
             >
               {form === 'propose' ? '제안 보내기' : '막힘 표시'}
             </button>

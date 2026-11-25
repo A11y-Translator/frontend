@@ -13,7 +13,8 @@ import type { PlanFile, PlanSource } from '@/api/types'
 import planDoc from '@/assets/plan-doc.png'
 import { PROJECT } from '@/data/mock'
 import { deadlineText, isRouteFor, recommendRoute, updatePlan, usePlan, type PlanRole } from '@/data/planStore'
-import { Card, GlassPanel, PageHeader, PrimaryButton, RoleDot, Segmented } from '@/ui'
+import { Card, GlassPanel, PageHeader, PrimaryButton, RoleChip, RoleDot, Segmented } from '@/ui'
+import { StartTopBar } from './StartTopBar'
 import { useToast } from '@/ui/toast'
 
 const UNITS = [
@@ -119,9 +120,14 @@ export function StartPage() {
 
   return (
     <div className="grid min-h-full w-full grid-cols-1 gap-6 px-(--gutter) pt-(--page-top) pb-[26px] @4xl:grid-cols-[minmax(0,500px)_minmax(0,644px)] @4xl:gap-6">
+      {/* 오른쪽 위: 내 아바타 (Figma R00) */}
+      <div className="@4xl:col-span-2">
+        <StartTopBar />
+      </div>
+
       {/* 왼쪽 */}
       <div className="flex min-w-0 flex-col">
-        <PageHeader title="시작하기" sub="기획안을 기반으로 우리 원정대의 프로젝트 완주길을 만들어요." />
+        <PageHeader title="프로젝트 시작하기" sub="기획안을 기반으로 프로젝트 완주길을 생성합니다." />
 
         <form
           noValidate
@@ -131,12 +137,12 @@ export function StartPage() {
             void submit()
           }}
         >
-          {/* 일정 */}
+          {/* 프로젝트 설정: 최종 마감 · 역할 */}
           <GlassPanel className="flex flex-col gap-4 p-[22px]">
-            <h2 className="text-base font-bold text-ink">일정</h2>
+            <h2 className="text-base font-bold text-ink">프로젝트 설정</h2>
 
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-[13px] font-semibold text-ink">마감일</h3>
+              <h3 className="text-[13px] font-semibold text-ink">최종 마감</h3>
               <Segmented label="마감 단위" options={UNITS} value={plan.unit} onChange={(unit) => updatePlan({ unit })} />
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -152,7 +158,7 @@ export function StartPage() {
                 hint={plan.unit === 'day' ? '시간 단위를 고르면 시각을 바꿀 수 있어요' : undefined}
                 className={`font-mono text-[13px] font-medium ${plan.unit === 'day' ? 'text-muted' : ''}`}
               />
-              <p className={`text-[13px] font-semibold ${left !== null && left < 0 ? 'text-blocked' : 'text-checkpoint-text'}`} aria-live="polite">
+              <p className={`text-[13px] font-semibold ${left !== null && left < 0 ? 'text-blocked' : 'text-role-front'}`} aria-live="polite">
                 {left === null ? '날짜를 골라 주세요' : left > 0 ? `${left}일 남음` : left === 0 ? '오늘 마감' : `${-left}일 지남`}
               </p>
             </div>
@@ -182,7 +188,7 @@ export function StartPage() {
             {source === 'file' && (
               <div className="flex items-center justify-between gap-3 rounded-[10px] border border-line px-3.5 py-3">
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="shrink-0 rounded-full bg-[rgb(66_46_43/0.95)] px-1.5 py-[3px] font-mono text-[10px] leading-none font-medium tracking-[0.4px] text-blocked">{ext}</span>
+                  <span className="shrink-0 rounded-md bg-ink px-1.5 py-[3px] font-mono text-[10px] leading-none font-semibold tracking-[0.4px] text-canvas">{ext}</span>
                   <span className="truncate text-sm font-medium text-ink">{file.name}</span>
                   {file.pages !== null && <span className="shrink-0 text-xs text-muted">{file.pages}쪽</span>}
                 </div>
@@ -217,6 +223,39 @@ export function StartPage() {
                 <span className="mt-1 block text-right font-mono text-[11px] text-muted">{text.length}자</span>
               </label>
             )}
+          </Card>
+
+          {/* 참여 오름 사람 — 역할별 인원 (Figma R00). 초대는 서버 연결 후 */}
+          <Card className="flex flex-col gap-3 p-[22px]">
+            <h2 className="text-base font-bold text-ink">
+              참여 오름 사람 <span className="font-medium text-muted">· {totalPeople}명</span>
+            </h2>
+            <ul className="flex flex-wrap items-center gap-2">
+              {plan.roles
+                .filter((r) => r.people > 0)
+                .map((r) => (
+                  <li key={r.id}>
+                    {r.role ? (
+                      <RoleChip role={r.role}>
+                        {r.label} {r.people}
+                      </RoleChip>
+                    ) : (
+                      <span className="inline-flex items-center rounded-[14px] bg-fill-2 px-2.5 py-1.5 text-[13px] font-semibold text-ink">
+                        {r.label} {r.people}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => toast('초대 링크 보내기는 서버가 연결되면 쓸 수 있어요')}
+                  className="rounded-[14px] border border-line px-2.5 py-1.5 text-[13px] font-medium text-muted hover:text-ink"
+                >
+                  + 초대
+                </button>
+              </li>
+            </ul>
           </Card>
 
           <div className="mt-[14px] flex flex-wrap items-center justify-end gap-3">
@@ -384,6 +423,7 @@ function PlanDocument({ source, file, link, text, onText }: { source: Source; fi
       </div>
 
       {/* 문서는 패널 안에서만 스크롤 */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- 스크롤 영역은 키보드로 스크롤할 수 있어야 해요 */}
       <div className="min-h-0 w-full flex-1 overflow-y-auto pb-[18px]" tabIndex={0} role="region" aria-label="기획 문서 미리보기">
         {source === 'text' ? (
           mode === 'edit' ? (

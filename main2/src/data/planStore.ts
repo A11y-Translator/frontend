@@ -177,3 +177,29 @@ export function deadlineChip(p: Pick<Plan, 'date' | 'time' | 'unit'>) {
   const left = d.daysLeft > 0 ? `${d.daysLeft}일 남음` : d.daysLeft === 0 ? '오늘 마감' : `${-d.daysLeft}일 지남`
   return `최종 마감 ${date} (${d.weekday}) ${time} · ${left}`
 }
+
+const md = (d: Date) => `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, '0')}`
+
+/**
+ * 체크포인트마다 대략의 기간 (루트 화면 아래 칩: '1 · 로그인  11/19 – 11/24').
+ * 오늘 ~ 마감일을 체크포인트 수로 나누되, 구간끼리 조금씩 겹치게(디자인·프론트·백이 앞뒤로 이어 받도록) 잡아요.
+ *   길이 = 전체 기간의 약 36% · 시작 간격 = (전체 − 길이) ÷ (개수 − 1) · 마지막 구간은 마감일에 끝남
+ *   예) 11/19 시작 · 12/03 마감 · 4개 → 11/19–11/24, 11/22–11/27, 11/25–11/30, 11/28–12/03 (피그마 R00 과 같음)
+ * 서버가 체크포인트별 날짜를 주면 그 값을 쓰면 돼요.
+ */
+export function checkpointRanges(p: Pick<Plan, 'date' | 'checkpoints'>, start = new Date()): string[] {
+  const end = new Date(`${p.date}T00:00:00`)
+  const n = p.checkpoints.length
+  if (Number.isNaN(end.getTime()) || n === 0) return p.checkpoints.map(() => '')
+  const s = new Date(start)
+  s.setHours(0, 0, 0, 0)
+  const span = Math.max(0, Math.round((end.getTime() - s.getTime()) / 86_400_000))
+  const len = Math.max(1, Math.round(span * 0.36))
+  const step = n > 1 ? (span - len) / (n - 1) : 0
+  const day = (k: number) => new Date(s.getTime() + Math.round(k) * 86_400_000)
+  return p.checkpoints.map((_, i) => {
+    const from = day(i * step)
+    const to = i === n - 1 ? end : day(i * step + len)
+    return `${md(from)} – ${md(to)}`
+  })
+}

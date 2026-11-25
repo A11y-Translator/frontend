@@ -4,7 +4,7 @@ import type { RoleId } from '@/data/mock'
 export type VersionId = 'current' | 'dev'
 
 export const GITHUB_STATUS = 'GitHub 연결됨 · campus-app'
-export const ROOM = { name: '프론트', people: '2명' }
+export const ROOM = { name: '프론트 방', people: '2명' }
 export const SCREEN_NAME = '메인 피드'
 export const PR_CHIP = 'dev 반영 · PR #25, #26'
 

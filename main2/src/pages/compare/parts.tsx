@@ -40,7 +40,7 @@ export function CompareShell({ variant, children }: { variant: Tone; children: R
             <button
               type="button"
               onClick={soon('기획 문서')}
-              className="rounded-[13px] border border-line bg-fill-3 px-2.5 py-[5px] text-xs leading-none font-medium whitespace-nowrap text-ink hover:bg-white/[0.14]"
+              className="rounded-[13px] border border-line bg-fill-3 px-2.5 py-[5px] text-xs leading-none font-medium whitespace-nowrap text-ink hover:bg-fill-3"
             >
               기획 문서 ↗
             </button>
@@ -65,7 +65,7 @@ export function CompareShell({ variant, children }: { variant: Tone; children: R
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {/* 디자인이 두 가지라 서로 오갈 수 있게 (어느 쪽을 쓸지 정해지면 지워요) */}
-          <nav aria-label="버전 비교 시안" className="flex items-center gap-0.5 rounded-[14px] border border-dashed border-white/20 p-0.5">
+          <nav aria-label="버전 비교 시안" className="flex items-center gap-0.5 rounded-[14px] border border-dashed border-ink/20 p-0.5">
             {VARIANTS.map((v) => {
               const on = v.id === variant
               return (
