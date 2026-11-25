@@ -90,7 +90,7 @@ export function RequestProgressDialog({ card, open, onOpenChange, onDelivered }:
           <span
             aria-hidden
             className={`flex size-4 shrink-0 items-center justify-center rounded-lg border text-[10px] leading-normal font-bold ${
-              askConfirm ? 'border-[rgb(214_227_111/0.22)] bg-[rgb(214_227_111/0.13)] text-summit' : 'border-white/25 text-transparent'
+              askConfirm ? 'border-role-back/25 bg-role-back-bg text-ink' : 'border-ink/20 text-transparent'
             }`}
           >
             ✓

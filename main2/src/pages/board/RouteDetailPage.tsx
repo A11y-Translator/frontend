@@ -108,7 +108,7 @@ export function RouteDetailPage() {
                       {pin.no}
                     </button>
                   ) : (
-                    <span className="relative flex size-[30px] items-center justify-center rounded-full bg-[rgb(244_244_241/0.16)] font-mono text-[11px] leading-none font-medium text-ink">
+                    <span className="relative flex size-[30px] items-center justify-center rounded-full bg-fill-2 font-mono text-[11px] leading-none font-medium text-ink">
                       {pin.no}
                       <span className="sr-only"> {pin.name} (예정)</span>
                     </span>
@@ -122,7 +122,7 @@ export function RouteDetailPage() {
                       type="button"
                       onClick={openSheet}
                       aria-haspopup="dialog"
-                      className="absolute bottom-[calc(100%+14px)] -left-[63px] flex h-[94px] w-[164px] flex-col items-start rounded-2xl border border-[rgb(244_244_241/0.16)] bg-surface px-3 pt-2.5 text-left whitespace-nowrap hover:border-white/30"
+                      className="absolute bottom-[calc(100%+14px)] -left-[63px] flex h-[94px] w-[164px] flex-col items-start rounded-2xl border border-line bg-surface px-3 pt-2.5 text-left whitespace-nowrap hover:border-ink/20"
                     >
                       <span className="max-w-full truncate text-[13px] leading-5 font-bold text-ink">{next.title}</span>
                       <span className="mt-1 font-mono text-[10px] leading-[15px] font-medium text-muted">{next.dates}</span>
@@ -136,7 +136,7 @@ export function RouteDetailPage() {
                       aria-hidden
                       className="absolute bottom-[calc(100%-10px)] -left-[27px] -z-10 h-[62px] w-[108px] rounded-2xl border border-line bg-fill px-[10px] pt-1.5 whitespace-nowrap"
                     >
-                      <p className="text-[13px] leading-5 font-bold text-summit">{ROUTE_SUMMIT.name}</p>
+                      <p className="text-[13px] leading-5 font-bold text-ink">{ROUTE_SUMMIT.name}</p>
                       <p className="mt-1 font-mono text-[10px] leading-[17px] font-medium text-ink">{summitWhen}</p>
                     </div>
                   )}
@@ -202,7 +202,7 @@ export function RouteDetailPage() {
 
 function SectionBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[rgb(159_195_211/0.22)] bg-[rgb(159_195_211/0.13)] font-mono text-[10px] leading-none font-medium text-checkpoint">
+    <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-role-front/25 bg-role-front-bg font-mono text-[10px] leading-none font-medium text-checkpoint">
       {children}
     </span>
   )
@@ -231,7 +231,7 @@ function SectionPanel({
       id={id}
       aria-labelledby={headingId}
       style={style}
-      className={`flex min-w-0 flex-col rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-[15px] ${className}`}
+      className={`flex min-w-0 flex-col rounded-[20px] border border-line bg-fill p-[15px] ${className}`}
     >
       <div className="flex min-h-9 items-center gap-2.5">
         <SectionBadge>{section.no}</SectionBadge>
@@ -241,14 +241,14 @@ function SectionPanel({
           </h2>
           <p className="font-mono text-[10px] font-medium text-muted">{section.dates}</p>
         </div>
-        <span className="shrink-0 rounded-[9px] border border-[rgb(214_227_111/0.22)] bg-[rgb(214_227_111/0.13)] px-2 py-[3px] text-[10px] leading-[normal] font-bold whitespace-nowrap text-summit">
+        <span className="shrink-0 rounded-[9px] border border-role-back/25 bg-role-back-bg px-2 py-[3px] text-[10px] leading-[normal] font-bold whitespace-nowrap text-ink">
           {section.status}
         </span>
       </div>
 
       {section.parts.map((part) => (
         <fieldset key={part.label} className="m-0 mt-6 flex min-w-0 flex-col gap-1 border-0 p-0">
-          <legend className="mb-1 p-0 text-[10px] leading-[15px] font-bold text-summit">{part.label}</legend>
+          <legend className="mb-1 p-0 text-[10px] leading-[15px] font-bold text-ink">{part.label}</legend>
           {part.todos.map((t) => (
             <TodoRow key={t.id} tone="route" label={t.label} source={t.source} checked={todos[t.id]} onChange={(v) => onToggle(t.id, v)} />
           ))}
@@ -273,8 +273,8 @@ function UpcomingPanel({
 }) {
   const headingId = useId()
   return (
-    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-2 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-[15px]">
-      <h2 id={headingId} className="text-[10px] leading-[15px] font-bold text-summit">
+    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-2 rounded-[20px] border border-line bg-fill p-[15px]">
+      <h2 id={headingId} className="text-[10px] leading-[15px] font-bold text-ink">
         예정 구간
       </h2>
       <ol className="m-0 flex list-none flex-col gap-1 p-0">
@@ -296,7 +296,7 @@ function UpcomingPanel({
                   type="button"
                   onClick={onOpenSheet}
                   aria-haspopup="dialog"
-                  className="flex min-h-11 w-full items-center gap-2.5 rounded-xl border border-[rgb(244_244_241/0.16)] bg-surface px-2.5 py-1.5 text-left hover:border-white/30"
+                  className="flex min-h-11 w-full items-center gap-2.5 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-left hover:border-ink/20"
                 >
                   {body}
                   <span className="shrink-0 text-[11px] text-muted">{ROUTE_NEXT.note}</span>
@@ -312,7 +312,7 @@ function UpcomingPanel({
             <img src={routeFlag} alt="" className="size-3" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-px leading-[1.4]">
-            <span className="text-[13px] font-bold text-summit">{ROUTE_SUMMIT.name}</span>
+            <span className="text-[13px] font-bold text-ink">{ROUTE_SUMMIT.name}</span>
             <span className="font-mono text-[10px] font-medium text-ink">{summitWhen}</span>
           </span>
         </li>

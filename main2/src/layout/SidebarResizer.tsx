@@ -71,6 +71,8 @@ export function SidebarResizer({ navRef, collapsed, setCollapsed, setWidth, onRe
   const now = Math.round(collapsed ? SIDEBAR_RAIL : currentW())
 
   return (
+    // 포커스되는 separator 는 ARIA 에서 조절 위젯(슬라이더처럼)이라 규칙의 오탐이에요
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="separator"
       aria-orientation="vertical"
@@ -79,6 +81,7 @@ export function SidebarResizer({ navRef, collapsed, setCollapsed, setWidth, onRe
       aria-valuemax={SIDEBAR_MAX}
       aria-valuenow={now}
       aria-valuetext={collapsed ? '접힘' : `${now}px`}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
       title="끌어서 폭 조절 · 두 번 클릭하면 기본 폭"
       onPointerDown={onPointerDown}

@@ -4,9 +4,10 @@
 export type RoleId = 'design' | 'front' | 'back'
 
 export const ROLE: Record<RoleId, { label: string; color: string; bg: string; path: string }> = {
-  design: { label: '디자인', color: '#f2ff9b', bg: 'rgb(61 65 54 / 0.95)', path: '/rooms/design' },
-  front: { label: '프론트', color: '#ece8fd', bg: 'rgb(61 62 67 / 0.95)', path: '/rooms/front' },
-  back: { label: '백', color: '#b9fcff', bg: 'rgb(37 62 54 / 0.95)', path: '/rooms/back' },
+  // 색은 CSS 변수라 밝은 화면 / 어두운 곳(.theme-dark)에서 알맞은 값으로 바뀌어요 (styles/index.css)
+  design: { label: '디자인', color: 'var(--color-role-design)', bg: 'var(--color-role-design-bg)', path: '/rooms/design' },
+  front: { label: '프론트', color: 'var(--color-role-front)', bg: 'var(--color-role-front-bg)', path: '/rooms/front' },
+  back: { label: '백', color: 'var(--color-role-back)', bg: 'var(--color-role-back-bg)', path: '/rooms/back' },
 }
 
 export const WORKSPACE = { name: 'A11y Team' }

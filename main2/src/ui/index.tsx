@@ -5,7 +5,7 @@ import { ROLE, type RoleId } from '@/data/mock'
 
 type DivProps = HTMLAttributes<HTMLDivElement>
 
-/** 유리 패널: 반투명 어두운 면 + 블러 + 둥근 24px (일정 · 기획 문서 · 체크포인트 상세 등) */
+/** 큰 패널: 밝은 화면은 흰 카드, 어두운 곳은 반투명 유리 · 둥근 24px (일정 · 기획 문서 · 체크포인트 상세 등) */
 export function GlassPanel({ className = '', children, ...rest }: DivProps) {
   return (
     <div
@@ -17,7 +17,7 @@ export function GlassPanel({ className = '', children, ...rest }: DivProps) {
   )
 }
 
-/** 불투명 카드: #1c1d1f + 둥근 16px */
+/** 불투명 카드: 흰색(어두운 곳은 #1c1d1f) + 둥근 16px */
 export function Card({ className = '', children, ...rest }: DivProps) {
   return (
     <div {...rest} className={`rounded-2xl border border-line bg-surface ${className}`}>
@@ -41,13 +41,13 @@ export function PageHeader({ title, sub, right }: { title: ReactNode; sub?: Reac
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement>
 
-/** 주 버튼: 연두색 알약 (루트 생성하기 · 이 루트로 출발하기) */
+/** 주 버튼: 먹색 알약 (루트 생성하기 · 이 루트로 출발하기). 어두운 곳(.theme-dark)에서는 연두 알약 */
 export function PrimaryButton({ className = '', type = 'button', children, ...rest }: BtnProps) {
   return (
     <button
       type={type}
       {...rest}
-      className={`inline-flex items-center justify-center rounded-full bg-summit px-6 py-3.5 text-[15px] leading-none font-semibold whitespace-nowrap text-on-summit transition hover:brightness-105 active:brightness-95 disabled:opacity-50 ${className}`}
+      className={`inline-flex items-center justify-center rounded-full bg-primary px-6 py-3.5 text-[15px] leading-none font-semibold whitespace-nowrap text-on-primary transition hover:brightness-125 active:brightness-95 disabled:opacity-50 ${className}`}
     >
       {children}
     </button>
@@ -111,7 +111,7 @@ export function Chip({ className = '', children }: { className?: string; childre
 
 /** "AI 추천" 칩 */
 export function AiChip() {
-  return <Chip className="border border-[rgb(236_232_253/0.22)] bg-[rgb(236_232_253/0.13)] text-role-front">AI 추천</Chip>
+  return <Chip className="border border-role-front/25 bg-role-front-bg text-role-front">AI 추천</Chip>
 }
 
 /** 역할 색 점 (디자인 연두 · 프론트 연보라 · 백 하늘) */

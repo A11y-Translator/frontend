@@ -31,11 +31,11 @@ export function SectionTodoSheet({ open, onOpenChange }: { open: boolean; onOpen
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/60" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-32px)] w-[480px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 overflow-y-auto rounded-[28px] border border-line bg-[rgb(27_28_31/0.9)] p-[clamp(20px,5vw,28px)] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_30px_60px_0_rgb(0_0_0/0.45)] backdrop-blur-[20px] outline-none">
+        <Dialog.Content className="fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-32px)] w-[480px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 overflow-y-auto rounded-[28px] border border-line bg-surface p-[clamp(20px,5vw,28px)] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_30px_60px_0_rgb(0_0_0/0.45)] backdrop-blur-[20px] outline-none">
           {/* 머리: 구간 칩 · 날짜 · 제목 · 설명 */}
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-[9.5px] border border-[rgb(214_227_111/0.22)] bg-[rgb(214_227_111/0.13)] px-2 py-[3px] text-[11px] leading-none font-bold whitespace-nowrap text-summit">
+              <span className="rounded-[9.5px] border border-role-back/25 bg-role-back-bg px-2 py-[3px] text-[11px] leading-none font-bold whitespace-nowrap text-ink">
                 {SECTION_SHEET.chip}
               </span>
               <span className="text-xs font-medium text-muted">{SECTION_SHEET.meta}</span>
@@ -61,12 +61,12 @@ export function SectionTodoSheet({ open, onOpenChange }: { open: boolean; onOpen
                   <Link
                     to={c.path}
                     onClick={() => onOpenChange(false)}
-                    className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-fill px-3 py-2.5 hover:border-white/20"
+                    className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-fill px-3 py-2.5 hover:border-ink/20"
                   >
                     <img src={dotBlocked} alt="" className="size-[7px] shrink-0" />
                     <span className="text-[13px] font-bold text-ink">{c.title}</span>
                     <span className="min-w-0 flex-1 text-xs text-muted">{c.flow}</span>
-                    <span className="text-xs font-bold whitespace-nowrap text-[#ff8a6b]">{c.status}</span>
+                    <span className="text-xs font-bold whitespace-nowrap text-danger">{c.status}</span>
                   </Link>
                 </li>
               ))}

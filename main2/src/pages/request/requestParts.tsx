@@ -84,7 +84,7 @@ export function DialogFooter({ cancelLabel = '취소', submitLabel }: { cancelLa
 
 export const FIELD_LABEL = 'text-[13px] leading-normal font-semibold text-ink'
 export const FIELD_INPUT =
-  'w-full rounded-[10px] border border-line bg-transparent px-3.5 py-3 text-sm leading-normal font-medium text-ink placeholder:font-normal placeholder:text-muted focus-visible:border-white/25 aria-invalid:border-blocked'
+  'w-full rounded-[10px] border border-line bg-transparent px-3.5 py-3 text-sm leading-normal font-medium text-ink placeholder:font-normal placeholder:text-muted focus-visible:border-ink/20 aria-invalid:border-blocked'
 /** 안 보이는 radio/checkbox 를 감싼 label 에 포커스 테두리 표시 */
 export const FOCUS_WITHIN = 'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-summit'
 
@@ -189,9 +189,9 @@ export function RequestStepper({ steps, size = 'sm', align = 'start' }: { steps:
 export function ResultPreview({ file }: { file: { source: string; title: string; note: string; version: string } }) {
   return (
     <div className="@container w-full overflow-clip rounded-[20px] border border-line bg-fill">
-      <div aria-hidden className="relative h-[130px] w-full overflow-clip bg-white/[0.03]">
+      <div aria-hidden className="relative h-[130px] w-full overflow-clip bg-fill">
         <img src={thumbResult} alt="" className="absolute top-[7px] left-[60px] h-[116px] w-[70px] max-w-none" />
-        <div className="absolute top-[14px] left-[78px] h-[30px] w-[34px] rounded border-[1.5px] border-dashed border-[#e8710a] bg-[rgb(232_113_10/0.08)]" />
+        <div className="absolute top-[14px] left-[78px] h-[30px] w-[34px] rounded border-[1.5px] border-dashed border-[#e8710a] bg-due/10" />
         <div className="absolute top-[18px] left-[150px] flex items-center rounded-[13px] border border-[#f9c9a3] bg-fill-3 px-2.5 py-[5px]">
           <span className="text-xs leading-normal font-semibold whitespace-nowrap text-muted">{file.note}</span>
         </div>

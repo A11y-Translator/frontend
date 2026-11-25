@@ -80,13 +80,13 @@ export function VersionComparePage() {
           </span>
           <VersionPicker side="오른쪽" value={target} onChange={setTarget} />
           <span aria-hidden className="hidden h-7 w-px rounded-[14px] bg-contour @2xl:block" />
-          <span className="rounded-[11px] bg-[rgb(40_60_67/0.95)] px-2 py-1 text-xs font-bold whitespace-nowrap text-checkpoint-text">바뀐 곳 {changeCount}</span>
-          <span className="rounded-[11px] bg-[rgb(52_62_43/0.95)] px-2 py-1 text-xs font-bold whitespace-nowrap text-summit">미해결 코멘트 {c.openCount}</span>
+          <span className="rounded-[11px] bg-role-front-bg px-2 py-1 text-xs font-bold whitespace-nowrap text-checkpoint-text">바뀐 곳 {changeCount}</span>
+          <span className="rounded-[11px] bg-fill-3 px-2 py-1 text-xs font-bold whitespace-nowrap text-ink">미해결 코멘트 {c.openCount}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-[14px] border border-line bg-fill-3 py-1.5 pr-2.5 pl-3 text-xs whitespace-nowrap hover:bg-white/[0.14]">
+            <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-[14px] border border-line bg-fill-3 py-1.5 pr-2.5 pl-3 text-xs whitespace-nowrap hover:bg-fill-3">
               <span className="font-medium text-muted">화면</span>
               <span className="font-bold text-ink">{SCREEN_NAME}</span>
               <img src={iconChevronDown} alt="" className="size-3" />
@@ -103,7 +103,7 @@ export function VersionComparePage() {
                   {CHECKPOINTS.filter((p) => p.no > 0).map((p) => (
                     <DropdownMenu.RadioItem key={p.no} value={p.name} className={MENU_ITEM}>
                       {p.name}
-                      <DropdownMenu.ItemIndicator className="text-summit">✓</DropdownMenu.ItemIndicator>
+                      <DropdownMenu.ItemIndicator className="text-ink">✓</DropdownMenu.ItemIndicator>
                     </DropdownMenu.RadioItem>
                   ))}
                 </DropdownMenu.RadioGroup>
@@ -143,7 +143,7 @@ export function VersionComparePage() {
             </div>
           ) : (
             // 겹쳐 보기: 왼쪽 버전 위에 오른쪽 버전을 반투명하게 (피그마에 없는 화면 — 임시 구성)
-            <div className="flex flex-col items-center gap-3 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-3.5">
+            <div className="flex flex-col items-center gap-3 rounded-[20px] border border-line bg-fill p-3.5">
               <div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
                 <h3 className="flex flex-wrap items-center gap-1.5 text-[13px] font-bold text-ink">
                   <img src={DOT[base]} alt="" className="size-2" />
@@ -164,7 +164,7 @@ export function VersionComparePage() {
                     step={5}
                     value={overlay}
                     onChange={(e) => setOverlay(Number(e.target.value))}
-                    className="w-32 accent-summit"
+                    className="w-32 accent-ink"
                   />
                   <Mono className="w-8 text-right text-[10px]">{overlay}%</Mono>
                 </label>
@@ -214,7 +214,7 @@ function VersionPicker({ side, value, onChange }: { side: string; value: Version
                     <span className="font-bold">{VERSIONS[id].barLine}</span>
                   </span>
                 </span>
-                <DropdownMenu.ItemIndicator className="text-summit">✓</DropdownMenu.ItemIndicator>
+                <DropdownMenu.ItemIndicator className="text-ink">✓</DropdownMenu.ItemIndicator>
               </DropdownMenu.RadioItem>
             ))}
           </DropdownMenu.RadioGroup>
@@ -232,16 +232,16 @@ function Pane({ version, children }: { version: VersionId; children: ReactNode }
   return (
     <section
       aria-label={`${v.paneName} ${v.chip}`}
-      className="flex min-w-[270px] flex-1 flex-col items-center gap-3 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-3.5"
+      className="flex min-w-[270px] flex-1 flex-col items-center gap-3 rounded-[20px] border border-line bg-fill p-3.5"
     >
       <div className="flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <div className="flex items-center gap-1.5">
           <img src={DOT[version]} alt="" className="size-2 shrink-0" />
           <h3 className="text-[13px] font-bold whitespace-nowrap text-ink">{v.paneName}</h3>
           {version === 'current' ? (
-            <span className="rounded-[9.5px] border border-line bg-fill-3 px-1.5 py-0.5 text-[11px] font-bold whitespace-nowrap text-summit">{v.chip}</span>
+            <span className="rounded-[9.5px] border border-line bg-fill-3 px-1.5 py-0.5 text-[11px] font-bold whitespace-nowrap text-ink">{v.chip}</span>
           ) : (
-            <span className="rounded-[8.5px] bg-[rgb(40_60_67/0.95)] px-1.5 py-0.5 font-mono text-[10px] font-medium whitespace-nowrap text-checkpoint-text">{v.chip}</span>
+            <span className="rounded-[8.5px] bg-role-front-bg px-1.5 py-0.5 font-mono text-[10px] font-medium whitespace-nowrap text-checkpoint-text">{v.chip}</span>
           )}
         </div>
         <button type="button" onClick={soon(`${v.url} 새 창으로 열기`)} className="rounded text-[11px] font-medium whitespace-nowrap text-muted hover:text-ink">
@@ -276,7 +276,7 @@ function Legend({ show, onToggle }: { show: ShowState; onToggle: (key: keyof Sho
           {it.dot ? (
             <img src={it.dot} alt="" className="size-2.5" />
           ) : (
-            <span aria-hidden className="h-2.5 w-3.5 rounded-[5px] border-[1.2px] border-dashed border-[rgb(169_201_218/0.44)] bg-[rgb(40_60_67/0.95)]" />
+            <span aria-hidden className="h-2.5 w-3.5 rounded-[5px] border-[1.2px] border-dashed border-role-front/25 bg-role-front-bg" />
           )}
           {it.label}
         </button>
@@ -378,7 +378,7 @@ function CommentsPanel({
         )}
       </div>
 
-      <form onSubmit={submit} className="flex items-center gap-2 rounded-xl border border-line py-2 pr-2 pl-3 focus-within:border-white/25">
+      <form onSubmit={submit} className="flex items-center gap-2 rounded-xl border border-line py-2 pr-2 pl-3 focus-within:border-ink/20">
         <input
           ref={inputRef}
           value={text}
@@ -417,10 +417,14 @@ function CommentCard({
 }) {
   const action = 'rounded text-xs font-medium whitespace-nowrap text-muted hover:text-ink'
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- 마우스 편의용: 키보드는 핀 버튼(PinBadge)으로 같은 선택을 할 수 있어요
     <li
       ref={refCb}
-      onClick={onSelect}
-      className={`flex flex-col items-start gap-2 p-3 ${selected ? 'rounded-[20px] border-[1.5px] border-white/[0.06] bg-white/[0.03]' : 'rounded-2xl border border-line bg-fill'}`}
+      onClick={(e) => {
+        // 안쪽 버튼 · 입력칸을 누른 건 선택으로 치지 않아요
+        if (!(e.target as HTMLElement).closest('button, a, input, textarea')) onSelect()
+      }}
+      className={`flex flex-col items-start gap-2 p-3 ${selected ? 'rounded-[20px] border-[1.5px] border-line bg-fill' : 'rounded-2xl border border-line bg-fill'}`}
     >
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -454,7 +458,7 @@ function CommentCard({
         </ul>
       )}
 
-      <div className="flex flex-wrap items-center gap-3" onClick={(e) => e.stopPropagation()}>
+      <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={onReply} className={action}>
           답글
         </button>
@@ -462,7 +466,7 @@ function CommentCard({
           {x.resolved ? '미해결로 되돌리기' : '해결로 표시'}
         </button>
         {selected && !x.resolved && (
-          <Link to="/requests/new" className="rounded-[10.5px] bg-[rgb(52_62_43/0.95)] px-2 py-1 text-[11px] font-bold whitespace-nowrap text-summit hover:brightness-110">
+          <Link to="/requests/new" className="rounded-[10.5px] bg-fill-3 px-2 py-1 text-[11px] font-bold whitespace-nowrap text-ink hover:brightness-110">
             넘겨주기로 만들기
           </Link>
         )}

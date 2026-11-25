@@ -32,7 +32,7 @@ export function RoleTag({ role }: { role: RoleId }) {
 }
 
 const TONE: Record<FlowTone, string> = {
-  due: 'text-xs font-semibold text-[#f1c28d]',
+  due: 'text-xs font-semibold text-due',
   muted: 'text-xs font-semibold text-muted',
   action: 'text-xs font-semibold text-checkpoint-text',
   blocked: 'text-xs font-semibold text-blocked',

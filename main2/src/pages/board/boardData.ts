@@ -19,45 +19,47 @@ export const SOURCE_LABEL: Record<TodoSource, string> = { plan: '기획안', ai:
 
 // 최종 마감 칩은 시작하기에서 정한 마감일로 만들어요 (@/data/planStore 의 deadlineChip)
 
-/**
- * 원정대 흐름 작은 지도의 핀 자리. x·y 는 피그마 좌표(408.919 × 168.223 상자 안, 핀 왼쪽 위).
- * 이름 · 개수는 planStore 의 체크포인트에서 오고, 여기 값은 "자리"로만 써요 (MainBoardPage 의 flowPins).
- */
-export const FLOW_MAP = { width: 408.919, height: 168.223 }
-export const FLOW_PINS: { no: number | 'summit'; label: string; x: number; y: number }[] = [
-  { no: 1, label: '로그인', x: 1.63, y: 107.81 },
-  { no: 2, label: '메인보드', x: 97.47, y: 85.05 },
-  { no: 3, label: '마이페이지', x: 193.3, y: 58.7 },
-  { no: 4, label: '알림', x: 289.13, y: 29.95 },
-  { no: 'summit', label: '완주', x: 390.95, y: 0 },
-]
-
-/** 원정대 흐름 아래 요청 줄은 넘겨주기 카드 저장소(@/data/requestStore)에서 만들어요. 한 번에 보여 줄 줄 수 (피그마: 2줄) */
-export const FLOW_ROWS = 2
-
-/** 역할(방) 카드 — 피그마에는 세 카드의 글자가 모두 같아요 */
+/** 역할(방) 카드 — Figma "01 메인": 방마다 AI 요약 · 최근 자료 · 마지막 메시지가 달라요 */
 export interface RoomCardData {
   role: RoleId
+  /** "새 메시지 3" — 방에 안 읽은 메시지 수 (서버 연결 전 예시 값) */
+  newMessages: number
   aiSummary: string
   latestLink: { kind: string; title: string }
   lastMessage: { title: string; when: string; lines: string[] }
 }
 
-const ROOM_CARD_BODY = {
-  aiSummary: '로그인 화면 v2 넘김 완료 · 마이페이지 시안 오늘 마감 예정',
-  latestLink: { kind: 'FIGMA', title: '로그인 화면 v2' },
-  lastMessage: {
-    title: '작업 진행 상황',
-    when: '10분 전',
-    lines: ['오늘 마이페이지 전부 작업 완료했고, 사용성테스트 진행 후 추후 수정하겠습니다.', '더 필요한거 있으면 코멘트 남겨주세요.'],
-  },
-}
-
-/** 화면에 놓이는 순서: 디자인 · 백 · 프론트 */
+/** 화면에 놓이는 순서: (흐름) · 디자인 방 / 프론트 방 · 백 방 */
 export const ROOM_CARDS: RoomCardData[] = [
-  { role: 'design', ...ROOM_CARD_BODY },
-  { role: 'back', ...ROOM_CARD_BODY },
-  { role: 'front', ...ROOM_CARD_BODY },
+  {
+    role: 'design',
+    newMessages: 3,
+    aiSummary: '로그인 화면 v2 넘김 완료 · 마이페이지 시안 오늘 마감 예정',
+    latestLink: { kind: 'FIGMA', title: '로그인 화면 v2' },
+    lastMessage: {
+      title: '작업 진행 상황',
+      when: '10분 전',
+      lines: ['오늘 마이페이지 전부 작업 완료했고, 사용성테스트 진행 후 추후 수정하겠습니다.', '더 필요한거 있으면 코멘트 남겨주세요.'],
+    },
+  },
+  {
+    role: 'front',
+    newMessages: 5,
+    aiSummary: '메인 화면 배포 완료 · 로그인은 API 대기로 목업 진행 중',
+    latestLink: { kind: '배포', title: '메인 화면 미리보기' },
+    lastMessage: { title: '작업 진행 상황', when: '30분 전', lines: ['로그인 API 나오기 전까지 목업으로 진행 중'] },
+  },
+  {
+    role: 'back',
+    newMessages: 1,
+    aiSummary: '로그인 API 토큰 처리 문제로 지연 · 회원가입 API 명세 전달 완료',
+    latestLink: { kind: 'API 문서', title: '회원가입 API 명세' },
+    lastMessage: {
+      title: '작업 진행 상황',
+      when: '10분 전',
+      lines: ['토큰 처리 문제는 오늘 안에 해결해서 로그인 API 넘길게요.', '회원가입 API 는 명세대로 진행 중이에요.'],
+    },
+  },
 ]
 
 /* ───────── Sheet · 2구간 할 일 추천 ───────── */

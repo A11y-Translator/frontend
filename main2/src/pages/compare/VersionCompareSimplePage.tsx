@@ -100,7 +100,7 @@ export function VersionCompareSimplePage() {
               <section
                 key={version}
                 aria-label={VERSIONS[version].simpleName}
-                className="flex min-w-[274px] flex-1 flex-col items-center gap-3.5 rounded-[20px] border border-white/[0.06] bg-white/[0.03] p-4"
+                className="flex min-w-[274px] flex-1 flex-col items-center gap-3.5 rounded-[20px] border border-line bg-fill p-4"
               >
                 <div className="flex w-full flex-col gap-0.5">
                   <h3 className="flex items-center gap-1.5 text-sm font-bold text-ink">
@@ -175,7 +175,7 @@ export function VersionCompareSimplePage() {
             </div>
 
             {composing ? (
-              <form onSubmit={submit} className="flex flex-col gap-2 rounded-2xl border border-line bg-fill p-3 focus-within:border-white/30">
+              <form onSubmit={submit} className="flex flex-col gap-2 rounded-2xl border border-line bg-fill p-3 focus-within:border-ink/20">
                 <label htmlFor="new-comment" className="text-xs font-medium text-muted">
                   {c.draft ? `${VERSIONS[c.draft.version].simpleName} 화면에 찍은 자리에 남겨요` : '화면을 누르면 그 자리에 핀이 찍혀요'}
                 </label>
@@ -205,7 +205,7 @@ export function VersionCompareSimplePage() {
                 type="button"
                 onClick={openComposer}
                 aria-keyshortcuts="C"
-                className="w-full rounded-[20.5px] border border-line bg-white/[0.08] px-4 py-3 text-sm leading-normal font-bold whitespace-nowrap text-ink hover:bg-white/[0.12]"
+                className="w-full rounded-[20.5px] border border-line bg-fill-2 px-4 py-3 text-sm leading-normal font-bold whitespace-nowrap text-ink hover:bg-fill-3"
               >
                 코멘트 남기기
               </button>
@@ -246,28 +246,32 @@ function SimpleComment({
     setReply('')
   }
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- 마우스 편의용: 키보드는 핀 버튼(PinBadge)으로 같은 선택을 할 수 있어요
     <li
       ref={refCb}
-      onClick={onSelect}
-      className={`flex flex-col items-start gap-1.5 p-3 ${selected ? 'rounded-2xl bg-[rgb(40_60_67/0.95)]' : 'rounded-[10px]'} ${x.resolved ? 'opacity-70' : ''}`}
+      onClick={(e) => {
+        // 안쪽 버튼 · 입력칸을 누른 건 선택으로 치지 않아요
+        if (!(e.target as HTMLElement).closest('button, a, input, textarea')) onSelect()
+      }}
+      className={`flex flex-col items-start gap-1.5 p-3 ${selected ? 'rounded-2xl bg-role-front-bg' : 'rounded-[10px]'} ${x.resolved ? 'opacity-70' : ''}`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
         <PinBadge comment={x} tone="simple" selected={selected} onSelect={onSelect} />
         <span className="text-[13px] font-bold whitespace-nowrap text-ink">{x.author}</span>
-        <span className={`text-xs font-medium whitespace-nowrap ${selected ? 'text-[#b4bcc1]' : 'text-muted'}`}>
+        <span className={`text-xs font-medium whitespace-nowrap ${selected ? 'text-muted' : 'text-muted'}`}>
           {ROLE[x.role].label} · {x.time}
           {x.resolved && ' · 해결됨'}
         </span>
       </div>
       <p className="text-sm leading-normal text-ink">{x.simpleText}</p>
 
-      <div className="flex items-center gap-3.5 text-xs" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center gap-3.5 text-xs">
         <button
           type="button"
           aria-expanded={threadOpen}
           aria-controls={threadId}
           onClick={onToggleThread}
-          className={`rounded font-medium whitespace-nowrap hover:text-ink ${selected ? 'text-[#b4bcc1]' : 'text-muted'}`}
+          className={`rounded font-medium whitespace-nowrap hover:text-ink ${selected ? 'text-muted' : 'text-muted'}`}
         >
           답글{x.replies.length > 0 && ` ${x.replies.length}`}
         </button>
@@ -277,14 +281,14 @@ function SimpleComment({
       </div>
 
       {threadOpen && (
-        <div id={threadId} className="flex w-full flex-col gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+        <div id={threadId} className="flex w-full flex-col gap-2 pt-1">
           {x.replies.length > 0 && (
             <ul className="flex flex-col gap-2" aria-label="답글">
               {x.replies.map((r, i) => (
-                <li key={i} className="flex flex-col gap-0.5 border-l-2 border-white/15 pl-2.5">
+                <li key={i} className="flex flex-col gap-0.5 border-l-2 border-ink/20 pl-2.5">
                   <p className="text-xs">
                     <span className="font-bold text-ink">{r.author}</span>{' '}
-                    <span className={`font-medium ${selected ? 'text-[#b4bcc1]' : 'text-muted'}`}>
+                    <span className={`font-medium ${selected ? 'text-muted' : 'text-muted'}`}>
                       {ROLE[r.role].label} · {r.time}
                     </span>
                   </p>
@@ -293,13 +297,13 @@ function SimpleComment({
               ))}
             </ul>
           )}
-          <form onSubmit={submit} className="flex items-center gap-2 rounded-xl border border-white/15 py-1.5 pr-1.5 pl-3 focus-within:border-white/40">
+          <form onSubmit={submit} className="flex items-center gap-2 rounded-xl border border-ink/20 py-1.5 pr-1.5 pl-3 focus-within:border-ink/20">
             <input
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               aria-label={`${x.id}번 코멘트에 답글 달기`}
               placeholder="답글 달기"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-[#b4bcc1] focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-muted focus:outline-none"
             />
             <button type="submit" className="rounded-[13px] bg-summit px-3 py-1.5 text-xs font-bold whitespace-nowrap text-on-summit hover:brightness-105">
               보내기
