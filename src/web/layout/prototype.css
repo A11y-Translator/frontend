@@ -391,6 +391,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
+.prototype-project-grid.prototype-project-grid--all {
+  /* 프로젝트 목록 화면: 폭에 맞춰 여러 줄로 */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
 .prototype-project-grid > li {
   position: relative;
   min-width: 0;

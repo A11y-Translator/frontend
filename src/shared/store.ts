@@ -216,6 +216,7 @@ export const actions = {
     const inspection = await api.runInspection(created, 0, onProgress)
     const project: Project = {
       ...created,
+      createdAt: created.createdAt ?? new Date().toISOString(),
       currentVersion: inspection.version,
       status: 'active',
       discover: undefined,

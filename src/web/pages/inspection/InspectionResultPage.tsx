@@ -15,6 +15,7 @@ import { CATEGORY_FILTERS, formatScannedAt, isResolved } from '@/web/common/issu
 import { SiteCapture, type SiteCaptureHandle } from '@/web/common/SiteCapture'
 import { IssueSidePanel } from '@/web/pages/issue/IssueSidePanel'
 import { CommentThread } from '@/web/pages/issue/CommentThread'
+import { ProgressMountain3D } from '@/web/common/ProgressMountain3D'
 import back from '@/shared/assets/figma/chevron-left.svg'
 import refresh from '@/shared/assets/figma/refresh-white.svg'
 import pageIcon from '@/shared/assets/figma/page.svg'
@@ -107,6 +108,15 @@ function InspectionResult({
       setRechecking(false)
     }
   }
+  // 프로젝트 진행도 (3D 산): 이 버전의 모든 페이지 이슈 중 해결한 비율 + 지난 버전들의 해결률
+  const [showProgress, setShowProgress] = useState(true)
+  const solvedCount = issues.filter(isResolved).length
+  const progress = issues.length ? Math.round((solvedCount / issues.length) * 100) : 0
+  const importantLeft = issues.filter((i) => !isResolved(i) && i.priority === 'high').length
+  const milestones = history
+    .filter((h) => h !== inspection && h.issues.length > 0 && (!inspection || h.version < inspection.version))
+    .slice(-5)
+    .map((h) => ({ label: `v${h.version}`, percent: Math.round((h.issues.filter(isResolved).length / h.issues.length) * 100) }))
   const comments = state.comments.filter((c) => c.issueId === selected?.id)
   return (
     <div className="inspection-result">
@@ -137,6 +147,53 @@ function InspectionResult({
             {rechecking ? '검사 중…' : '재검사'}
           </button>
         </header>
+        <section aria-labelledby="project-progress-title" className="rounded-2xl bg-white px-6 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="project-progress-title" className="text-base font-semibold">
+              프로젝트 진행도 <span className="ml-1 text-[#1d4ed8]">{progress}%</span>
+            </h2>
+            <button
+              type="button"
+              aria-expanded={showProgress}
+              aria-controls="project-progress-body"
+              onClick={() => setShowProgress((v) => !v)}
+              className="rounded-lg px-2 py-1 text-sm text-[#5c6068] hover:bg-[#f4f5f7]"
+            >
+              {showProgress ? '접기' : '펼치기'}
+            </button>
+          </div>
+          {showProgress && (
+            <div id="project-progress-body" className="mt-2 grid grid-cols-1 items-center gap-4 @3xl:grid-cols-[minmax(0,1fr)_200px]">
+              <ProgressMountain3D
+                percent={progress}
+                milestones={milestones}
+                seedKey={projectId}
+                label={`프로젝트 진행도 산: 이슈 ${issues.length}개 중 ${solvedCount}개 해결, 정상까지 ${progress}% 올라왔어요.${
+                  milestones.length ? ` 지난 버전 ${milestones.map((m) => `${m.label} ${m.percent}%`).join(', ')}.` : ''
+                }`}
+                className="h-[240px] w-full"
+              />
+              <dl className="grid grid-cols-3 gap-3 text-sm @3xl:grid-cols-1">
+                <div>
+                  <dt className="text-[#5c6068]">해결한 이슈</dt>
+                  <dd className="text-xl font-bold">
+                    {solvedCount}
+                    <span className="text-sm font-medium text-[#5c6068]"> / {issues.length}</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[#5c6068]">남은 중요 이슈</dt>
+                  <dd className="text-xl font-bold text-[#d93636]">{importantLeft}</dd>
+                </div>
+                <div>
+                  <dt className="text-[#5c6068]">검사 버전</dt>
+                  <dd className="text-xl font-bold">{inspection ? `v${inspection.version}` : `v${state.currentVersion}`}</dd>
+                </div>
+                <p className="col-span-3 text-xs text-[#8a8f98] @3xl:col-span-1">끌어서 산을 돌려 볼 수 있어요</p>
+              </dl>
+            </div>
+          )}
+        </section>
         <div className="inspection-result__toolbar">
           <label className="inspection-page-select">
             <img src={pageIcon} alt="" width="16" height="16" />

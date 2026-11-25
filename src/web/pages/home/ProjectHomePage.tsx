@@ -2,23 +2,19 @@ import { useState } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 import { Link, useNavigate } from 'react-router-dom'
 import { actions, findIssueContext, useAppState, workspaceIssues } from '@/shared/store'
-import { CURRENT_USER_ID, memberById } from '@/shared/mocks'
+import { CURRENT_USER_ID } from '@/shared/mocks'
 import { MentionNotice } from '@/web/common/MentionNotice'
 import { useAnnouncer } from '@/web/common/useAnnouncer'
 import { LiveToast } from '@/web/common/LiveToast'
-import { ProjectCardMenu } from './ProjectCardMenu'
+import { ProjectFolderCard } from './ProjectFolderCard'
+import { sortProjects } from '@/web/common/projectSort'
 import { UrlInspectForm } from './UrlInspectForm'
 import { useCreateAndInspect } from './useCreateAndInspect'
-import folderBack from '@/web/assets/prototype-folder-back.svg'
-import folderGlass from '@/web/assets/prototype-folder-glass.svg'
-import folderGrayBack from '@/web/assets/prototype-folder-gray-back.svg'
-import folderGrayGlass from '@/web/assets/prototype-folder-gray-glass.svg'
-import folderHighlight from '@/web/assets/prototype-folder-highlight.svg'
 import folderIcon from '@/web/assets/icon-folder.svg'
 
 export default function ProjectHomePage() {
   const state = useAppState()
-  const { projects, inspectionHistory } = state
+  const { projects } = state
   const [projectId, setProjectId] = useState('')
   const [query, setQuery] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -27,6 +23,10 @@ export default function ProjectHomePage() {
   const createAndInspect = useCreateAndInspect()
   const navigate = useNavigate()
   const selected = projects.find((p) => p.id === projectId)
+  // 내 할 일 진행률: 나에게 배정된 이슈 중 해결한 비율
+  const assigned = workspaceIssues(state).filter((i) => i.assigneeId === CURRENT_USER_ID)
+  const myDone = assigned.filter((i) => i.status === 'resolved').length
+  const myPercent = assigned.length ? Math.round((myDone / assigned.length) * 100) : 0
   const mine = workspaceIssues(state).filter(
     (i) => i.assigneeId === CURRENT_USER_ID && i.status !== 'resolved',
   )
@@ -111,53 +111,9 @@ export default function ProjectHomePage() {
             )}
           </div>
           <ul id="home-project-grid" className="prototype-project-grid">
-            {projects.slice(0, showAll ? undefined : 4).map((p, index) => {
-              const people = [
-                ...new Set(
-                  (
-                    state.inspections[p.id]?.issues ??
-                    state.issues.filter((i) => i.version === p.currentVersion)
-                  ).flatMap((i) => (i.assigneeId ? [i.assigneeId] : [])),
-                ),
-              ].slice(0, 2)
-              return (
-                <li key={p.id}>
-                  <Link to={`/projects/${p.id}/inspection`} className="prototype-folder-link">
-                    <div className="prototype-folder" aria-hidden="true">
-                      <img
-                        className="prototype-folder-back"
-                        src={index % 2 === 0 ? folderBack : folderGrayBack}
-                        alt=""
-                      />
-                      <span className="prototype-folder-paper" />
-                      <img
-                        className="prototype-folder-front"
-                        src={index % 2 === 0 ? folderGlass : folderGrayGlass}
-                        alt=""
-                      />
-                      <img className="prototype-folder-front" src={folderHighlight} alt="" />
-                      <span className="prototype-folder-avatars">
-                        {people.map((id) => (
-                          <span key={id}>{memberById(id)?.initial}</span>
-                        ))}
-                      </span>
-                      <span className="prototype-folder-date">{p.updatedAt} 수정</span>
-                    </div>
-                    <span className="prototype-folder-label">
-                      <b>{p.name}</b>
-                      <small>{p.status === 'active' ? '진행중' : '완료됨'}</small>
-                    </span>
-                  </Link>
-                  <div className="prototype-folder-menu">
-                    <ProjectCardMenu
-                      project={p}
-                      versions={inspectionHistory[p.id]?.length ?? 0}
-                      announce={announce}
-                    />
-                  </div>
-                </li>
-              )
-            })}
+            {sortProjects(projects, 'recent').slice(0, showAll ? undefined : 4).map((p, index) => (
+              <ProjectFolderCard key={p.id} project={p} index={index} announce={announce} />
+            ))}
           </ul>
           {!projects.length && (
             <Link className="prototype-empty" to="/projects/new">
@@ -171,6 +127,21 @@ export default function ProjectHomePage() {
               할일 <span>{mine.length}</span>
             </h2>
             <Link to="/todo/mine">전체보기</Link>
+          </div>
+          <div className="mb-3 flex flex-col gap-2 rounded-2xl bg-white px-6 py-4 shadow-[0_8px_20px_#00000005]">
+            <p className="flex items-baseline gap-1.5">
+              <span className="text-sm font-medium text-[#626873]">내 할 일</span>
+              <span className="text-2xl font-bold text-black">{mine.length}</span>
+              <span className="text-sm text-[#626873]">개 남았어요</span>
+              <span className="ml-auto text-sm font-semibold text-black">{myPercent}%</span>
+            </p>
+            {/* 막대는 장식 — 아래 글자로 같은 내용을 알려 줘요 */}
+            <span aria-hidden className="h-2 overflow-hidden rounded-full bg-[#dfe2e6]">
+              <span className="block h-full rounded-full bg-black" style={{ width: `${myPercent}%` }} />
+            </span>
+            <p className="text-[13px] text-[#626873]">
+              나에게 배정된 이슈 {assigned.length}개 중 {myDone}개 해결
+            </p>
           </div>
           <MentionNotice />
           <ul className="prototype-home-todos">
