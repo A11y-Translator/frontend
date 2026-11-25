@@ -68,7 +68,7 @@ export function ErrorState({
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-[19px] bg-summit px-4 py-2.5 text-[13px] leading-normal font-bold whitespace-nowrap text-on-summit transition hover:brightness-105 active:brightness-95"
+        className="rounded-[19px] bg-primary px-4 py-2.5 text-[13px] leading-normal font-bold whitespace-nowrap text-on-primary transition hover:brightness-105 active:brightness-95"
       >
         {actionLabel}
       </button>

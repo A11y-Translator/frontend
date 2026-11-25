@@ -72,7 +72,7 @@ export function DialogFooter({ cancelLabel = '취소', submitLabel }: { cancelLa
       </Dialog.Close>
       <button
         type="submit"
-        className="rounded-[21px] bg-summit px-6 py-3 text-[15px] leading-normal font-semibold whitespace-nowrap text-on-summit transition hover:brightness-105 active:brightness-95"
+        className="rounded-[21px] bg-primary px-6 py-3 text-[15px] leading-normal font-semibold whitespace-nowrap text-on-primary transition hover:brightness-105 active:brightness-95"
       >
         {submitLabel}
       </button>

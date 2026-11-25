@@ -60,20 +60,20 @@ export function A11yPage() {
           <iframe key={tab} src={`${A11Y_URL}${tab}`} title="웹 접근성 검사 (A11y Translator)" className="min-h-0 w-full flex-1 bg-[#f3f2ee]" />
         )}
         {status === 'checking' && (
-          <p role="status" className="m-auto text-sm text-[#6b6f66]">
+          <p role="status" className="m-auto text-sm text-muted">
             접근성 검사 화면을 불러오는 중…
           </p>
         )}
         {status === 'offline' && (
           <div role="alert" className="m-auto flex max-w-[440px] flex-col items-center gap-3 p-6 text-center">
-            <p className="text-base font-bold text-[#17181a]">접근성 검사 앱이 꺼져 있어요</p>
-            <p className="text-sm leading-relaxed text-[#55595f]">
+            <p className="text-base font-bold text-ink">접근성 검사 앱이 꺼져 있어요</p>
+            <p className="text-sm leading-relaxed text-muted">
               검사 화면은 전에 만든 A11y Translator 앱을 불러와서 보여 줘요.
               <br />
-              <code className="font-mono text-[#17181a]">C:\A11</code> 폴더에서 <code className="font-mono text-[#17181a]">npm run dev</code> 를 켠 뒤 다시 시도해 주세요.
+              <code className="font-mono text-ink">C:\A11</code> 폴더에서 <code className="font-mono text-ink">npm run dev</code> 를 켠 뒤 다시 시도해 주세요.
             </p>
-            <p className="font-mono text-xs text-[#6b6f66]">{A11Y_URL}</p>
-            <button type="button" onClick={() => setAttempt((n) => n + 1)} className="rounded-full bg-[#17181a] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-125">
+            <p className="font-mono text-xs text-muted">{A11Y_URL}</p>
+            <button type="button" onClick={() => setAttempt((n) => n + 1)} className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:brightness-125">
               다시 불러오기
             </button>
           </div>

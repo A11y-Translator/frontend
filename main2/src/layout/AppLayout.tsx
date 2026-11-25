@@ -1,5 +1,5 @@
-// 공통 틀: 왼쪽 검은 사이드바 + 본문(종이색 바탕 · Figma 밝은 테마).
-// 로그인 화면만 산 사진 배경 + 어두운 막을 씁니다 (dim 을 넘길 때 · 화면 전체가 .theme-dark).
+// 공통 틀 (Figma Section 3 · warm): 짙은 갈색 바깥 틀 위에 왼쪽 사이드바 + 둥근 종이색 본문.
+// 로그인 화면은 사이드바 없이 본문만 그려요 (bare) — 사진 · 로그인 패널은 LoginPage 가 직접 그립니다.
 // 확대·축소 없이 실제 크기(1:1)로 그리고, 어떤 화면 폭에서도 유동적으로 바뀝니다. (기존 웹과 같은 규칙)
 //  - 사이드바: 1280px 이상 펼침 · 768~1279px 접힘 · 768px 미만 숨김(위쪽 ☰ → 서랍)  — useSidebar
 //    경계를 마우스로 끌어 폭 조절, 아주 좁게 끌면 접힘 (SidebarResizer · 키보드 ←/→ · Enter)
@@ -8,50 +8,39 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useRef, useState } from 'react'
 import { Link, Outlet } from 'react-router-dom'
-import bgMountain from '@/assets/bg-mountain.jpg'
 import { Sidebar } from './Sidebar'
 import { SidebarResizer } from './SidebarResizer'
 import { useSidebar } from './useSidebar'
 
 interface Props {
-  /** 있으면 산 사진 배경 + 이 진하기의 어두운 막 (로그인 0.3). 없으면 종이색 바탕 */
-  dim?: number
-  /** 사이드바 맨 위 이름 (로그인 전에는 서비스 이름 "오름") */
-  workspaceName?: string
+  /** true 면 사이드바 · 모바일 메뉴 줄 · 종이색 본문 면 없이 내용만 (로그인 화면) */
+  bare?: boolean
 }
 
-export function AppLayout({ dim, workspaceName }: Props) {
-  const photo = dim !== undefined
+export function AppLayout({ bare = false }: Props) {
   const { mobile, collapsed, setCollapsed, width, setWidth, drawerOpen, setDrawerOpen } = useSidebar()
   const navRef = useRef<HTMLElement>(null)
   const [resizing, setResizing] = useState(false)
 
   return (
-    <div className={`relative flex h-dvh overflow-hidden bg-canvas ${photo ? 'theme-dark' : ''}`}>
+    <div className="relative flex h-dvh overflow-hidden bg-frame">
       <a href="#main" className="sr-only-focusable rounded bg-primary px-3 py-2 text-on-primary">
         본문으로 건너뛰기
       </a>
 
-      {!mobile && (
+      {!bare && !mobile && (
         <div className={`relative z-10 flex shrink-0 ${resizing ? 'cursor-col-resize select-none' : ''}`}>
-          <Sidebar ref={navRef} collapsed={collapsed} width={collapsed ? undefined : (width ?? undefined)} animate={!resizing} workspaceName={workspaceName} />
+          <Sidebar ref={navRef} collapsed={collapsed} width={collapsed ? undefined : (width ?? undefined)} animate={!resizing} />
           <SidebarResizer navRef={navRef} collapsed={collapsed} setCollapsed={setCollapsed} setWidth={setWidth} onResizingChange={setResizing} />
         </div>
       )}
 
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* 로그인 화면만: 산 사진 + 어두운 막 (피그마 unsplash 이미지) */}
-        {photo && (
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <img src={bgMountain} alt="" className="size-full object-cover" />
-            <div className="absolute inset-0 bg-black" style={{ opacity: dim }} />
-          </div>
-        )}
-
-        {mobile && (
+      {/* 본문 면: 데스크톱은 틀 안에 12px 띄운 둥근 종이색 면, 모바일은 화면에 꽉 차게 */}
+      <div className={`relative flex min-w-0 flex-1 flex-col overflow-hidden ${bare ? '' : mobile ? 'bg-canvas' : 'my-3 mr-3 rounded-[32px] bg-canvas'}`}>
+        {!bare && mobile && (
           <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <div className="theme-dark relative flex h-14 shrink-0 items-center gap-2 border-b border-line bg-nav px-3">
-              <Dialog.Trigger aria-label="메뉴 열기" className="flex size-10 items-center justify-center rounded-lg text-ink hover:bg-white/[0.06]">
+            <div className="theme-dark relative flex h-14 shrink-0 items-center gap-2 bg-frame px-3">
+              <Dialog.Trigger aria-label="메뉴 열기" className="flex size-10 items-center justify-center rounded-full text-ink hover:bg-white/[0.06]">
                 <svg aria-hidden width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                   <path d="M3.5 6h15M3.5 11h15M3.5 16h15" />
                 </svg>
@@ -62,9 +51,9 @@ export function AppLayout({ dim, workspaceName }: Props) {
             </div>
             <Dialog.Portal>
               <Dialog.Overlay className="fixed inset-0 z-40 bg-black/60" />
-              <Dialog.Content aria-describedby={undefined} className="fixed inset-y-0 left-0 z-50 w-[260px] max-w-[85vw] shadow-[4px_0_24px_rgba(0,0,0,0.5)] outline-none">
+              <Dialog.Content aria-describedby={undefined} className="fixed inset-y-0 left-0 z-50 w-[260px] max-w-[85vw] bg-frame shadow-[4px_0_24px_rgba(0,0,0,0.5)] outline-none">
                 <Dialog.Title className="sr-only">주 메뉴</Dialog.Title>
-                <Sidebar onClose={() => setDrawerOpen(false)} workspaceName={workspaceName} />
+                <Sidebar onClose={() => setDrawerOpen(false)} />
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>

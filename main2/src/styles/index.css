@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 /*
- * 디자인 토큰 — Figma "회의 › R00 · 01 · 01-2 · 03 · 07 · 11" (Oreum · 밝은 종이 테마) 기준
- *   바탕 종이색 #f3f2ee · 카드 흰색 · 글자 먹색 #17181a · 주 버튼 먹색 알약 · 강조 연두 #d6e36f
- * 사이드바와 "프로젝트 루트" 산 패널처럼 어두운 곳은 .theme-dark 를 붙이면 아래 어두운 값으로 바뀌어요.
+ * 디자인 토큰 — Figma "11/18 추가회의 › Section 3 (· warm)" 기준 (Oreum · 따뜻한 종이 테마)
+ *   바깥 틀 짙은 갈색 #171412 · 본문 종이색 #f4f2ef (둥근 32px) · 카드 흰색 · 글자 #1c1a18
+ *   주 버튼 짙은 갈색 알약 #3b3632 · 강조 연두 #d6e36f
+ * 사이드바와 "추천 루트" 산 패널처럼 어두운 곳은 .theme-dark 를 붙이면 아래 어두운 값으로 바뀌어요.
  * 새 색이 필요하면 여기에 먼저 추가하고 클래스(bg-*, text-*, border-*)로 사용하세요.
  */
 @theme {
@@ -11,27 +12,29 @@
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   /* 글자 */
-  --color-ink: #17181a; /* 기본 글자 */
-  --color-muted: #6b6f66; /* 보조 글자 (종이색 위 대비 4.9:1) */
-  --color-faint: #8a8b85; /* 숫자 칩 */
-  --color-on-summit: #141517; /* 연두 위 글자 */
-  --color-on-light: #17181a; /* 밝은 핀 위 글자 */
+  --color-ink: #1c1a18; /* 기본 글자 */
+  --color-muted: #6e6760; /* 보조 글자 — 피그마는 #857e77 이지만 종이색 위 대비가 3.6:1 이라 5:1 이 되게 조금 진하게 */
+  --color-faint: #8a847d; /* 숫자 칩 */
+  --color-on-summit: #1c1a18; /* 연두 위 글자 */
+  --color-on-light: #1c1a18; /* 밝은 핀 위 글자 */
 
-  /* 주 버튼 (밝은 화면: 먹색 알약 · 어두운 곳: 연두 알약) */
-  --color-primary: #17181a;
+  /* 주 버튼 (밝은 화면: 짙은 갈색 알약 · 어두운 곳: 연두 알약) */
+  --color-primary: #3b3632;
   --color-on-primary: #ffffff;
-  --color-focus: #2f5a6b;
+  --color-focus: #3b3632;
 
   /* 면 */
-  --color-canvas: #f3f2ee; /* 화면 바탕 (종이색) */
-  --color-nav: #000000; /* 사이드바 */
+  --color-frame: #171412; /* 바깥 틀 (사이드바 뒤 · 본문 둘레) */
+  --color-panel-dark: #24201d; /* 어두운 패널 (사이드바 위쪽 묶음 · 산 패널) */
+  --color-canvas: #f4f2ef; /* 본문 바탕 (종이색) */
+  --color-nav: #171412; /* 사이드바 (= 바깥 틀) */
   --color-surface: #ffffff; /* 카드 */
   --color-glass: #ffffff; /* 큰 패널 (어두운 곳에서는 반투명 유리) */
-  --color-line: rgb(23 24 26 / 0.09);
-  --color-line-soft: rgb(23 24 26 / 0.07);
-  --color-fill: rgb(23 24 26 / 0.035); /* 입력칸·행 */
-  --color-fill-2: rgb(23 24 26 / 0.05);
-  --color-fill-3: rgb(23 24 26 / 0.09);
+  --color-line: #e9e5e0;
+  --color-line-soft: #e9e5e0;
+  --color-fill: rgb(59 54 50 / 0.045); /* 입력칸·행 */
+  --color-fill-2: rgb(59 54 50 / 0.065);
+  --color-fill-3: rgb(59 54 50 / 0.11);
 
   /* 루트(산) */
   --color-summit: #d6e36f; /* 정상 · 강조 칩 */
@@ -39,34 +42,34 @@
   --color-checkpoint-text: #2f5a6b;
   --color-contour: #e9e9e4; /* 등고선 */
   --color-pin-now: #f4f4f1;
-  --color-menu-active: #334024;
+  --color-menu-active: #3b3632;
   --color-danger: #d93636; /* 막힘 · 빨간 숫자 */
   --color-blocked: #c2412d;
-  --color-due: #c86a12; /* 마감 임박 (주황) */
+  --color-due: #b5600f; /* 마감 임박 (주황) */
 
-  /* 역할(원정대) — 디자인 보라 · 프론트 파랑 · 백 청록 */
-  --color-role-design: #5b4fd6;
-  --color-role-front: #2f63d8;
-  --color-role-back: #1f8a78;
-  --color-role-design-bg: #eeebfc;
-  --color-role-front-bg: #e8eefc;
-  --color-role-back-bg: #e1f4ef;
+  /* 역할(원정대) — 디자인 올리브 · 프론트 라벤더 · 백 청록 (warm: 채도를 낮춘 색) */
+  --color-role-design: #646a2f;
+  --color-role-front: #5a5196;
+  --color-role-back: #3a716d;
+  --color-role-design-bg: #f1f3d8;
+  --color-role-front-bg: #e9e5f5;
+  --color-role-back-bg: #dbefea;
 
   --color-avatar: #ece8fd;
   --color-avatar-text: #3d2f8f;
 }
 
-/* 어두운 영역 (사이드바 · 산 패널 · 로그인) — 예전 "내추럴 다크" 값 */
+/* 어두운 영역 (사이드바 · 산 패널) */
 .theme-dark {
-  --color-ink: #eeeeec;
-  --color-muted: #8e9196;
+  --color-ink: #f6f4f1;
+  --color-muted: #a8a19a;
   --color-faint: #8a8a8a;
   --color-primary: #d6e36f;
-  --color-on-primary: #141517;
+  --color-on-primary: #1c1a18;
   --color-focus: #d6e36f;
-  --color-canvas: #111111;
-  --color-surface: #1c1d1f;
-  --color-glass: rgb(27 28 31 / 0.88);
+  --color-canvas: #171412;
+  --color-surface: #2a2522;
+  --color-glass: rgb(36 32 29 / 0.88);
   --color-line: rgb(255 255 255 / 0.08);
   --color-line-soft: rgb(255 255 255 / 0.07);
   --color-fill: rgb(255 255 255 / 0.05);
@@ -76,9 +79,9 @@
   --color-danger: #ff4343;
   --color-blocked: #ffa69b;
   --color-due: #ffb86b;
-  --color-role-design: #c9b8ff;
-  --color-role-front: #a9c2ff;
-  --color-role-back: #8fe3d4;
+  --color-role-design: #f2ff9b;
+  --color-role-front: #ece8fd;
+  --color-role-back: #b9fcff;
   color: var(--color-ink);
   color-scheme: dark;
   scrollbar-color: rgb(255 255 255 / 0.18) transparent;
@@ -87,10 +90,10 @@
 :root {
   /*
    * 레이아웃 크기 — 확대·축소(zoom) 없이 실제 크기(1:1)로 그리고, 화면 폭에 따라 유동적으로.
-   * 사이드바: 피그마 220px (1440 기준). 넓은 화면에서 살짝 넓어짐.
+   * 사이드바: 피그마 240px (1440 기준 · 안쪽 여백 12px 포함). 넓은 화면에서 살짝 넓어짐.
    * 본문 좌우 여백: 피그마 30px, 좁아지면 16px 까지.
    */
-  --sidebar-w: clamp(220px, 15.3vw, 248px);
+  --sidebar-w: clamp(240px, 16.6vw, 256px);
   --gutter: clamp(16px, 2.1vw, 30px);
   /* 화면 맨 위 ~ 제목 사이 여백 — 모든 화면이 같은 높이에서 시작하도록 한 곳에서 정함 (피그마는 82px 인 화면도 있지만 너무 떠 보여서 통일) */
   --page-top: clamp(16px, 3.4vh, 32px);
@@ -105,7 +108,7 @@
   }
   body {
     margin: 0;
-    background: var(--color-canvas);
+    background: var(--color-frame);
   }
   :focus-visible {
     outline: 2px solid var(--color-focus);
@@ -120,7 +123,7 @@
   /* 얇은 스크롤바 (어두운 곳은 .theme-dark 에서 밝게) */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(23 24 26 / 0.18) transparent;
+    scrollbar-color: rgb(28 26 24 / 0.18) transparent;
   }
 }
 
@@ -134,16 +137,21 @@
   }
 }
 
-/* 패널 그림자 — 밝은 화면은 아주 옅게, 어두운 곳은 예전 유리 느낌 */
+/* 패널 그림자 — 밝은 화면은 피그마 카드 그림자(0 20 22 · 10%), 어두운 곳은 유리 느낌 */
 @utility glass-edge {
-  box-shadow:
-    0 1px 2px 0 rgb(23 24 26 / 0.04),
-    0 8px 24px 0 rgb(23 24 26 / 0.05);
+  box-shadow: 0 20px 22px 0 rgb(28 26 23 / 0.1);
   .theme-dark & {
     box-shadow:
       inset 0 1px 0 0 rgb(255 255 255 / 0.05),
       0 20px 44px 0 rgb(0 0 0 / 0.32);
   }
+}
+
+/* 어두운 패널 바탕: 짙은 갈색 + 왼쪽 위에서 번지는 옅은 빛 (피그마 사이드바 위쪽 묶음 · 산 패널) */
+@utility panel-dark {
+  background:
+    radial-gradient(75% 80% at 35% 0%, rgb(140 128 119 / 0.55), rgb(140 128 119 / 0) 100%),
+    var(--color-panel-dark);
 }
 
 @media (prefers-reduced-motion: reduce) {

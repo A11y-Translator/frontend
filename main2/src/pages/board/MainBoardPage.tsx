@@ -299,9 +299,9 @@ function RoomCard({ card }: { card: RoomCardData }) {
 
       {/* 보낼 것 / 받을 것 */}
       <dl className="m-0 mt-auto flex gap-2.5">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-2xl px-4 py-3" style={{ background: role.bg }}>
-          <dt className="text-xs font-medium text-muted">보낼 것</dt>
-          <dd className="m-0 text-2xl leading-[normal] font-bold tracking-[-0.02em]" style={{ color: role.color }}>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-2xl bg-primary px-4 py-3 text-white/65">
+          <dt className="text-xs font-medium text-inherit">보낼 것</dt>
+          <dd className="m-0 text-2xl leading-[normal] font-bold tracking-[-0.02em]">
             {send}
           </dd>
         </div>

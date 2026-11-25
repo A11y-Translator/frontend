@@ -343,7 +343,7 @@ function AddRole() {
               <span className="sr-only">새 역할 이름</span>
               <input value={name} onChange={(e) => setName(e.target.value)} maxLength={10} placeholder="예: 기획, QA" className={`${FIELD} w-36 py-2 text-[13px] placeholder:text-muted`} />
             </label>
-            <button type="submit" disabled={!name.trim()} className="rounded-full bg-summit px-3.5 py-2 text-[13px] font-semibold text-on-summit disabled:opacity-40">
+            <button type="submit" disabled={!name.trim()} className="rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-on-primary disabled:opacity-40">
               추가
             </button>
           </form>
@@ -429,7 +429,7 @@ function PlanDocument({ source, file, link, text, onText }: { source: Source; fi
           mode === 'edit' ? (
             <label className="block h-full">
               <span className="sr-only">기획 문서 편집</span>
-              <textarea value={text} onChange={(e) => onText(e.target.value)} placeholder="기획 내용을 적어 주세요" className="size-full min-h-[320px] resize-none rounded-[10px] bg-white p-6 text-sm leading-relaxed text-[#17181a] outline-none" />
+              <textarea value={text} onChange={(e) => onText(e.target.value)} placeholder="기획 내용을 적어 주세요" className="size-full min-h-[320px] resize-none rounded-[10px] bg-white p-6 text-sm leading-relaxed text-ink outline-none" />
             </label>
           ) : (
             <Paper>{text.trim() || '왼쪽 "직접 입력" 칸이나 위의 "편집"에서 기획 내용을 적으면 여기에 보여요.'}</Paper>
@@ -472,5 +472,5 @@ function PlanDocument({ source, file, link, text, onText }: { source: Source; fi
 
 /** 흰 종이 모양 (글자 기획안 미리보기) */
 function Paper({ children }: { children: ReactNode }) {
-  return <div className="mx-auto min-h-full w-full max-w-[539px] rounded-[10px] bg-white p-6 text-sm leading-relaxed whitespace-pre-wrap text-[#17181a]">{children}</div>
+  return <div className="mx-auto min-h-full w-full max-w-[539px] rounded-[10px] bg-white p-6 text-sm leading-relaxed whitespace-pre-wrap text-ink">{children}</div>
 }

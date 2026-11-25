@@ -92,8 +92,8 @@ export function RouteMapPage() {
         {/* 프로젝트 루트 (3D 산) — Figma 에서도 이 패널만 어두워요 */}
         <section
           aria-labelledby="route-preview-title"
-          className="theme-dark relative flex h-[clamp(420px,70vh,640px)] flex-col overflow-hidden rounded-[27px]"
-          style={{ backgroundImage: 'linear-gradient(141.6deg, rgb(42 44 48) 0%, rgb(22 23 26) 71.4%)' }}
+          className="theme-dark relative flex h-[clamp(420px,70vh,640px)] flex-col overflow-hidden rounded-[32px]"
+          style={{ backgroundImage: 'radial-gradient(90% 70% at 50% 0%, rgb(140 128 119 / 0.42), rgb(140 128 119 / 0) 70%), linear-gradient(180deg, #24201d 0%, #1b1816 100%)' }}
         >
           <div className="pointer-events-none relative z-10 flex items-start justify-between gap-3 px-7 pt-6">
             <h2 id="route-preview-title" className="text-lg leading-tight font-bold tracking-[-0.02em] text-ink">

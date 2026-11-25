@@ -392,7 +392,7 @@ function CommentsPanel({
             자리 취소
           </button>
         )}
-        <button type="submit" className="rounded-[15px] bg-summit px-3.5 py-[7px] text-[13px] leading-normal font-bold whitespace-nowrap text-on-summit hover:brightness-105">
+        <button type="submit" className="rounded-[15px] bg-primary px-3.5 py-[7px] text-[13px] leading-normal font-bold whitespace-nowrap text-on-primary hover:brightness-105">
           보내기
         </button>
       </form>
