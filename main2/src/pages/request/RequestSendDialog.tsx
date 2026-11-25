@@ -188,7 +188,7 @@ export function RequestSendDialog({ open, onOpenChange, from, onSent, mode = 're
                   <label
                     key={o.value}
                     className={`relative cursor-pointer rounded-2xl px-3 py-2 text-[13px] leading-normal whitespace-nowrap ${FOCUS_WITHIN} ${
-                      on ? 'bg-summit font-semibold text-on-summit' : 'bg-fill-2 font-medium text-ink hover:bg-fill-3'
+                      on ? 'bg-primary font-semibold text-on-primary' : 'bg-fill-2 font-medium text-ink hover:bg-fill-3'
                     }`}
                   >
                     <input type="radio" name={`${id}-due-mode`} value={o.value} checked={on} onChange={() => pickDue(o.value)} className="sr-only" />

@@ -109,7 +109,7 @@ export function SectionTodoSheet({ open, onOpenChange }: { open: boolean; onOpen
               type="button"
               onClick={add}
               disabled={count === 0}
-              className="rounded-[19px] bg-summit px-5 py-[11px] text-[13px] leading-none font-bold whitespace-nowrap text-on-summit hover:brightness-105 active:brightness-95 disabled:opacity-50"
+              className="rounded-[19px] bg-primary px-5 py-[11px] text-[13px] leading-none font-bold whitespace-nowrap text-on-primary hover:brightness-105 active:brightness-95 disabled:opacity-50"
             >
               할 일 {count}개 담기
             </button>

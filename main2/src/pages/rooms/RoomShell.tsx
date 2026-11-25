@@ -187,13 +187,6 @@ export function RoomFeed({ label, items, composer, live = '', density = 'cozy', 
 
 /* ───────── 메시지 한 줄 ───────── */
 
-// 아바타 바탕색 (피그마 값 — 역할 칩 바탕과는 조금 다름)
-const AVATAR_BG: Record<RoleId, string> = {
-  design: 'rgb(52 62 43 / 0.95)',
-  front: 'rgb(40 60 67 / 0.95)',
-  back: 'rgb(37 62 54 / 0.95)',
-}
-
 export function MessageRow({
   item,
   compact = false,
@@ -213,8 +206,7 @@ export function MessageRow({
     <li className="flex w-full items-start gap-3">
       <span
         aria-hidden
-        className={`flex shrink-0 items-center justify-center rounded-full text-[13px] font-semibold ${compact ? 'size-[30px]' : 'size-8'}`}
-        style={{ background: AVATAR_BG[item.role], color: role.color }}
+        className={`flex shrink-0 items-center justify-center rounded-full bg-fill-3 text-[13px] font-semibold text-ink ${compact ? 'size-[30px]' : 'size-8'}`}
       >
         {item.author.slice(0, 1)}
       </span>
@@ -327,7 +319,7 @@ export function Composer({ placeholder, onSend, label = '메시지 입력', lead
       <button
         type="submit"
         disabled={disabled}
-        className="shrink-0 rounded-[15px] bg-summit px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-on-summit transition hover:brightness-105 active:brightness-95 disabled:opacity-50"
+        className="shrink-0 rounded-[15px] bg-primary px-3.5 py-[7px] text-[13px] leading-normal font-semibold whitespace-nowrap text-on-primary transition hover:brightness-105 active:brightness-95 disabled:opacity-50"
       >
         보내기
       </button>

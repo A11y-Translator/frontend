@@ -46,10 +46,10 @@ function Home() {
 export const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   {
-    // 로그인 전: 배경 사진이 밝게 보이고, 사이드바 이름은 "오름"
+    // 로그인 전: 사이드바 없이 사진 + 로그인 패널만 (Figma 00 로그인 · warm)
     element: (
       <GuestOnly>
-        <AppLayout dim={0.3} workspaceName="오름" />
+        <AppLayout bare />
       </GuestOnly>
     ),
     children: [{ path: '/login', element: <LoginPage /> }], // 시작하기/login

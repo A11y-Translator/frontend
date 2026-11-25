@@ -64,7 +64,7 @@ export function RouteDetailPage() {
   const openSheet = () => setSheetOpen(true)
 
   return (
-    <div className="flex min-h-full w-full flex-col bg-[#111214]">
+    <div className="flex min-h-full w-full flex-col bg-frame">
       <div className="grid grid-cols-1">
         {/* 제목 */}
         <header className="z-10 col-start-1 row-start-1 flex flex-col gap-1.5 self-start justify-self-start px-[clamp(16px,3.25cqw,40px)] pt-(--page-top)">

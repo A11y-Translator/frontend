@@ -88,7 +88,7 @@ export function RequestReviewCard({ card, steps, onConfirm, onFix }: Props) {
             <button
               type="button"
               onClick={onConfirm}
-              className="rounded-[19.5px] bg-summit px-[22px] py-[11px] text-sm leading-normal font-semibold whitespace-nowrap text-on-summit transition hover:brightness-105 active:brightness-95"
+              className="rounded-[19.5px] bg-primary px-[22px] py-[11px] text-sm leading-normal font-semibold whitespace-nowrap text-on-primary transition hover:brightness-105 active:brightness-95"
             >
               확인했어요
             </button>

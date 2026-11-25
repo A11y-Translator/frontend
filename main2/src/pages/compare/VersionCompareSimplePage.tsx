@@ -195,7 +195,7 @@ export function VersionCompareSimplePage() {
                   <button type="button" onClick={closeComposer} className="rounded-[15px] px-3 py-[7px] text-[13px] font-medium text-muted hover:text-ink">
                     취소
                   </button>
-                  <button type="submit" className="rounded-[15px] bg-summit px-3.5 py-[7px] text-[13px] font-bold text-on-summit hover:brightness-105">
+                  <button type="submit" className="rounded-[15px] bg-primary px-3.5 py-[7px] text-[13px] font-bold text-on-primary hover:brightness-105">
                     보내기
                   </button>
                 </div>
@@ -305,7 +305,7 @@ function SimpleComment({
               placeholder="답글 달기"
               className="min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-muted focus:outline-none"
             />
-            <button type="submit" className="rounded-[13px] bg-summit px-3 py-1.5 text-xs font-bold whitespace-nowrap text-on-summit hover:brightness-105">
+            <button type="submit" className="rounded-[13px] bg-primary px-3 py-1.5 text-xs font-bold whitespace-nowrap text-on-primary hover:brightness-105">
               보내기
             </button>
           </form>

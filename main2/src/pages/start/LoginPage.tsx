@@ -1,18 +1,19 @@
-// Figma: 시작하기/login (1094:5922) — 산 사진 위 "Oreum 시작하기" + 오른쪽 로그인 패널.
+// Figma: 00 로그인 · warm (1128:7519) — 사이드바 없이, 왼쪽 둥근 산 사진("Oreum 시작하기") + 오른쪽 종이색 로그인 패널.
 // 로그인은 api.auth 를 거칩니다 (@/data/sessionStore). 목업 모드에서는 아무 이메일 · 비밀번호로나 들어가고,
 // 구글로 로그인하기는 예시 사용자로 들어가요. 로그인되면 라우터(GuestOnly)가 시작하기(/start)로 보냅니다.
 import { useId, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { errorMessage } from '@/api/http'
 import { signIn, signInWithGoogle } from '@/data/sessionStore'
-import logo from '@/assets/logo-oreum.svg'
+import logo from '@/assets/logo-oreum-ink.svg'
+import bgMountain from '@/assets/bg-mountain.jpg'
 import google from '@/assets/google.svg'
 import googleMask from '@/assets/google-mask.svg'
 import { useSoon } from '@/ui/toast'
 
 const INPUT =
-  'h-10 w-full rounded-xl border border-line bg-fill px-[17px] text-xs tracking-[-0.006em] text-ink outline-none placeholder:text-[#c1c1c1] focus-visible:border-summit'
-const TEXT_LINK = 'text-xs tracking-[-0.006em] text-muted hover:text-ink hover:underline'
+  'h-12 w-full rounded-xl border border-line bg-surface px-[17px] text-base tracking-[-0.025em] text-ink outline-none placeholder:text-muted focus-visible:border-primary @4xl:h-10 @4xl:text-xs'
+const TEXT_LINK = 'py-1 text-[13px] tracking-[-0.006em] text-muted hover:text-ink hover:underline @4xl:py-0 @4xl:text-xs'
 
 const ERROR = 'mt-1.5 text-xs leading-normal font-medium text-blocked'
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -53,27 +54,32 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full w-full flex-col @4xl:flex-row">
-      {/* 소개 문구 */}
-      <div className="flex flex-1 flex-col justify-center gap-1.5 px-[clamp(20px,4.3cqw,53px)] py-10">
-        <h1 className="text-[clamp(30px,1.2rem+2.4cqw,48px)] leading-tight font-semibold tracking-[-0.02em] text-ink">Oreum 시작하기</h1>
-        <p className="max-w-[560px] text-[clamp(15px,0.8rem+0.6cqw,20px)] text-[#c9ccd1] [text-shadow:0_1px_12px_rgb(0_0_0/0.6)]">
-          기획안을 기반으로 원정대의 루트를 생성하고, 소통하도록 돕습니다.
-        </p>
+    <div className="flex min-h-full w-full flex-col p-2 @4xl:flex-row @4xl:gap-3 @4xl:p-3">
+      {/* 산 사진 + 소개 문구 (사진 아래쪽을 어둡게 해서 글자가 읽히게).
+          좁은 화면: 사진 아래쪽에 로그인 패널이 겹쳐 올라오므로 그만큼(40px) 글자를 위로 띄움 */}
+      <div className="relative flex min-h-[36dvh] shrink-0 flex-col justify-end overflow-hidden rounded-[28px] px-6 pt-6 pb-[68px] @4xl:min-h-0 @4xl:flex-1 @4xl:rounded-[32px] @4xl:px-[clamp(20px,4cqw,48px)] @4xl:py-[clamp(24px,4cqw,48px)]">
+        <img src={bgMountain} alt="" className="absolute inset-0 size-full object-cover" />
+        <div aria-hidden className="absolute inset-0 bg-linear-to-b from-[rgb(23_20_18/0)] via-[rgb(23_20_18/0.1)] via-55% to-[rgb(23_20_18/0.72)]" />
+        <div className="relative flex flex-col gap-1.5">
+          <h1 className="text-[clamp(28px,1.2rem+2.4cqw,48px)] leading-[1.25] font-semibold tracking-[-0.025em] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.45)]">Oreum 시작하기</h1>
+          <p className="max-w-[560px] text-[clamp(14px,0.8rem+0.6cqw,20px)] leading-[1.45] tracking-[-0.025em] text-balance break-keep text-white/80 [text-shadow:0_1px_12px_rgb(0_0_0/0.45)]">
+            기획안을 기반으로 원정대의 루트를 생성하고, 소통하도록 돕습니다.
+          </p>
+        </div>
       </div>
 
       {/* 로그인 패널 */}
       <section
         aria-label="로그인"
-        className="flex shrink-0 flex-col items-center justify-center bg-black/50 px-6 py-12 backdrop-blur-xl @4xl:w-[min(540px,44%)] @4xl:rounded-l-[30px]"
+        className="relative -mt-10 flex flex-1 flex-col items-center justify-center rounded-[28px] bg-canvas px-6 py-10 shadow-[0_-12px_32px_rgb(23_20_18/0.28)] @4xl:mt-0 @4xl:w-[min(528px,44%)] @4xl:flex-none @4xl:rounded-[32px] @4xl:py-12 @4xl:shadow-none"
       >
-        <div className="flex w-full max-w-[258px] flex-col items-center">
+        <div className="flex w-full max-w-[340px] flex-col items-center @4xl:max-w-[258px]">
           <Link to="/board" aria-label="Oreum · 메인보드로 가기" className="rounded">
-            <img src={logo} alt="" width={30.44} height={34.11} />
+            <img src={logo} alt="" width={29.58} height={34.11} />
           </Link>
 
-          <form noValidate className="mt-[45px] flex w-full flex-col items-center gap-7" onSubmit={submit}>
-            <div className="flex w-full flex-col gap-4">
+          <form noValidate className="mt-8 flex w-full flex-col items-center gap-6 @4xl:mt-[45px] @4xl:gap-7" onSubmit={submit}>
+            <div className="flex w-full flex-col gap-3 @4xl:gap-4">
               <div>
                 <label>
                   <span className="sr-only">이메일</span>
@@ -130,7 +136,7 @@ export function LoginPage() {
                 type="submit"
                 disabled={busy}
                 aria-busy={busy || undefined}
-                className="h-[34px] w-full rounded-full bg-summit text-xs tracking-[-0.006em] text-on-summit hover:brightness-105 disabled:opacity-60"
+                className="h-12 w-full rounded-2xl bg-primary text-[15px] font-medium tracking-[-0.006em] text-on-primary hover:brightness-125 disabled:opacity-60 @4xl:h-[34px] @4xl:text-xs @4xl:font-normal"
               >
                 {busy ? '로그인하는 중…' : '로그인 하기'}
               </button>
@@ -147,7 +153,7 @@ export function LoginPage() {
             type="button"
             disabled={busy}
             onClick={() => void run(signInWithGoogle)}
-            className="mt-[11px] flex h-[34px] w-full items-center justify-center gap-2 rounded-xl border border-line bg-fill text-xs font-medium tracking-[-0.006em] text-ink hover:bg-fill-3 disabled:opacity-60"
+            className="mt-[11px] flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface text-[15px] font-medium tracking-[-0.006em] text-ink hover:bg-fill-2 disabled:opacity-60 @4xl:h-[34px] @4xl:text-xs"
           >
             {/* 구글 로고: 피그마와 같이 마스크(글자 G 모양) 안에 색 그림을 넣음 */}
             <span
@@ -160,7 +166,7 @@ export function LoginPage() {
             구글로 로그인하기
           </button>
 
-          <ul className="mt-[12px] flex flex-col items-center gap-2">
+          <ul className="mt-4 flex flex-col items-center gap-1 @4xl:mt-[12px] @4xl:gap-2">
             <li>
               <button type="button" onClick={soon('회사 / 학교 계정 로그인')} className={TEXT_LINK}>
                 회사 / 학교 계정으로 로그인 하기

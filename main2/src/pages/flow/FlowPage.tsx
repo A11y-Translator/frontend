@@ -518,7 +518,7 @@ function DateStrip({ cards }: { cards: HandoffCard[] }) {
             {isToday && <span>오늘</span>}
             {k === endKey && <span className="text-summit">정상</span>}
             {list.length > 0 && (
-              <span className={`flex size-4 items-center justify-center rounded-full text-[10px] font-bold ${blocked ? 'bg-danger text-white' : open ? 'bg-role-front text-white' : 'bg-role-back text-white'}`}>
+              <span className={`flex size-4 items-center justify-center rounded-full text-[10px] font-bold ${blocked ? 'bg-danger text-white' : open ? 'bg-role-front text-on-primary' : 'bg-role-back text-on-primary'}`}>
                 {list.length}
                 <span className="sr-only">건{blocked ? ', 막힘 있음' : ''}</span>
               </span>
