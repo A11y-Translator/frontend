@@ -11,6 +11,10 @@ import { Navbar } from './Navbar'
 import { SidebarResizer } from './SidebarResizer'
 import { useSidebar } from './useSidebar'
 import './prototype.css'
+import './embedded.css'
+
+// Oreum(main2) 안에 끼워졌을 때만 html 에 표시를 달아 embedded.css(색·비율 맞춤)가 적용되게 해요
+if (window.self !== window.top) document.documentElement.classList.add('embedded')
 
 function MenuIcon() {
   return (
@@ -25,6 +29,8 @@ export function WebLayout() {
   const { mobile, collapsed, toggle, setCollapsed, width, setWidth, drawerOpen, setDrawerOpen } = useSidebar()
   const navRef = useRef<HTMLElement>(null)
   const [resizing, setResizing] = useState(false)
+  // Oreum(main2)의 "웹 접근성 검사" 화면 안에 끼워졌을 때(iframe)는 사이드바를 숨겨요 — 메뉴는 바깥 Oreum 이 대신 보여 줌
+  const embedded = window.self !== window.top
 
   return (
     <div className="relative flex h-dvh overflow-hidden bg-web-bg">
@@ -32,7 +38,7 @@ export function WebLayout() {
         본문으로 건너뛰기
       </a>
 
-      {!mobile && !inspectionView && (
+      {!mobile && !inspectionView && !embedded && (
         // 사이드바 + 오른쪽 경계 끌기 손잡이 (끌어서 폭 조절 · 아주 좁게 끌면 아이콘만)
         <div className={`relative flex shrink-0 ${resizing ? 'cursor-col-resize select-none' : ''}`}>
           <Navbar ref={navRef} collapsed={collapsed} onToggle={toggle} width={collapsed ? undefined : (width ?? undefined)} animate={!resizing} />
@@ -41,7 +47,7 @@ export function WebLayout() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {mobile && !inspectionView && (
+        {mobile && !inspectionView && !embedded && (
           <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
             {/* 모바일 위쪽 바: ☰ 메뉴 + 서비스 이름 */}
             <div className="flex h-14 shrink-0 items-center gap-2 border-b border-web-header-line bg-white px-3 font-pretendard">
